@@ -7,7 +7,9 @@ setup(
     install_requires=['cliff'],
     entry_points={
         'console_scripts':
-            'aws-cfn-gen = wonder_tool.main:wonder_main'
+            'aws-cfn-gen = wonder_tool.main:main',
+        'wonder_tool.command':
+            'configure = wonder_tool.configure:Configure'
     },
     zip_safe=False,
     classifiers=[
