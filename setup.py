@@ -10,6 +10,7 @@ setup(
             'aws-cfn-gen = aws_cfn_gen.main:main',
         'aws_cfn_gen.command': [
             'configure = aws_cfn_gen.configure:Configure',
+            'generate = aws_cfn_gen.generator:Generator',
         ]
     },
     zip_safe=False,
