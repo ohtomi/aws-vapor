@@ -7,9 +7,10 @@ setup(
     install_requires=['cliff'],
     entry_points={
         'console_scripts':
-            'aws-cfn-gen = wonder_tool.main:main',
-        'wonder_tool.command':
-            'configure = wonder_tool.configure:Configure'
+            'aws-cfn-gen = aws_cfn_gen.main:main',
+        'aws_cfn_gen.command': [
+            'configure = aws_cfn_gen.configure:Configure',
+        ]
     },
     zip_safe=False,
     classifiers=[

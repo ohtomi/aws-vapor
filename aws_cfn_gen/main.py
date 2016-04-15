@@ -11,7 +11,7 @@ class CliApp(App):
         super(CliApp, self).__init__(
             description='AWS Cloudformation Template Generator',
             version='0.0.1',
-            command_manager=CommandManager('wonder_tool.command'),
+            command_manager=CommandManager('aws_cfn_gen.command'),
         )
 
 def main(argv=sys.argv[1:]):
