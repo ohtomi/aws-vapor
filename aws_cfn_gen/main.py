@@ -14,6 +14,11 @@ class CliApp(App):
             command_manager=CommandManager('aws_cfn_gen.command'),
         )
 
+
 def main(argv=sys.argv[1:]):
     app = CliApp()
     return app.run(argv)
+
+
+if __name__ == '__main__':
+    sys.exit(main(sys.argv[1:]))
