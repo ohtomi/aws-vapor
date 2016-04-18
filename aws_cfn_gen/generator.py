@@ -2,6 +2,8 @@
 
 from cliff.command import Command
 
+import aws_cfn_gen.utils as utils
+
 
 class Generator(Command):
     '''generate AWS Cloudformation template'''
@@ -12,4 +14,7 @@ class Generator(Command):
         return parser
 
     def take_action(self, parsed_args):
-        self.app.stdout.write('data -> %s\n' % parsed_args.data[0])
+        self.app.stdout.write('data -> {0}\n'.format(parsed_args.data[0]))
+
+        props = utils.load_config_file()
+        self.app.stdout.write('{0} -> {1}\n'.format('username', props['variables']['username']))
