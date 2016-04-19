@@ -6,7 +6,7 @@ from os.path import (exists, expanduser)
 import ConfigParser
 
 
-CONFIG_DIRECTORY = expanduser('~/.aws-cfn-gen')
+CONFIG_DIRECTORY = expanduser('~/.cfngen')
 CONFIG_FILE_NAME = 'config'
 
 

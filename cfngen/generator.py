@@ -2,11 +2,11 @@
 
 from cliff.command import Command
 
-import aws_cfn_gen.utils as utils
+import cfngen.utils as utils
 
 
 class Generator(Command):
-    '''generate AWS Cloudformation template'''
+    '''generate AWS Cloudformation template from python object'''
 
     def get_parser(self, prog_name):
         parser = super(Generator, self).get_parser(prog_name)

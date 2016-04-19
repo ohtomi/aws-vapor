@@ -2,7 +2,7 @@
 
 from cliff.command import Command
 
-import aws_cfn_gen.utils as utils
+import cfngen.utils as utils
 
 
 class Configure(Command):

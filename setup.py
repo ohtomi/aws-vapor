@@ -1,16 +1,16 @@
 from setuptools import setup, find_packages
 
 setup(
-    name='aws-cfn-gen',
+    name='cfngen',
     version='1.0',
     packages=find_packages(),
     install_requires=['cliff'],
     entry_points={
         'console_scripts':
-            'aws-cfn-gen = aws_cfn_gen.main:main',
-        'aws_cfn_gen.command': [
-            'config = aws_cfn_gen.configure:Configure',
-            'template = aws_cfn_gen.generator:Generator',
+            'cfngen = cfngen.main:main',
+        'cfngen.command': [
+            'config = cfngen.configure:Configure',
+            'template = cfngen.generator:Generator',
         ]
     },
     zip_safe=False,
