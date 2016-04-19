@@ -10,7 +10,7 @@ CONFIG_DIRECTORY = expanduser('~/.aws-cfn-gen')
 CONFIG_FILE_NAME = 'config'
 
 
-def load_config_file():
+def load_from_config_file():
     props = {}
 
     if not exists(CONFIG_DIRECTORY + '/' + CONFIG_FILE_NAME):
@@ -28,7 +28,7 @@ def load_config_file():
     return props
 
 
-def save_configuration(props):
+def save_to_config_file(props):
     config = ConfigParser.RawConfigParser()
 
     for section, entries in props.items():

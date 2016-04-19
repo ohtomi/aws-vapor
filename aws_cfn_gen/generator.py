@@ -16,5 +16,5 @@ class Generator(Command):
     def take_action(self, parsed_args):
         self.app.stdout.write('data -> {0}\n'.format(parsed_args.data[0]))
 
-        props = utils.load_config_file()
+        props = utils.load_from_config_file()
         self.app.stdout.write('{0} -> {1}\n'.format('username', props['variables']['username']))

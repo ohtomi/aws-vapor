@@ -5,10 +5,6 @@ from cliff.command import Command
 import aws_cfn_gen.utils as utils
 
 
-CONFIG_SECTION_VOCABULARY = 'vocabulary'
-CONFIG_SECTION_VARIABLES = 'variables'
-
-
 class Configure(Command):
     '''configure this tool'''
 
@@ -26,7 +22,7 @@ class Configure(Command):
             raise ValueError('unknown mode')
 
     def show_current_configuration(self):
-        props = utils.load_config_file()
+        props = utils.load_from_config_file()
         for section, entries in props.items():
             self.app.stdout.write(u'[{0}]\n'.format(section))
             for key, value in entries.items():
@@ -35,12 +31,19 @@ class Configure(Command):
     def create_new_configuration(self):
         props = {}
 
-        entries = {}
         # TODO
-        props[CONFIG_SECTION_VOCABULARY] = entries
+        props['vocabulary'] = {}
 
-        entries = {}
         # TODO
-        props[CONFIG_SECTION_VARIABLES] = entries
+        props['variables'] = {}
+        props['variables']['username'] = self.read_user_input('username: ')
 
-        utils.save_configuration(props)
+        utils.save_to_config_file(props)
+
+    def read_user_input(self, prompt, default_value=None):
+        while True:
+            value = raw_input(prompt)
+            if value is not '':
+                return value
+            elif default_value is not None:
+                return default_value
