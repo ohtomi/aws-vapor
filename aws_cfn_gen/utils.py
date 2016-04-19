@@ -21,7 +21,7 @@ def load_config_file():
 
     for section in config.sections():
         for key, value in config.items(section):
-            if not hasattr(props, section):
+            if not section in props:
                 props[section] = {}
             props[section][key] = value
 
