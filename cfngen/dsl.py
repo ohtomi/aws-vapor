@@ -52,32 +52,61 @@ class Element(object):
 
     def __init__(self, name):
         self.name = name
-        self.props = []
+        self.attrs = []
 
-    def add_property(self, name, value):
-        self.props.append((name, value))
+    def add_attribute(self, attr):
+        self.attrs.append(attr)
         return self
 
     def to_template(self, template):
         element = template[self.name] = {}
-        for name, value in self.props:
-            element[name] = value
+        for attr in self.attrs:
+            attr.to_template(element)
+
+
+class Attribute(object):
+
+    def __init__(self, name, value, to_template):
+        self.name = name
+        self.value = value
+        self.to_template = to_template
+
+    def to_template(self, template):
+        self.to_template(template)
+
+    @staticmethod
+    def scalar(name, value):
+        def to_template(template):
+            template[name] = value
+        return Attribute(name, value, to_template)
+
+    @staticmethod
+    def dict(name, value):
+        def to_template(template):
+            template[name] = value
+        return Attribute(name, value, to_template)
 
 
 if __name__ == '__main__':
     t = Template(description='Sample Template')
     t.add_parameter(
         Element('KeyName')
-            .add_property('Description', 'Name of an existing EC2 KeyPair to enable SSH access to the server')
-            .add_property('Type', 'String'))
+            .add_attribute(
+                Attribute.scalar('Description', 'Name of an existing EC2 KeyPair to enable SSH access to the server'))
+            .add_attribute(
+                Attribute.scalar('Type', 'String')))
     t.add_parameter(
         Element('InstanceType')
-            .add_property('Description', 'EC2 instance type')
-            .add_property('Type', 'String')
-            .add_property('Default', 't1.micro'))
+            .add_attribute(
+                Attribute.scalar('Description', 'EC2 instance type'))
+            .add_attribute(
+                Attribute.scalar('Type', 'String'))
+            .add_attribute(
+                Attribute.scalar('Default', 't1.micro')))
     t.add_mappings(
         Element('RegionToAMI')
-            .add_property('ap-northeast-1', {'AMI': 'ami-a1bec3a0'}))
+            .add_attribute(
+                Attribute.dict('ap-northeast-1', {'AMI': 'ami-a1bec3a0'})))
 
     #from pprint import PrettyPrinter
     #PrettyPrinter(indent=2).pprint(t.to_template())
