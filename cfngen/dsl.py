@@ -68,13 +68,19 @@ if __name__ == '__main__':
     t = Template(description='Sample Template')
     t.add_parameter(
         Element('KeyName')
-            .add_property('Description', 'Name of an existing EC2 KeyPair to enable SSH access to the bastion server')
+            .add_property('Description', 'Name of an existing EC2 KeyPair to enable SSH access to the server')
             .add_property('Type', 'String'))
     t.add_parameter(
         Element('InstanceType')
             .add_property('Description', 'EC2 instance type')
             .add_property('Type', 'String')
             .add_property('Default', 't1.micro'))
+    t.add_mappings(
+        Element('RegionToAMI')
+            .add_property('ap-northeast-1', {'AMI': 'ami-a1bec3a0'}))
 
-    from pprint import PrettyPrinter
-    PrettyPrinter(indent=2).pprint(t.to_template())
+    #from pprint import PrettyPrinter
+    #PrettyPrinter(indent=2).pprint(t.to_template())
+
+    from json import dumps
+    print(dumps(t.to_template(), indent=2, separators=(',', ': ')))
