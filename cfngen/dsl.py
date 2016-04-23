@@ -96,27 +96,22 @@ if __name__ == '__main__':
     t = Template(description='Sample Template')
     t.add_parameter(
         Element('KeyName')
-            .add_attribute(
-                Attribute.scalar('Description', 'Name of an existing EC2 KeyPair to enable SSH access to the server'))
-            .add_attribute(
-                Attribute.scalar('Type', 'String')))
+            .add_attribute(Attribute.scalar('Description', 'Name of an existing EC2 KeyPair to enable SSH access to the server'))
+            .add_attribute(Attribute.scalar('Type', 'String'))
+    )
     t.add_parameter(
         Element('InstanceType')
-            .add_attribute(
-                Attribute.scalar('Description', 'EC2 instance type'))
-            .add_attribute(
-                Attribute.scalar('Type', 'String'))
-            .add_attribute(
-                Attribute.scalar('Default', 't1.micro')))
+            .add_attribute(Attribute.scalar('Description', 'EC2 instance type'))
+            .add_attribute(Attribute.scalar('Type', 'String'))
+            .add_attribute(Attribute.scalar('Default', 't1.micro'))
+    )
     t.add_mappings(
         Element('RegionToAMI')
-            .add_attribute(
-                Attribute.dict('ap-northeast-1', {'AMI': 'ami-a1bec3a0'})))
+            .add_attribute(Attribute.dict('ap-northeast-1', {'AMI': 'ami-a1bec3a0'}))
+    )
     vpc = Element('VPC')
-    vpc.add_attribute(
-        Attribute.scalar('Type', 'AWS::EC2::VPC'))
-    vpc.add_attribute(
-        Attribute.dict('Properties', {'CidrBlock': '10.104.0.0/16', 'InstanceTenancy': 'default'}))
+    vpc.add_attribute(Attribute.scalar('Type', 'AWS::EC2::VPC'))
+    vpc.add_attribute(Attribute.dict('Properties', {'CidrBlock': '10.104.0.0/16', 'InstanceTenancy': 'default'}))
     t.add_resources(vpc)
     t.add_outputs(
         Element('VpcId')
