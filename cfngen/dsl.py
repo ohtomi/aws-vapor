@@ -66,9 +66,8 @@ class Element(object):
 
 class Attribute(object):
 
-    def __init__(self, name, value, to_template):
+    def __init__(self, name, to_template):
         self.name = name
-        self.value = value
         self.to_template = to_template
 
     def to_template(self, template):
@@ -78,13 +77,14 @@ class Attribute(object):
     def scalar(name, value):
         def to_template(template):
             template[name] = value
-        return Attribute(name, value, to_template)
+        return Attribute(name, to_template)
 
     @staticmethod
     def dict(name, value):
         def to_template(template):
             template[name] = value
-        return Attribute(name, value, to_template)
+        return Attribute(name, to_template)
+
 
 
 if __name__ == '__main__':
