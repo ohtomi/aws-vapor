@@ -85,6 +85,11 @@ class Attribute(object):
             template[name] = value
         return Attribute(name, to_template)
 
+    @staticmethod
+    def reference(name, element):
+        def to_template(template):
+            template[name] = {'Ref': element.name}
+        return Attribute(name, to_template)
 
 
 if __name__ == '__main__':
@@ -107,6 +112,17 @@ if __name__ == '__main__':
         Element('RegionToAMI')
             .add_attribute(
                 Attribute.dict('ap-northeast-1', {'AMI': 'ami-a1bec3a0'})))
+    vpc = Element('VPC')
+    vpc.add_attribute(
+        Attribute.scalar('Type', 'AWS::EC2::VPC'))
+    vpc.add_attribute(
+        Attribute.dict('Properties', {'CidrBlock': '10.104.0.0/16', 'InstanceTenancy': 'default'}))
+    t.add_resources(vpc)
+    t.add_outputs(
+        Element('VpcId')
+            .add_attribute(Attribute.scalar('Description', '-'))
+            .add_attribute(Attribute.reference('Value', vpc))
+    )
 
     #from pprint import PrettyPrinter
     #PrettyPrinter(indent=2).pprint(t.to_template())
