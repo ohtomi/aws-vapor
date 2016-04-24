@@ -64,6 +64,36 @@ class Element(object):
             attr.to_template(element)
 
 
+class Parameter(Element):
+
+    def __init__(self, name):
+        super(Parameter, self).__init__(name)
+
+
+class Mapping(Element):
+
+    def __init__(self, name):
+        super(Mapping, self).__init__(name)
+
+
+class Resource(Element):
+
+    def __init__(self, name):
+        super(Resource, self).__init__(name)
+
+    def type(self, name):
+        self.attribute(Attribute.scalar('Type', name))
+
+    def dependsOn(self, resource):
+        self.attribute(Attribute.reference('DependsOn', resource))
+
+
+class Output(Element):
+
+    def __init__(self, name):
+        super(Output, self).__init__(name)
+
+
 class Attribute(object):
 
     def __init__(self, name, to_template):
@@ -109,8 +139,8 @@ if __name__ == '__main__':
         Element('RegionToAMI')
             .attribute(Attribute.dict('ap-northeast-1', {'AMI': 'ami-a1bec3a0'}))
     )
-    vpc = Element('VPC')
-    vpc.attribute(Attribute.scalar('Type', 'AWS::EC2::VPC'))
+    vpc = Resource('VPC')
+    vpc.type('AWS::EC2::VPC')
     vpc.attribute(Attribute.dict('Properties', {'CidrBlock': '10.104.0.0/16', 'InstanceTenancy': 'default'}))
     t.resources(vpc)
     t.outputs(
