@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 
 
-class Template(object):
+class Root(object):
 
     def __init__(self, version='2010-09-09', description=''):
         self.version = version
@@ -123,7 +123,7 @@ class Attribute(object):
 
 
 if __name__ == '__main__':
-    t = Template(description='Sample Template')
+    t = Root(description='Sample Template')
     t.parameters(
         Element('KeyName')
             .attribute(Attribute.scalar('Description', 'Name of an existing EC2 KeyPair to enable SSH access to the server'))
