@@ -16,22 +16,22 @@ class Template(object):
             self.elements[section_name] = []
         return self.elements[section_name]
 
-    def add_parameter(self, element):
+    def parameters(self, element):
         section = self.get_section('Parameters')
         section.append(element)
         return self
 
-    def add_mappings(self, element):
+    def mappings(self, element):
         section = self.get_section('Mappings')
         section.append(element)
         return self
 
-    def add_resources(self, element):
+    def resources(self, element):
         section = self.get_section('Resources')
         section.append(element)
         return self
 
-    def add_outputs(self, element):
+    def outputs(self, element):
         section = self.get_section('Outputs')
         section.append(element)
         return self
@@ -54,7 +54,7 @@ class Element(object):
         self.name = name
         self.attrs = []
 
-    def add_attribute(self, attr):
+    def attribute(self, attr):
         self.attrs.append(attr)
         return self
 
@@ -94,29 +94,29 @@ class Attribute(object):
 
 if __name__ == '__main__':
     t = Template(description='Sample Template')
-    t.add_parameter(
+    t.parameters(
         Element('KeyName')
-            .add_attribute(Attribute.scalar('Description', 'Name of an existing EC2 KeyPair to enable SSH access to the server'))
-            .add_attribute(Attribute.scalar('Type', 'String'))
+            .attribute(Attribute.scalar('Description', 'Name of an existing EC2 KeyPair to enable SSH access to the server'))
+            .attribute(Attribute.scalar('Type', 'String'))
     )
-    t.add_parameter(
+    t.parameters(
         Element('InstanceType')
-            .add_attribute(Attribute.scalar('Description', 'EC2 instance type'))
-            .add_attribute(Attribute.scalar('Type', 'String'))
-            .add_attribute(Attribute.scalar('Default', 't1.micro'))
+            .attribute(Attribute.scalar('Description', 'EC2 instance type'))
+            .attribute(Attribute.scalar('Type', 'String'))
+            .attribute(Attribute.scalar('Default', 't1.micro'))
     )
-    t.add_mappings(
+    t.mappings(
         Element('RegionToAMI')
-            .add_attribute(Attribute.dict('ap-northeast-1', {'AMI': 'ami-a1bec3a0'}))
+            .attribute(Attribute.dict('ap-northeast-1', {'AMI': 'ami-a1bec3a0'}))
     )
     vpc = Element('VPC')
-    vpc.add_attribute(Attribute.scalar('Type', 'AWS::EC2::VPC'))
-    vpc.add_attribute(Attribute.dict('Properties', {'CidrBlock': '10.104.0.0/16', 'InstanceTenancy': 'default'}))
-    t.add_resources(vpc)
-    t.add_outputs(
+    vpc.attribute(Attribute.scalar('Type', 'AWS::EC2::VPC'))
+    vpc.attribute(Attribute.dict('Properties', {'CidrBlock': '10.104.0.0/16', 'InstanceTenancy': 'default'}))
+    t.resources(vpc)
+    t.outputs(
         Element('VpcId')
-            .add_attribute(Attribute.scalar('Description', '-'))
-            .add_attribute(Attribute.reference('Value', vpc))
+            .attribute(Attribute.scalar('Description', '-'))
+            .attribute(Attribute.reference('Value', vpc))
     )
 
     #from pprint import PrettyPrinter
