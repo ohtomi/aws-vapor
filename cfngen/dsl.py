@@ -143,6 +143,18 @@ if __name__ == '__main__':
     vpc.type('AWS::EC2::VPC')
     vpc.attribute(Attribute.dict('Properties', {'CidrBlock': '10.104.0.0/16', 'InstanceTenancy': 'default'}))
     t.resources(vpc)
+    igw = Resource('InternetGateway')
+    igw.type('AWS:EC2::InternetGateway')
+    t.resources(igw)
+    attachIgw = Resource('AttachInternetGateway')
+    attachIgw.type('AWS::EC2::VPCGatewayAttachment')
+    attachIgw.attribute(Attribute.dict('Properties', {
+        #Attribute.reference'VpcId', vpc),
+        'VpcId': {'Ref': vpc.name},
+        #Attribute.reference('InternetGatewayId', igw)
+        'InternetGatewayId': {'Ref': igw.name}
+    }))
+    t.resources(attachIgw)
     t.outputs(
         Element('VpcId')
             .attribute(Attribute.scalar('Description', '-'))
