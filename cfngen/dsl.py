@@ -110,9 +110,17 @@ class Attribute(object):
         return Attribute(name, to_template)
 
     @staticmethod
-    def dict(name, value):
+    def list(name, value):
         def to_template(template):
-            template[name] = value
+            attr = template[name] = {}
+            for item in value:
+                if isinstance(item, dict):
+                    for k, v in item.iteritems():
+                        attr[k] = v
+                elif hasattr(item, 'to_template'):
+                    item.to_template(attr)
+                else:
+                    pass # TODO
         return Attribute(name, to_template)
 
     @staticmethod
@@ -137,23 +145,26 @@ if __name__ == '__main__':
     )
     t.mappings(
         Element('RegionToAMI')
-            .attribute(Attribute.dict('ap-northeast-1', {'AMI': 'ami-a1bec3a0'}))
+            .attribute(Attribute.list('ap-northeast-1', [
+                {'AMI': 'ami-a1bec3a0'}
+            ]))
     )
     vpc = Resource('VPC')
     vpc.type('AWS::EC2::VPC')
-    vpc.attribute(Attribute.dict('Properties', {'CidrBlock': '10.104.0.0/16', 'InstanceTenancy': 'default'}))
+    vpc.attribute(Attribute.list('Properties', [
+        {'CidrBlock': '10.104.0.0/16'},
+        {'InstanceTenancy': 'default'}
+    ]))
     t.resources(vpc)
     igw = Resource('InternetGateway')
     igw.type('AWS:EC2::InternetGateway')
     t.resources(igw)
     attachIgw = Resource('AttachInternetGateway')
     attachIgw.type('AWS::EC2::VPCGatewayAttachment')
-    attachIgw.attribute(Attribute.dict('Properties', {
-        #Attribute.reference'VpcId', vpc),
-        'VpcId': {'Ref': vpc.name},
-        #Attribute.reference('InternetGatewayId', igw)
-        'InternetGatewayId': {'Ref': igw.name}
-    }))
+    attachIgw.attribute(Attribute.list('Properties', [
+        Attribute.reference('VpcId', vpc),
+        Attribute.reference('InternetGatewayId', igw)
+    ]))
     t.resources(attachIgw)
     t.outputs(
         Element('VpcId')
