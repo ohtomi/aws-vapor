@@ -172,8 +172,5 @@ if __name__ == '__main__':
             .attribute(Attribute.reference('Value', vpc))
     )
 
-    #from pprint import PrettyPrinter
-    #PrettyPrinter(indent=2).pprint(t.to_template())
-
     from json import dumps
     print(dumps(t.to_template(), indent=2, separators=(',', ': ')))
