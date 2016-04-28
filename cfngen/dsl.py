@@ -1,12 +1,14 @@
 # -*- coding: utf-8 -*-
 
+from collections import OrderedDict
+
 
 class Root(object):
 
     def __init__(self, version='2010-09-09', description=''):
         self.version = version
         self.description = description
-        self.elements = {}
+        self.elements = OrderedDict()
 
     def __getattr(self, name):
         pass
@@ -37,7 +39,7 @@ class Root(object):
         return self
 
     def to_template(self):
-        template = {}
+        template = OrderedDict()
         template['AWSTemplateFormatVersion'] = self.version
         template['Description'] = self.description
         for section_name, entries in self.elements.items():
