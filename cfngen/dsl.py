@@ -147,10 +147,9 @@ if __name__ == '__main__':
     )
     t.mappings(
         Element('RegionToAMI')
-            .attribute(Attribute.list('ap-northeast-1', [
-                {'AMI': 'ami-a1bec3a0'}
-            ]))
+            .attribute(Attribute.scalar('ap-northeast-1', {'AMI': 'ami-a1bec3a0'}))
     )
+
     vpc = Resource('VPC')
     vpc.type('AWS::EC2::VPC')
     vpc.attribute(Attribute.list('Properties', [
@@ -158,9 +157,11 @@ if __name__ == '__main__':
         {'InstanceTenancy': 'default'}
     ]))
     t.resources(vpc)
+
     igw = Resource('InternetGateway')
     igw.type('AWS:EC2::InternetGateway')
     t.resources(igw)
+
     attachIgw = Resource('AttachInternetGateway')
     attachIgw.type('AWS::EC2::VPCGatewayAttachment')
     attachIgw.attribute(Attribute.list('Properties', [
@@ -168,6 +169,7 @@ if __name__ == '__main__':
         Attribute.reference('InternetGatewayId', igw)
     ]))
     t.resources(attachIgw)
+
     t.outputs(
         Element('VpcId')
             .attribute(Attribute.scalar('Description', '-'))
