@@ -10,7 +10,9 @@ This tool generates AWS Cloudformation template from python object.
 
 ## How to install
 
-TODO
+```bash
+$ pip install git+https://github.com/ohtomi/aws-cloudformation-generator
+```
 
 ## How to use
 
