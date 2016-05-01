@@ -153,8 +153,8 @@ if __name__ == '__main__':
     vpc = Resource('VPC')
     vpc.type('AWS::EC2::VPC')
     vpc.attribute(Attribute.list('Properties', [
-        {'CidrBlock': '10.104.0.0/16'},
-        {'InstanceTenancy': 'default'}
+        Attribute.scalar('CidrBlock', '10.104.0.0/16'),
+        Attribute.scalar('InstanceTenancy', 'default')
     ]))
     t.resources(vpc)
 
