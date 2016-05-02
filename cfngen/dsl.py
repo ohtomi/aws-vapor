@@ -114,7 +114,7 @@ class Attribute(object):
     @staticmethod
     def list(name, value):
         def to_template(template):
-            attr = template[name] = {}
+            attr = template[name] = OrderedDict()
             for item in value:
                 if isinstance(item, dict):
                     for k, v in item.iteritems():
