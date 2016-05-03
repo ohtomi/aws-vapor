@@ -43,7 +43,7 @@ class Root(object):
         template['AWSTemplateFormatVersion'] = self.version
         template['Description'] = self.description
         for section_name, entries in self.elements.items():
-            section = template[section_name] = {}
+            section = template[section_name] = OrderedDict()
             for element in entries:
                 element.to_template(section)
 
@@ -61,7 +61,7 @@ class Element(object):
         return self
 
     def to_template(self, template):
-        element = template[self.name] = {}
+        element = template[self.name] = OrderedDict()
         for attr in self.attrs:
             attr.to_template(element)
 
