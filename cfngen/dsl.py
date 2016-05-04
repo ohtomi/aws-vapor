@@ -147,7 +147,10 @@ if __name__ == '__main__':
     )
     t.mappings(
         Element('RegionToAMI')
-            .attribute(Attribute.scalar('ap-northeast-1', {'AMI': 'ami-a1bec3a0'}))
+            .attribute(Attribute.list('ap-northeast-1', [
+                Attribute.scalar('AMI1', 'ami-a1bec3a0'),
+                Attribute.scalar('AMI2', 'ami-a1bec3a1')
+            ]))
     )
 
     vpc = Resource('VPC')
