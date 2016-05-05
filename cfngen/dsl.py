@@ -60,6 +60,9 @@ class Element(object):
         self.attrs.append(attr)
         return self
 
+    def attribute_scalar(self, name, value):
+        return self.attribute(Attribute.scalar(name, value))
+
     def to_template(self, template):
         element = template[self.name] = OrderedDict()
         for attr in self.attrs:
@@ -136,14 +139,14 @@ if __name__ == '__main__':
     t = Root(description='Sample Template')
     t.parameters(
         Element('KeyName')
-            .attribute(Attribute.scalar('Description', 'Name of an existing EC2 KeyPair to enable SSH access to the server'))
-            .attribute(Attribute.scalar('Type', 'String'))
+            .attribute_scalar('Description', 'Name of an existing EC2 KeyPair to enable SSH access to the server')
+            .attribute_scalar('Type', 'String')
     )
     t.parameters(
         Element('InstanceType')
-            .attribute(Attribute.scalar('Description', 'EC2 instance type'))
-            .attribute(Attribute.scalar('Type', 'String'))
-            .attribute(Attribute.scalar('Default', 't1.micro'))
+            .attribute_scalar('Description', 'EC2 instance type')
+            .attribute_scalar('Type', 'String')
+            .attribute_scalar('Default', 't1.micro')
     )
     t.mappings(
         Element('RegionToAMI')
@@ -175,7 +178,7 @@ if __name__ == '__main__':
 
     t.outputs(
         Element('VpcId')
-            .attribute(Attribute.scalar('Description', '-'))
+            .attribute_scalar('Description', '-')
             .attribute(Attribute.reference('Value', vpc))
     )
 
