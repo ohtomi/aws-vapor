@@ -3,7 +3,7 @@
 from collections import OrderedDict
 
 
-class Root(object):
+class Template(object):
 
     def __init__(self, version='2010-09-09', description=''):
         self.version = version
@@ -61,7 +61,13 @@ class Element(object):
         return self
 
     def attribute_scalar(self, name, value):
-        return self.attribute(Attribute.scalar(name, value))
+        return self.attribute(ScalarAttribute(name, value))
+
+    def attribute_list(self, name, values):
+        return self.attribute(ListAttribute(name, values))
+
+    def attribute_reference(self, name, element):
+        return self.attribute(ReferenceAttribute(name, element))
 
     def to_template(self, template):
         element = template[self.name] = OrderedDict()
@@ -87,10 +93,10 @@ class Resource(Element):
         super(Resource, self).__init__(name)
 
     def type(self, name):
-        self.attribute(Attribute.scalar('Type', name))
+        self.attribute(ScalarAttribute('Type', name))
 
     def dependsOn(self, resource):
-        self.attribute(Attribute.reference('DependsOn', resource))
+        self.attribute(ReferenceAttribute('DependsOn', resource))
 
 
 class Output(Element):
@@ -101,42 +107,53 @@ class Output(Element):
 
 class Attribute(object):
 
-    def __init__(self, name, to_template):
+    def __init__(self, name):
         self.name = name
-        self.to_template = to_template
 
     def to_template(self, template):
-        self.to_template(template)
+        raise NotImplementedError('override me')
 
-    @staticmethod
-    def scalar(name, value):
-        def to_template(template):
-            template[name] = value
-        return Attribute(name, to_template)
 
-    @staticmethod
-    def list(name, value):
-        def to_template(template):
-            attr = template[name] = OrderedDict()
-            for item in value:
-                if isinstance(item, dict):
-                    for k, v in item.iteritems():
-                        attr[k] = v
-                elif hasattr(item, 'to_template'):
-                    item.to_template(attr)
-                else:
-                    pass # TODO
-        return Attribute(name, to_template)
+class ScalarAttribute(Attribute):
 
-    @staticmethod
-    def reference(name, element):
-        def to_template(template):
-            template[name] = {'Ref': element.name}
-        return Attribute(name, to_template)
+    def __init__(self, name, value):
+        super(ScalarAttribute, self).__init__(name)
+        self.value = value
+
+    def to_template(self, template):
+        template[self.name] = self.value
+
+
+class ListAttribute(Attribute):
+
+    def __init__(self, name, values):
+        super(ListAttribute, self).__init__(name)
+        self.values = values
+
+    def to_template(self, template):
+        attr = template[self.name] = OrderedDict()
+        for item in self.values:
+            if isinstance(item, dict):
+                for k, v in item.iteritems():
+                    attr[k] = v
+            elif hasattr(item, 'to_template'):
+                item.to_template(attr)
+            else:
+                pass # TODO
+
+
+class ReferenceAttribute(Attribute):
+
+    def __init__(self, name, element):
+        super(ReferenceAttribute, self).__init__(name)
+        self.element = element
+
+    def to_template(self, template):
+        template[self.name] = {'Ref': self.element.name}
 
 
 if __name__ == '__main__':
-    t = Root(description='Sample Template')
+    t = Template(description='Sample Template')
     t.parameters(
         Element('KeyName')
             .attribute_scalar('Description', 'Name of an existing EC2 KeyPair to enable SSH access to the server')
@@ -150,18 +167,18 @@ if __name__ == '__main__':
     )
     t.mappings(
         Element('RegionToAMI')
-            .attribute(Attribute.list('ap-northeast-1', [
-                Attribute.scalar('AMI1', 'ami-a1bec3a0'),
-                Attribute.scalar('AMI2', 'ami-a1bec3a1')
-            ]))
+            .attribute_list('ap-northeast-1', [
+                ScalarAttribute('AMI1', 'ami-a1bec3a0'),
+                ScalarAttribute('AMI2', 'ami-a1bec3a1')
+            ])
     )
 
     vpc = Resource('VPC')
     vpc.type('AWS::EC2::VPC')
-    vpc.attribute(Attribute.list('Properties', [
-        Attribute.scalar('CidrBlock', '10.104.0.0/16'),
-        Attribute.scalar('InstanceTenancy', 'default')
-    ]))
+    vpc.attribute_list('Properties', [
+        ScalarAttribute('CidrBlock', '10.104.0.0/16'),
+        ScalarAttribute('InstanceTenancy', 'default')
+    ])
     t.resources(vpc)
 
     igw = Resource('InternetGateway')
@@ -170,16 +187,16 @@ if __name__ == '__main__':
 
     attachIgw = Resource('AttachInternetGateway')
     attachIgw.type('AWS::EC2::VPCGatewayAttachment')
-    attachIgw.attribute(Attribute.list('Properties', [
-        Attribute.reference('VpcId', vpc),
-        Attribute.reference('InternetGatewayId', igw)
-    ]))
+    attachIgw.attribute_list('Properties', [
+        ReferenceAttribute('VpcId', vpc),
+        ReferenceAttribute('InternetGatewayId', igw)
+    ])
     t.resources(attachIgw)
 
     t.outputs(
         Element('VpcId')
             .attribute_scalar('Description', '-')
-            .attribute(Attribute.reference('Value', vpc))
+            .attribute_reference('Value', vpc)
     )
 
     from json import dumps
