@@ -56,18 +56,19 @@ class Element(object):
         self.name = name
         self.attrs = []
 
-    def attribute(self, attr):
+    def attributes(self, attr):
         self.attrs.append(attr)
         return self
 
-    def attribute_scalar(self, name, value):
-        return self.attribute(ScalarAttribute(name, value))
-
-    def attribute_list(self, name, values):
-        return self.attribute(ListAttribute(name, values))
-
-    def attribute_reference(self, name, element):
-        return self.attribute(ReferenceAttribute(name, element))
+    def attribute(self, name, value):
+        if isinstance(value, str):
+            return self.attributes(ScalarAttribute(name, value))
+        elif isinstance(value, Element):
+            return self.attributes(ReferenceAttribute(name, value))
+        elif isinstance(value, list):
+            return self.attributes(ListAttribute(name, value))
+        else:
+            pass # TODO
 
     def to_template(self, template):
         element = template[self.name] = OrderedDict()
@@ -93,11 +94,11 @@ class Resource(Element):
         super(Resource, self).__init__(name)
 
     def type(self, name):
-        self.attribute(ScalarAttribute('Type', name))
+        self.attributes(ScalarAttribute('Type', name))
         return self
 
     def dependsOn(self, resource):
-        self.attribute(ReferenceAttribute('DependsOn', resource))
+        self.attributes(ReferenceAttribute('DependsOn', resource))
         return self
 
 
@@ -157,22 +158,22 @@ class ReferenceAttribute(Attribute):
 if __name__ == '__main__':
     t = Template(description='Sample Template')
     t.parameters(Element('KeyName')
-        .attribute_scalar('Description', 'Name of an existing EC2 KeyPair to enable SSH access to the server')
-        .attribute_scalar('Type', 'String')
+        .attribute('Description', 'Name of an existing EC2 KeyPair to enable SSH access to the server')
+        .attribute('Type', 'String')
     )
     t.parameters(Element('InstanceType')
-        .attribute_scalar('Description', 'EC2 instance type')
-        .attribute_scalar('Type', 'String')
-        .attribute_scalar('Default', 't1.micro')
+        .attribute('Description', 'EC2 instance type')
+        .attribute('Type', 'String')
+        .attribute('Default', 't1.micro')
     )
     t.mappings(Element('RegionToAMI')
-        .attribute_list('ap-northeast-1', [
+        .attribute('ap-northeast-1', [
             ScalarAttribute('AMI1', 'ami-a1bec3a0'),
             ScalarAttribute('AMI2', 'ami-a1bec3a1')
         ])
     )
 
-    vpc = Resource('VPC').type('AWS::EC2::VPC').attribute_list('Properties', [
+    vpc = Resource('VPC').type('AWS::EC2::VPC').attribute('Properties', [
         ScalarAttribute('CidrBlock', '10.104.0.0/16'),
         ScalarAttribute('InstanceTenancy', 'default')
     ])
@@ -181,15 +182,15 @@ if __name__ == '__main__':
     igw = Resource('InternetGateway').type('AWS:EC2::InternetGateway')
     t.resources(igw)
 
-    attachIgw = Resource('AttachInternetGateway').type('AWS::EC2::VPCGatewayAttachment').attribute_list('Properties', [
+    attachIgw = Resource('AttachInternetGateway').type('AWS::EC2::VPCGatewayAttachment').attribute('Properties', [
         ReferenceAttribute('VpcId', vpc),
         ReferenceAttribute('InternetGatewayId', igw)
     ])
     t.resources(attachIgw)
 
     t.outputs(Element('VpcId')
-        .attribute_scalar('Description', '-')
-        .attribute_reference('Value', vpc)
+        .attribute('Description', '-')
+        .attribute('Value', vpc)
     )
 
     from json import dumps
