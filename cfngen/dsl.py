@@ -68,7 +68,7 @@ class Element(object):
         elif isinstance(value, list):
             return self.attributes(ListAttribute(name, value))
         else:
-            pass # TODO
+            raise ValueError('TODO')
 
     def to_template(self, template):
         element = template[self.name] = OrderedDict()
@@ -142,7 +142,7 @@ class ListAttribute(Attribute):
             elif hasattr(item, 'to_template'):
                 item.to_template(attr)
             else:
-                pass # TODO
+                raise ValueError('TODO')
 
 
 class ReferenceAttribute(Attribute):
