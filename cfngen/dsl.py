@@ -94,12 +94,13 @@ class Resource(Element):
         super(Resource, self).__init__(name)
 
     def type(self, name):
-        self.attributes(ScalarAttribute('Type', name))
-        return self
+        return self.attributes(ScalarAttribute('Type', name))
 
     def dependsOn(self, resource):
-        self.attributes(ReferenceAttribute('DependsOn', resource))
-        return self
+        return self.attributes(ReferenceAttribute('DependsOn', resource))
+
+    def properties(self, props):
+        return self.attribute('Properties', props)
 
 
 class Output(Element):
@@ -173,7 +174,7 @@ if __name__ == '__main__':
         ])
     )
 
-    vpc = Resource('VPC').type('AWS::EC2::VPC').attribute('Properties', [
+    vpc = Resource('VPC').type('AWS::EC2::VPC').properties([
         ScalarAttribute('CidrBlock', '10.104.0.0/16'),
         ScalarAttribute('InstanceTenancy', 'default')
     ])
@@ -182,7 +183,7 @@ if __name__ == '__main__':
     igw = Resource('InternetGateway').type('AWS:EC2::InternetGateway')
     t.resources(igw)
 
-    attachIgw = Resource('AttachInternetGateway').type('AWS::EC2::VPCGatewayAttachment').attribute('Properties', [
+    attachIgw = Resource('AttachInternetGateway').type('AWS::EC2::VPCGatewayAttachment').properties([
         ReferenceAttribute('VpcId', vpc),
         ReferenceAttribute('InternetGatewayId', igw)
     ])
