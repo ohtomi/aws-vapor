@@ -97,7 +97,7 @@ class Resource(Element):
         return self.attributes(ScalarAttribute('Type', name))
 
     def dependsOn(self, resource):
-        return self.attributes(ReferenceAttribute('DependsOn', resource))
+        return self.attributes(ScalarAttribute('DependsOn', resource.name))
 
     def properties(self, props):
         return self.attribute('Properties', props)
@@ -188,6 +188,11 @@ if __name__ == '__main__':
         ReferenceAttribute('InternetGatewayId', igw)
     ])
     t.resources(attachIgw)
+
+    nat = Resource('NatGatewayEIP').type('AWS::EC2::EIP').dependsOn(attachIgw).properties([
+        ScalarAttribute('Domain', 'vpc')
+    ])
+    t.resources(nat)
 
     t.outputs(Element('VpcId')
         .attribute('Description', '-')
