@@ -10,9 +10,6 @@ class Template(object):
         self.description = description
         self.elements = OrderedDict()
 
-    def __getattr(self, name):
-        pass
-
     def get_section(self, section_name):
         if not self.elements.has_key(section_name):
             self.elements[section_name] = []
@@ -81,6 +78,12 @@ class Parameter(Element):
     def __init__(self, name):
         super(Parameter, self).__init__(name)
 
+    def description(self, desc):
+        return self.attribute('Description', desc)
+
+    def type(self, name):
+        return self.attribute('Type', name)
+
 
 class Mapping(Element):
 
@@ -94,19 +97,32 @@ class Resource(Element):
         super(Resource, self).__init__(name)
 
     def type(self, name):
-        return self.attributes(ScalarAttribute('Type', name))
+        return self.attribute('Type', name)
 
     def dependsOn(self, resource):
-        return self.attributes(ScalarAttribute('DependsOn', resource.name))
+        return self.attribute('DependsOn', resource.name)
 
     def properties(self, props):
         return self.attribute('Properties', props)
+
+    def property(self, prop):
+        for attr in self.attrs:
+            if attr.name == 'Properties':
+                attr.values.append(prop)
+                return self
+        return self.properties([prop])
 
 
 class Output(Element):
 
     def __init__(self, name):
         super(Output, self).__init__(name)
+
+    def description(self, desc):
+        return self.attribute('Description', desc)
+
+    def value(self, value):
+        return self.attribute('Value', value)
 
 
 class Attribute(object):
@@ -158,24 +174,29 @@ class ReferenceAttribute(Attribute):
 
 if __name__ == '__main__':
     t = Template(description='Sample Template')
-    t.parameters(Element('KeyName')
-        .attribute('Description', 'Name of an existing EC2 KeyPair to enable SSH access to the server')
-        .attribute('Type', 'String')
+
+    t.parameters(Parameter('KeyName')
+        .description('Name of an existing EC2 KeyPair to enable SSH access to the server')
+        .type('String')
     )
-    t.parameters(Element('InstanceType')
-        .attribute('Description', 'EC2 instance type')
-        .attribute('Type', 'String')
-        .attribute('Default', 't1.micro')
-    )
-    t.mappings(Element('RegionToAMI')
-        .attribute('ap-northeast-1', [
-            ScalarAttribute('AMI1', 'ami-a1bec3a0'),
-            ScalarAttribute('AMI2', 'ami-a1bec3a1')
+
+    t.mappings(Mapping('GroupToCIDR')
+        .attribute('VPC', [
+            ScalarAttribute('CIDR', '10.104.0.0/16'),
+        ])
+        .attribute('ApiServerSubnet', [
+            ScalarAttribute('CIDR', '10.104.128.0/24'),
+        ])
+        .attribute('ComputingServerSubnet', [
+            ScalarAttribute('CIDR', '10.104.144.0/20'),
+        ])
+        .attribute('MongoDBSubnet', [
+            ScalarAttribute('CIDR', '10.104.129.0/24')
         ])
     )
 
     vpc = Resource('VPC').type('AWS::EC2::VPC').properties([
-        ScalarAttribute('CidrBlock', '10.104.0.0/16'),
+        ScalarAttribute('CidrBlock', {'Fn::FindInMap': ['GroupToCIDR', 'VPC', 'CIDR']}), # TODO
         ScalarAttribute('InstanceTenancy', 'default')
     ])
     t.resources(vpc)
@@ -183,21 +204,99 @@ if __name__ == '__main__':
     igw = Resource('InternetGateway').type('AWS:EC2::InternetGateway')
     t.resources(igw)
 
-    attachIgw = Resource('AttachInternetGateway').type('AWS::EC2::VPCGatewayAttachment').properties([
+    attach_igw = Resource('AttachInternetGateway').type('AWS::EC2::VPCGatewayAttachment').properties([
         ReferenceAttribute('VpcId', vpc),
         ReferenceAttribute('InternetGatewayId', igw)
     ])
-    t.resources(attachIgw)
+    t.resources(attach_igw)
 
-    nat = Resource('NatGatewayEIP').type('AWS::EC2::EIP').dependsOn(attachIgw).properties([
+    t.resources(Resource('NatGatewayEIP').type('AWS::EC2::EIP').dependsOn(attach_igw).properties([
         ScalarAttribute('Domain', 'vpc')
-    ])
-    t.resources(nat)
+    ]))
 
-    t.outputs(Element('VpcId')
-        .attribute('Description', '-')
-        .attribute('Value', vpc)
-    )
+    nat_gw = Resource('NatGateway').type('AWS::EC2::NatGateway').properties([
+        ScalarAttribute('AllocationId', {'Fn::GetAtt': ['NatGatewayEIP', 'AllocationId']}) # TODO
+    ])
+    t.resources(nat_gw)
+
+    public_route_table = Resource('PublicRouteTable').type('AWS::EC2::RouteTable').dependsOn(attach_igw).properties([
+        ReferenceAttribute('VpcId', vpc)
+    ])
+    t.resources(public_route_table)
+
+    private_route_table = Resource('PrivateRouteTable').type('AWS::EC2::RouteTable').dependsOn(attach_igw).properties([
+        ReferenceAttribute('VpcId', vpc)
+    ])
+    t.resources(private_route_table)
+
+    t.resources(Resource('PublicRoute').type('AWS::EC2::Route').dependsOn(attach_igw).properties([
+        ReferenceAttribute('RouteTableId', public_route_table),
+        ScalarAttribute('DestinationCidrBlock', '0.0.0.0/0'),
+        ReferenceAttribute('GatewayId', igw)
+    ]))
+
+    t.resources(Resource('PrivateRoute').type('AWS::EC2::Route').dependsOn(attach_igw).properties([
+        ReferenceAttribute('RouteTableId', private_route_table),
+        ScalarAttribute('DestinationCidrBlock', '0.0.0.0/0'),
+        ReferenceAttribute('GatewayId', nat_gw)
+    ]))
+
+    api_server_subnet = Resource('ApiServerSubnet').type('AWS::EC2::Subnet').dependsOn(attach_igw).properties([
+        ReferenceAttribute('VpcId', vpc),
+        ScalarAttribute('AvailabilityZone', {'Fn::Select': ['0', {'Fn::GetAZs': {'Ref': 'AWS::Region'}}]}), # TODO
+        ScalarAttribute('CidrBlock', {'Fn::FindInMap': ['GroupToCIDR', 'ApiServerSubnet', 'CIDR']}), # TODO
+        ScalarAttribute('MapPublicIpOnLaunch', 'true')
+    ])
+    t.resources(api_server_subnet)
+    nat_gw.property(ReferenceAttribute('SubnetId', api_server_subnet))
+
+    computing_server_subnet = Resource('ComputingServerSubnet').type('AWS::EC2::Subnet').dependsOn(attach_igw).properties([
+        ReferenceAttribute('VpcId', vpc),
+        ScalarAttribute('AvailabilityZone', {'Fn::Select': ['0', {'Fn::GetAZs': {'Ref': 'AWS::Region'}}]}), # TODO
+        ScalarAttribute('CidrBlock', {'Fn::FindInMap': ['GroupToCIDR', 'ComputingServerSubnet', 'CIDR']}), # TODO
+        ScalarAttribute('MapPublicIpOnLaunch', 'false')
+    ])
+    t.resources(computing_server_subnet)
+
+    mongo_db_subnet = Resource('MongoDBSubnet').type('AWS::EC2::Subnet').dependsOn(attach_igw).properties([
+        ReferenceAttribute('VpcId', vpc),
+        ScalarAttribute('AvailabilityZone', {'Fn::Select': ['0', {'Fn::GetAZs': {'Ref': 'AWS::Region'}}]}), # TODO
+        ScalarAttribute('CidrBlock', {'Fn::FindInMap': ['GroupToCIDR', 'MongoDBSubnet', 'CIDR']}), # TODO
+        ScalarAttribute('MapPublicIpOnLaunch', 'false')
+    ])
+    t.resources(mongo_db_subnet)
+
+    t.resources(Resource('ApiServerSubnetRouteTableAssociation').type('AWS::EC2::SubnetRouteTableAssociation').properties([
+        ReferenceAttribute('SubnetId', api_server_subnet),
+        ReferenceAttribute('RouteTableId', public_route_table)
+    ]))
+
+    t.resources(Resource('ComputingServerSubnetRouteTableAssociation').type('AWS::EC2::SubnetRouteTableAssociation').properties([
+        ReferenceAttribute('SubnetId', computing_server_subnet),
+        ReferenceAttribute('RouteTableId', private_route_table)
+    ]))
+
+    t.resources(Resource('MongoDBSubnetRouteTableAssociation').type('AWS::EC2::SubnetRouteTableAssociation').properties([
+        ReferenceAttribute('SubnetId', mongo_db_subnet),
+        ReferenceAttribute('RouteTableId', private_route_table)
+    ]))
+
+    vpc_default_security_group = Resource('VPCDefaultSecurityGroup').type('AWS::EC2::SecurityGroup').properties([
+        ReferenceAttribute('VpcId', vpc),
+        ScalarAttribute('GroupDescription', 'Allow all communications in VPC'),
+        ScalarAttribute('SecurityGroupIngress', [ # TODO
+            {'IpProtocol': 'tcp', 'FromPort': '0', 'ToPort': '65535', 'CidrIp': {'Fn::FindInMap': ['GroupToCIDR', 'VPC', 'CIDR']}},
+            {'IpProtocol': 'udp', 'FromPort': '0', 'ToPort': '65535', 'CidrIp': {'Fn::FindInMap': ['GroupToCIDR', 'VPC', 'CIDR']}},
+            {'IpProtocol': 'icmp', 'FromPort': '-1', 'ToPort': '-1', 'CidrIp': {'Fn::FindInMap': ['GroupToCIDR', 'VPC', 'CIDR']}}
+        ])
+    ])
+    t.resources(vpc_default_security_group)
+
+    t.outputs(Output('VpcId').description('-').value(vpc))
+    t.outputs(Output('ApiServerSubnet').description('-').value(api_server_subnet))
+    t.outputs(Output('ComputingServerSubnet').description('-').value(computing_server_subnet))
+    t.outputs(Output('MongoDBSubnet').description('-').value(mongo_db_subnet))
+    t.outputs(Output('VPCDefaultSecurityGroup').description('-').value(vpc_default_security_group))
 
     from json import dumps
     print(dumps(t.to_template(), indent=2, separators=(',', ': ')))
