@@ -57,13 +57,13 @@ class Element(object):
         self.attrs.append(attr)
         return self
 
-    def attribute(self, name, value):
-        if isinstance(value, str):
-            return self.attributes(ScalarAttribute(name, value))
-        elif isinstance(value, Element):
-            return self.attributes(ReferenceAttribute(name, value))
-        elif isinstance(value, list):
-            return self.attributes(ListAttribute(name, value))
+    def attribute(self, name, any):
+        if isinstance(any, str):
+            return self.attributes(ScalarAttribute(name, any))
+        elif isinstance(any, Element):
+            return self.attributes(ReferenceAttribute(name, any))
+        elif isinstance(any, list):
+            return self.attributes(MultiValueMapAttribute(name, any))
         else:
             raise ValueError('TODO')
 
@@ -144,10 +144,10 @@ class ScalarAttribute(Attribute):
         template[self.name] = self.value
 
 
-class ListAttribute(Attribute):
+class MultiValueMapAttribute(Attribute):
 
     def __init__(self, name, values):
-        super(ListAttribute, self).__init__(name)
+        super(MultiValueMapAttribute, self).__init__(name)
         self.values = values
 
     def to_template(self, template):
@@ -182,13 +182,13 @@ if __name__ == '__main__':
 
     t.mappings(Mapping('GroupToCIDR')
         .attribute('VPC', [
-            ScalarAttribute('CIDR', '10.104.0.0/16'),
+            ScalarAttribute('CIDR', '10.104.0.0/16')
         ])
         .attribute('ApiServerSubnet', [
-            ScalarAttribute('CIDR', '10.104.128.0/24'),
+            ScalarAttribute('CIDR', '10.104.128.0/24')
         ])
         .attribute('ComputingServerSubnet', [
-            ScalarAttribute('CIDR', '10.104.144.0/20'),
+            ScalarAttribute('CIDR', '10.104.144.0/20')
         ])
         .attribute('MongoDBSubnet', [
             ScalarAttribute('CIDR', '10.104.129.0/24')
