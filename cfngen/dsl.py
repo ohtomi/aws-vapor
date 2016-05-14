@@ -141,7 +141,13 @@ class ScalarAttribute(Attribute):
         self.value = value
 
     def to_template(self, template):
-        template[self.name] = self.value
+        if isinstance(self.value, str):
+            template[self.name] = self.value
+        elif hasattr(self.value, 'to_template'):
+            attr = template[self.name] = OrderedDict()
+            self.value.to_template(attr)
+        else:
+            template[self.name] = self.value
 
 
 class MultiValueMapAttribute(Attribute):
@@ -196,7 +202,7 @@ if __name__ == '__main__':
     )
 
     vpc = Resource('VPC').type('AWS::EC2::VPC').properties([
-        ScalarAttribute('CidrBlock', {'Fn::FindInMap': ['GroupToCIDR', 'VPC', 'CIDR']}), # TODO
+        ScalarAttribute('CidrBlock', ScalarAttribute('Fn::FindInMap', ['GroupToCIDR', 'VPC', 'CIDR'])), # TODO
         ScalarAttribute('InstanceTenancy', 'default')
     ])
     t.resources(vpc)
