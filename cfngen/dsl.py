@@ -221,7 +221,7 @@ if __name__ == '__main__':
     ]))
 
     nat_gw = Resource('NatGateway').type('AWS::EC2::NatGateway').properties([
-        ScalarAttribute('AllocationId', {'Fn::GetAtt': ['NatGatewayEIP', 'AllocationId']}) # TODO
+        ScalarAttribute('AllocationId', ScalarAttribute('Fn::GetAtt', ['NatGatewayEIP', 'AllocationId'])) # TODO
     ])
     t.resources(nat_gw)
 
@@ -249,8 +249,8 @@ if __name__ == '__main__':
 
     api_server_subnet = Resource('ApiServerSubnet').type('AWS::EC2::Subnet').dependsOn(attach_igw).properties([
         ReferenceAttribute('VpcId', vpc),
-        ScalarAttribute('AvailabilityZone', {'Fn::Select': ['0', {'Fn::GetAZs': {'Ref': 'AWS::Region'}}]}), # TODO
-        ScalarAttribute('CidrBlock', {'Fn::FindInMap': ['GroupToCIDR', 'ApiServerSubnet', 'CIDR']}), # TODO
+        ScalarAttribute('AvailabilityZone', ScalarAttribute('Fn::Select', ['0', {'Fn::GetAZs': {'Ref': 'AWS::Region'}}])), # TODO
+        ScalarAttribute('CidrBlock', ScalarAttribute('Fn::FindInMap', ['GroupToCIDR', 'ApiServerSubnet', 'CIDR'])), # TODO
         ScalarAttribute('MapPublicIpOnLaunch', 'true')
     ])
     t.resources(api_server_subnet)
@@ -258,16 +258,16 @@ if __name__ == '__main__':
 
     computing_server_subnet = Resource('ComputingServerSubnet').type('AWS::EC2::Subnet').dependsOn(attach_igw).properties([
         ReferenceAttribute('VpcId', vpc),
-        ScalarAttribute('AvailabilityZone', {'Fn::Select': ['0', {'Fn::GetAZs': {'Ref': 'AWS::Region'}}]}), # TODO
-        ScalarAttribute('CidrBlock', {'Fn::FindInMap': ['GroupToCIDR', 'ComputingServerSubnet', 'CIDR']}), # TODO
+        ScalarAttribute('AvailabilityZone', ScalarAttribute('Fn::Select', ['0', {'Fn::GetAZs': {'Ref': 'AWS::Region'}}])), # TODO
+        ScalarAttribute('CidrBlock', ScalarAttribute('Fn::FindInMap', ['GroupToCIDR', 'ComputingServerSubnet', 'CIDR'])), # TODO
         ScalarAttribute('MapPublicIpOnLaunch', 'false')
     ])
     t.resources(computing_server_subnet)
 
     mongo_db_subnet = Resource('MongoDBSubnet').type('AWS::EC2::Subnet').dependsOn(attach_igw).properties([
         ReferenceAttribute('VpcId', vpc),
-        ScalarAttribute('AvailabilityZone', {'Fn::Select': ['0', {'Fn::GetAZs': {'Ref': 'AWS::Region'}}]}), # TODO
-        ScalarAttribute('CidrBlock', {'Fn::FindInMap': ['GroupToCIDR', 'MongoDBSubnet', 'CIDR']}), # TODO
+        ScalarAttribute('AvailabilityZone', ScalarAttribute('Fn::Select', ['0', {'Fn::GetAZs': {'Ref': 'AWS::Region'}}])), # TODO
+        ScalarAttribute('CidrBlock', ScalarAttribute('Fn::FindInMap', ['GroupToCIDR', 'MongoDBSubnet', 'CIDR'])), # TODO
         ScalarAttribute('MapPublicIpOnLaunch', 'false')
     ])
     t.resources(mongo_db_subnet)
