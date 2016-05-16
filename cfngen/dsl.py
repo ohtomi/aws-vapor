@@ -60,10 +60,10 @@ class Element(object):
     def attribute(self, name, any):
         if isinstance(any, str):
             return self.attributes(ScalarAttribute(name, any))
-        elif isinstance(any, Element):
-            return self.attributes(ReferenceAttribute(name, any))
         elif isinstance(any, list):
             return self.attributes(MultiValueMapAttribute(name, any))
+        elif isinstance(any, Element):
+            return self.attributes(ReferenceAttribute(name, any))
         else:
             raise ValueError('TODO')
 
@@ -143,11 +143,13 @@ class ScalarAttribute(Attribute):
     def to_template(self, template):
         if isinstance(self.value, str):
             template[self.name] = self.value
-        elif hasattr(self.value, 'to_template'):
+        elif isinstance(self.value, list):
+            template[self.name] = self.value
+        elif isinstance(self.value, Attribute):
             attr = template[self.name] = OrderedDict()
             self.value.to_template(attr)
         else:
-            template[self.name] = self.value
+            raise ValueError('TODO')
 
 
 class MultiValueMapAttribute(Attribute):
@@ -162,7 +164,7 @@ class MultiValueMapAttribute(Attribute):
             if isinstance(item, dict):
                 for k, v in item.iteritems():
                     attr[k] = v
-            elif hasattr(item, 'to_template'):
+            elif isinstance(item, Attribute):
                 item.to_template(attr)
             else:
                 raise ValueError('TODO')
