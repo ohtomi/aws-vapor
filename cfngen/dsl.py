@@ -90,6 +90,9 @@ class Mapping(Element):
     def __init__(self, name):
         super(Mapping, self).__init__(name)
 
+    def define(self, category, tuples):
+        return self.attribute(category, [ScalarAttribute(k, v) for k, v in tuples])
+
 
 class Resource(Element):
 
@@ -193,7 +196,7 @@ class Intrinsics(object):
         return {'Fn::GetAtt': [logical_name_of_resource, attribute_name]}
 
     @staticmethod
-    def get_azs(region):
+    def get_azs(region=''):
         return {'Fn::GetAZs': region}
 
     @staticmethod
@@ -218,17 +221,17 @@ if __name__ == '__main__':
     )
 
     t.mappings(Mapping('GroupToCIDR')
-        .attribute('VPC', [
-            ScalarAttribute('CIDR', '10.104.0.0/16')
+        .define('VPC', [
+            ('CIDR', '10.104.0.0/16')
         ])
-        .attribute('ApiServerSubnet', [
-            ScalarAttribute('CIDR', '10.104.128.0/24')
+        .define('ApiServerSubnet', [
+            ('CIDR', '10.104.128.0/24')
         ])
-        .attribute('ComputingServerSubnet', [
-            ScalarAttribute('CIDR', '10.104.144.0/20')
+        .define('ComputingServerSubnet', [
+            ('CIDR', '10.104.144.0/20')
         ])
-        .attribute('MongoDBSubnet', [
-            ScalarAttribute('CIDR', '10.104.129.0/24')
+        .define('MongoDBSubnet', [
+            ('CIDR', '10.104.129.0/24')
         ])
     )
 
@@ -280,7 +283,7 @@ if __name__ == '__main__':
 
     api_server_subnet = Resource('ApiServerSubnet').type('AWS::EC2::Subnet').dependsOn(attach_igw).properties([
         ReferenceAttribute('VpcId', vpc),
-        ScalarAttribute('AvailabilityZone', Intrinsics.select('0', Intrinsics.get_azs(Intrinsics.ref('AWS::Region')))),
+        ScalarAttribute('AvailabilityZone', Intrinsics.select('0', Intrinsics.get_azs())),
         ScalarAttribute('CidrBlock', Intrinsics.find_in_map('GroupToCIDR', 'ApiServerSubnet', 'CIDR')),
         ScalarAttribute('MapPublicIpOnLaunch', 'true')
     ])
@@ -289,7 +292,7 @@ if __name__ == '__main__':
 
     computing_server_subnet = Resource('ComputingServerSubnet').type('AWS::EC2::Subnet').dependsOn(attach_igw).properties([
         ReferenceAttribute('VpcId', vpc),
-        ScalarAttribute('AvailabilityZone', Intrinsics.select('0', Intrinsics.get_azs(Intrinsics.ref('AWS::Region')))),
+        ScalarAttribute('AvailabilityZone', Intrinsics.select('0', Intrinsics.get_azs())),
         ScalarAttribute('CidrBlock', Intrinsics.find_in_map('GroupToCIDR', 'ComputingServerSubnet', 'CIDR')),
         ScalarAttribute('MapPublicIpOnLaunch', 'false')
     ])
@@ -297,7 +300,7 @@ if __name__ == '__main__':
 
     mongo_db_subnet = Resource('MongoDBSubnet').type('AWS::EC2::Subnet').dependsOn(attach_igw).properties([
         ReferenceAttribute('VpcId', vpc),
-        ScalarAttribute('AvailabilityZone', Intrinsics.select('0', Intrinsics.get_azs(Intrinsics.ref('AWS::Region')))),
+        ScalarAttribute('AvailabilityZone', Intrinsics.select('0', Intrinsics.get_azs())),
         ScalarAttribute('CidrBlock', Intrinsics.find_in_map('GroupToCIDR', 'MongoDBSubnet', 'CIDR')),
         ScalarAttribute('MapPublicIpOnLaunch', 'false')
     ])
