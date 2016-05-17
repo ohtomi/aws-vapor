@@ -141,15 +141,13 @@ class ScalarAttribute(Attribute):
         self.value = value
 
     def to_template(self, template):
-        if isinstance(self.value, str):
-            template[self.name] = self.value
-        elif isinstance(self.value, list):
+        if isinstance(self.value, list):
             template[self.name] = self.value
         elif isinstance(self.value, Attribute):
             attr = template[self.name] = OrderedDict()
             self.value.to_template(attr)
         else:
-            raise ValueError('TODO')
+            template[self.name] = self.value
 
 
 class MultiValueMapAttribute(Attribute):
@@ -180,6 +178,37 @@ class ReferenceAttribute(Attribute):
         template[self.name] = {'Ref': self.element.name}
 
 
+class Intrinsics(object):
+
+    @staticmethod
+    def base64(value_to_encode):
+        return {'Fn::Base64': value_to_encode}
+
+    @staticmethod
+    def find_in_map(map_name, top_level_key, second_level_key):
+        return {'Fn::FindInMap': [map_name, top_level_key, second_level_key]}
+
+    @staticmethod
+    def get_att(logical_name_of_resource, attribute_name):
+        return {'Fn::GetAtt': [logical_name_of_resource, attribute_name]}
+
+    @staticmethod
+    def get_azs(region):
+        return {'Fn::GetAZs': region}
+
+    @staticmethod
+    def join(delimiter, list_of_values):
+        return {'Fn::Join': [delimiter, list_of_values]}
+
+    @staticmethod
+    def select(index, list_of_objects):
+        return {'Fn::Select': [index, list_of_objects]}
+
+    @staticmethod
+    def ref(logical_name):
+        return {'Ref': logical_name}
+
+
 if __name__ == '__main__':
     t = Template(description='Sample Template')
 
@@ -204,7 +233,7 @@ if __name__ == '__main__':
     )
 
     vpc = Resource('VPC').type('AWS::EC2::VPC').properties([
-        ScalarAttribute('CidrBlock', ScalarAttribute('Fn::FindInMap', ['GroupToCIDR', 'VPC', 'CIDR'])), # TODO
+        ScalarAttribute('CidrBlock', Intrinsics.find_in_map('GroupToCIDR', 'VPC', 'CIDR')),
         ScalarAttribute('InstanceTenancy', 'default')
     ])
     t.resources(vpc)
@@ -223,7 +252,7 @@ if __name__ == '__main__':
     ]))
 
     nat_gw = Resource('NatGateway').type('AWS::EC2::NatGateway').properties([
-        ScalarAttribute('AllocationId', ScalarAttribute('Fn::GetAtt', ['NatGatewayEIP', 'AllocationId'])) # TODO
+        ScalarAttribute('AllocationId', Intrinsics.get_att('NatGatewayEIP', 'AllocationId'))
     ])
     t.resources(nat_gw)
 
@@ -251,8 +280,8 @@ if __name__ == '__main__':
 
     api_server_subnet = Resource('ApiServerSubnet').type('AWS::EC2::Subnet').dependsOn(attach_igw).properties([
         ReferenceAttribute('VpcId', vpc),
-        ScalarAttribute('AvailabilityZone', ScalarAttribute('Fn::Select', ['0', {'Fn::GetAZs': {'Ref': 'AWS::Region'}}])), # TODO
-        ScalarAttribute('CidrBlock', ScalarAttribute('Fn::FindInMap', ['GroupToCIDR', 'ApiServerSubnet', 'CIDR'])), # TODO
+        ScalarAttribute('AvailabilityZone', Intrinsics.select('0', Intrinsics.get_azs(Intrinsics.ref('AWS::Region')))),
+        ScalarAttribute('CidrBlock', Intrinsics.find_in_map('GroupToCIDR', 'ApiServerSubnet', 'CIDR')),
         ScalarAttribute('MapPublicIpOnLaunch', 'true')
     ])
     t.resources(api_server_subnet)
@@ -260,16 +289,16 @@ if __name__ == '__main__':
 
     computing_server_subnet = Resource('ComputingServerSubnet').type('AWS::EC2::Subnet').dependsOn(attach_igw).properties([
         ReferenceAttribute('VpcId', vpc),
-        ScalarAttribute('AvailabilityZone', ScalarAttribute('Fn::Select', ['0', {'Fn::GetAZs': {'Ref': 'AWS::Region'}}])), # TODO
-        ScalarAttribute('CidrBlock', ScalarAttribute('Fn::FindInMap', ['GroupToCIDR', 'ComputingServerSubnet', 'CIDR'])), # TODO
+        ScalarAttribute('AvailabilityZone', Intrinsics.select('0', Intrinsics.get_azs(Intrinsics.ref('AWS::Region')))),
+        ScalarAttribute('CidrBlock', Intrinsics.find_in_map('GroupToCIDR', 'ComputingServerSubnet', 'CIDR')),
         ScalarAttribute('MapPublicIpOnLaunch', 'false')
     ])
     t.resources(computing_server_subnet)
 
     mongo_db_subnet = Resource('MongoDBSubnet').type('AWS::EC2::Subnet').dependsOn(attach_igw).properties([
         ReferenceAttribute('VpcId', vpc),
-        ScalarAttribute('AvailabilityZone', ScalarAttribute('Fn::Select', ['0', {'Fn::GetAZs': {'Ref': 'AWS::Region'}}])), # TODO
-        ScalarAttribute('CidrBlock', ScalarAttribute('Fn::FindInMap', ['GroupToCIDR', 'MongoDBSubnet', 'CIDR'])), # TODO
+        ScalarAttribute('AvailabilityZone', Intrinsics.select('0', Intrinsics.get_azs(Intrinsics.ref('AWS::Region')))),
+        ScalarAttribute('CidrBlock', Intrinsics.find_in_map('GroupToCIDR', 'MongoDBSubnet', 'CIDR')),
         ScalarAttribute('MapPublicIpOnLaunch', 'false')
     ])
     t.resources(mongo_db_subnet)
