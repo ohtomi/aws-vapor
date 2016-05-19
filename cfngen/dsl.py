@@ -175,10 +175,10 @@ class ReferenceAttribute(Attribute):
 
     def __init__(self, name, element):
         super(ReferenceAttribute, self).__init__(name)
-        self.element = element
+        self.value = Intrinsics.ref(element)
 
     def to_template(self, template):
-        template[self.name] = {'Ref': self.element.name}
+        template[self.name] = self.value
 
 
 class Intrinsics(object):
@@ -208,8 +208,13 @@ class Intrinsics(object):
         return {'Fn::Select': [index, list_of_objects]}
 
     @staticmethod
-    def ref(logical_name):
-        return {'Ref': logical_name}
+    def ref(logical_name_or_element):
+        if isinstance(logical_name_or_element, str):
+            return {'Ref': logical_name_or_element}
+        elif isinstance(logical_name_or_element, Element):
+            return {'Ref': logical_name_or_element.name}
+        else:
+            raise ValueError('TODO')
 
 
 if __name__ == '__main__':
@@ -325,9 +330,9 @@ if __name__ == '__main__':
         ReferenceAttribute('VpcId', vpc),
         ScalarAttribute('GroupDescription', 'Allow all communications in VPC'),
         ScalarAttribute('SecurityGroupIngress', [ # TODO
-            {'IpProtocol': 'tcp', 'FromPort': '0', 'ToPort': '65535', 'CidrIp': {'Fn::FindInMap': ['GroupToCIDR', 'VPC', 'CIDR']}},
-            {'IpProtocol': 'udp', 'FromPort': '0', 'ToPort': '65535', 'CidrIp': {'Fn::FindInMap': ['GroupToCIDR', 'VPC', 'CIDR']}},
-            {'IpProtocol': 'icmp', 'FromPort': '-1', 'ToPort': '-1', 'CidrIp': {'Fn::FindInMap': ['GroupToCIDR', 'VPC', 'CIDR']}}
+            {'IpProtocol': 'tcp', 'FromPort': '0', 'ToPort': '65535', 'CidrIp': Intrinsics.find_in_map('GroupToCIDR', 'VPC', 'CIDR')},
+            {'IpProtocol': 'udp', 'FromPort': '0', 'ToPort': '65535', 'CidrIp': Intrinsics.find_in_map('GroupToCIDR', 'VPC', 'CIDR')},
+            {'IpProtocol': 'icmp', 'FromPort': '-1', 'ToPort': '-1', 'CidrIp': Intrinsics.find_in_map('GroupToCIDR', 'VPC', 'CIDR')}
         ])
     ])
     t.resources(vpc_default_security_group)
