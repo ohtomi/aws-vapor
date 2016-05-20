@@ -63,7 +63,7 @@ class Element(object):
         elif isinstance(any, list):
             return self.attributes(MultiValueMapAttribute(name, any))
         elif isinstance(any, Element):
-            return self.attributes(ReferenceAttribute(name, any))
+            return self.attributes(ScalarAttribute(name, any))
         else:
             raise ValueError('TODO')
 
@@ -149,6 +149,8 @@ class ScalarAttribute(Attribute):
         elif isinstance(self.value, Attribute):
             attr = template[self.name] = OrderedDict()
             self.value.to_template(attr)
+        elif isinstance(self.value, Element):
+            template[self.name] = Intrinsics.ref(self.value)
         else:
             template[self.name] = self.value
 
@@ -169,16 +171,6 @@ class MultiValueMapAttribute(Attribute):
                 item.to_template(attr)
             else:
                 raise ValueError('TODO')
-
-
-class ReferenceAttribute(Attribute):
-
-    def __init__(self, name, element):
-        super(ReferenceAttribute, self).__init__(name)
-        self.value = Intrinsics.ref(element)
-
-    def to_template(self, template):
-        template[self.name] = self.value
 
 
 class Intrinsics(object):
@@ -250,8 +242,8 @@ if __name__ == '__main__':
     t.resources(igw)
 
     attach_igw = Resource('AttachInternetGateway').type('AWS::EC2::VPCGatewayAttachment').properties([
-        ReferenceAttribute('VpcId', vpc),
-        ReferenceAttribute('InternetGatewayId', igw)
+        ScalarAttribute('VpcId', vpc),
+        ScalarAttribute('InternetGatewayId', igw)
     ])
     t.resources(attach_igw)
 
@@ -265,38 +257,38 @@ if __name__ == '__main__':
     t.resources(nat_gw)
 
     public_route_table = Resource('PublicRouteTable').type('AWS::EC2::RouteTable').dependsOn(attach_igw).properties([
-        ReferenceAttribute('VpcId', vpc)
+        ScalarAttribute('VpcId', vpc)
     ])
     t.resources(public_route_table)
 
     private_route_table = Resource('PrivateRouteTable').type('AWS::EC2::RouteTable').dependsOn(attach_igw).properties([
-        ReferenceAttribute('VpcId', vpc)
+        ScalarAttribute('VpcId', vpc)
     ])
     t.resources(private_route_table)
 
     t.resources(Resource('PublicRoute').type('AWS::EC2::Route').dependsOn(attach_igw).properties([
-        ReferenceAttribute('RouteTableId', public_route_table),
+        ScalarAttribute('RouteTableId', public_route_table),
         ScalarAttribute('DestinationCidrBlock', '0.0.0.0/0'),
-        ReferenceAttribute('GatewayId', igw)
+        ScalarAttribute('GatewayId', igw)
     ]))
 
     t.resources(Resource('PrivateRoute').type('AWS::EC2::Route').dependsOn(attach_igw).properties([
-        ReferenceAttribute('RouteTableId', private_route_table),
+        ScalarAttribute('RouteTableId', private_route_table),
         ScalarAttribute('DestinationCidrBlock', '0.0.0.0/0'),
-        ReferenceAttribute('GatewayId', nat_gw)
+        ScalarAttribute('GatewayId', nat_gw)
     ]))
 
     api_server_subnet = Resource('ApiServerSubnet').type('AWS::EC2::Subnet').dependsOn(attach_igw).properties([
-        ReferenceAttribute('VpcId', vpc),
+        ScalarAttribute('VpcId', vpc),
         ScalarAttribute('AvailabilityZone', Intrinsics.select('0', Intrinsics.get_azs())),
         ScalarAttribute('CidrBlock', Intrinsics.find_in_map('GroupToCIDR', 'ApiServerSubnet', 'CIDR')),
         ScalarAttribute('MapPublicIpOnLaunch', 'true')
     ])
     t.resources(api_server_subnet)
-    nat_gw.property(ReferenceAttribute('SubnetId', api_server_subnet))
+    nat_gw.property(ScalarAttribute('SubnetId', api_server_subnet))
 
     computing_server_subnet = Resource('ComputingServerSubnet').type('AWS::EC2::Subnet').dependsOn(attach_igw).properties([
-        ReferenceAttribute('VpcId', vpc),
+        ScalarAttribute('VpcId', vpc),
         ScalarAttribute('AvailabilityZone', Intrinsics.select('0', Intrinsics.get_azs())),
         ScalarAttribute('CidrBlock', Intrinsics.find_in_map('GroupToCIDR', 'ComputingServerSubnet', 'CIDR')),
         ScalarAttribute('MapPublicIpOnLaunch', 'false')
@@ -304,7 +296,7 @@ if __name__ == '__main__':
     t.resources(computing_server_subnet)
 
     mongo_db_subnet = Resource('MongoDBSubnet').type('AWS::EC2::Subnet').dependsOn(attach_igw).properties([
-        ReferenceAttribute('VpcId', vpc),
+        ScalarAttribute('VpcId', vpc),
         ScalarAttribute('AvailabilityZone', Intrinsics.select('0', Intrinsics.get_azs())),
         ScalarAttribute('CidrBlock', Intrinsics.find_in_map('GroupToCIDR', 'MongoDBSubnet', 'CIDR')),
         ScalarAttribute('MapPublicIpOnLaunch', 'false')
@@ -312,22 +304,22 @@ if __name__ == '__main__':
     t.resources(mongo_db_subnet)
 
     t.resources(Resource('ApiServerSubnetRouteTableAssociation').type('AWS::EC2::SubnetRouteTableAssociation').properties([
-        ReferenceAttribute('SubnetId', api_server_subnet),
-        ReferenceAttribute('RouteTableId', public_route_table)
+        ScalarAttribute('SubnetId', api_server_subnet),
+        ScalarAttribute('RouteTableId', public_route_table)
     ]))
 
     t.resources(Resource('ComputingServerSubnetRouteTableAssociation').type('AWS::EC2::SubnetRouteTableAssociation').properties([
-        ReferenceAttribute('SubnetId', computing_server_subnet),
-        ReferenceAttribute('RouteTableId', private_route_table)
+        ScalarAttribute('SubnetId', computing_server_subnet),
+        ScalarAttribute('RouteTableId', private_route_table)
     ]))
 
     t.resources(Resource('MongoDBSubnetRouteTableAssociation').type('AWS::EC2::SubnetRouteTableAssociation').properties([
-        ReferenceAttribute('SubnetId', mongo_db_subnet),
-        ReferenceAttribute('RouteTableId', private_route_table)
+        ScalarAttribute('SubnetId', mongo_db_subnet),
+        ScalarAttribute('RouteTableId', private_route_table)
     ]))
 
     vpc_default_security_group = Resource('VPCDefaultSecurityGroup').type('AWS::EC2::SecurityGroup').properties([
-        ReferenceAttribute('VpcId', vpc),
+        ScalarAttribute('VpcId', vpc),
         ScalarAttribute('GroupDescription', 'Allow all communications in VPC'),
         ScalarAttribute('SecurityGroupIngress', [ # TODO
             {'IpProtocol': 'tcp', 'FromPort': '0', 'ToPort': '65535', 'CidrIp': Intrinsics.find_in_map('GroupToCIDR', 'VPC', 'CIDR')},
