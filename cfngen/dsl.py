@@ -60,10 +60,10 @@ class Element(object):
     def attribute(self, name, any):
         if isinstance(any, str):
             return self.attributes(ScalarAttribute(name, any))
-        elif isinstance(any, list):
-            return self.attributes(MultiValueMapAttribute(name, any))
         elif isinstance(any, Element):
             return self.attributes(ScalarAttribute(name, any))
+        elif isinstance(any, list):
+            return self.attributes(MapAttribute(name, any))
         else:
             raise ValueError('TODO')
 
@@ -155,10 +155,10 @@ class ScalarAttribute(Attribute):
             template[self.name] = self.value
 
 
-class MultiValueMapAttribute(Attribute):
+class MapAttribute(Attribute):
 
     def __init__(self, name, values):
-        super(MultiValueMapAttribute, self).__init__(name)
+        super(MapAttribute, self).__init__(name)
         self.values = values
 
     def to_template(self, template):
