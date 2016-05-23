@@ -146,7 +146,7 @@ class ScalarAttribute(Attribute):
     def to_template(self, template):
         if isinstance(self.value, str):
             template[self.name] = self.value
-        if isinstance(self.value, list):
+        elif isinstance(self.value, list):
             template[self.name] = self.value
         elif isinstance(self.value, Attribute):
             attr = template[self.name] = OrderedDict()
