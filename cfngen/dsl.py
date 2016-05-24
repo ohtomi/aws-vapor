@@ -211,6 +211,34 @@ class Intrinsics(object):
             raise ValueError('TODO')
 
 
+class Pseudo(object):
+
+    @staticmethod
+    def account_id():
+        return {'Ref': 'AWS::AccountId'}
+
+    @staticmethod
+    def notification_arns():
+        return {'Ref': 'AWS::NotificationARNs'}
+
+    @staticmethod
+    def no_value():
+        return {'Ref': 'AWS::NoValue'}
+
+    @staticmethod
+    def region():
+        return {'Ref': 'AWS::Region'}
+
+    @staticmethod
+    def stack_id():
+        return {'Ref': 'AWS::StackId'}
+
+    @staticmethod
+    def stack_name():
+        return {'Ref': 'AWS::StackName'}
+
+
+
 if __name__ == '__main__':
     t = Template(description='Sample Template')
 
