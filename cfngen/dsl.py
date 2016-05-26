@@ -51,26 +51,14 @@ class Element(object):
 
     def __init__(self, name):
         self.name = name
-        self.attrs = []
+        self.attrs = OrderedDict()
 
-    def attributes(self, attr):
-        self.attrs.append(attr)
+    def attributes(self, name, value):
+        self.attrs[name] = value
         return self
 
-    def attribute(self, name, any):
-        if isinstance(any, str):
-            return self.attributes(ScalarAttribute(name, any))
-        elif isinstance(any, Element):
-            return self.attributes(ScalarAttribute(name, any))
-        elif isinstance(any, list):
-            return self.attributes(MapAttribute(name, any))
-        else:
-            raise ValueError('TODO')
-
     def to_template(self, template):
-        element = template[self.name] = OrderedDict()
-        for attr in self.attrs:
-            attr.to_template(element)
+        template[self.name] = self.attrs
 
 
 class Parameter(Element):
@@ -79,10 +67,10 @@ class Parameter(Element):
         super(Parameter, self).__init__(name)
 
     def description(self, desc):
-        return self.attribute('Description', desc)
+        return self.attributes('Description', desc)
 
     def type(self, name):
-        return self.attribute('Type', name)
+        return self.attributes('Type', name)
 
 
 class Mapping(Element):
@@ -91,7 +79,7 @@ class Mapping(Element):
         super(Mapping, self).__init__(name)
 
     def define(self, category, tuples):
-        return self.attribute(category, [ScalarAttribute(k, v) for k, v in tuples])
+        return self.attributes(category, [{k: v} for k, v in tuples])
 
 
 class Resource(Element):
@@ -100,18 +88,18 @@ class Resource(Element):
         super(Resource, self).__init__(name)
 
     def type(self, name):
-        return self.attribute('Type', name)
+        return self.attributes('Type', name)
 
     def dependsOn(self, resource):
-        return self.attribute('DependsOn', resource.name)
+        return self.attributes('DependsOn', resource.name)
 
     def properties(self, props):
-        return self.attribute('Properties', props)
+        return self.attributes('Properties', props)
 
     def property(self, prop):
-        for attr in self.attrs:
-            if attr.name == 'Properties':
-                attr.values.append(prop)
+        for name, maybe_props in self.attrs.items():
+            if name == 'Properties':
+                maybe_props.append(prop)
                 return self
         return self.properties([prop])
 
@@ -122,19 +110,16 @@ class Output(Element):
         super(Output, self).__init__(name)
 
     def description(self, desc):
-        return self.attribute('Description', desc)
+        return self.attributes('Description', desc)
 
     def value(self, value):
-        return self.attribute('Value', value)
+        return self.attributes('Value', value)
 
 
 class Attribute(object):
 
     def __init__(self, name):
         self.name = name
-
-    def to_template(self, template):
-        raise NotImplementedError('override me')
 
     @staticmethod
     def any(name, value):
@@ -147,8 +132,6 @@ class Attribute(object):
             if isinstance(any, dict):
                 for k, v in any.iteritems():
                     m[k] = v
-            elif isinstance(any, Attribute):
-                any.to_template(m)
             else:
                 raise ValueError('TODO')
         return m
@@ -156,44 +139,6 @@ class Attribute(object):
     @staticmethod
     def element(name, value):
         return {name: Intrinsics.ref(value)}
-
-
-class ScalarAttribute(Attribute):
-
-    def __init__(self, name, value):
-        super(ScalarAttribute, self).__init__(name)
-        self.value = value
-
-    def to_template(self, template):
-        if isinstance(self.value, str):
-            template[self.name] = self.value
-        elif isinstance(self.value, list):
-            template[self.name] = self.value
-        elif isinstance(self.value, Attribute):
-            attr = template[self.name] = OrderedDict()
-            self.value.to_template(attr)
-        elif isinstance(self.value, Element):
-            template[self.name] = Intrinsics.ref(self.value)
-        else:
-            template[self.name] = self.value
-
-
-class MapAttribute(Attribute):
-
-    def __init__(self, name, values):
-        super(MapAttribute, self).__init__(name)
-        self.values = values
-
-    def to_template(self, template):
-        attr = template[self.name] = OrderedDict()
-        for item in self.values:
-            if isinstance(item, dict):
-                for k, v in item.iteritems():
-                    attr[k] = v
-            elif isinstance(item, Attribute):
-                item.to_template(attr)
-            else:
-                raise ValueError('TODO')
 
 
 class Intrinsics(object):
@@ -380,11 +325,11 @@ if __name__ == '__main__':
     ])
     t.resources(vpc_default_security_group)
 
-    t.outputs(Output('VpcId').description('-').value(vpc))
-    t.outputs(Output('ApiServerSubnet').description('-').value(api_server_subnet))
-    t.outputs(Output('ComputingServerSubnet').description('-').value(computing_server_subnet))
-    t.outputs(Output('MongoDBSubnet').description('-').value(mongo_db_subnet))
-    t.outputs(Output('VPCDefaultSecurityGroup').description('-').value(vpc_default_security_group))
+    t.outputs(Output('VpcId').description('-').value(Intrinsics.ref(vpc)))
+    t.outputs(Output('ApiServerSubnet').description('-').value(Intrinsics.ref(api_server_subnet)))
+    t.outputs(Output('ComputingServerSubnet').description('-').value(Intrinsics.ref(computing_server_subnet)))
+    t.outputs(Output('MongoDBSubnet').description('-').value(Intrinsics.ref(mongo_db_subnet)))
+    t.outputs(Output('VPCDefaultSecurityGroup').description('-').value(Intrinsics.ref(vpc_default_security_group)))
 
     from json import dumps
     print(dumps(t.to_template(), indent=2, separators=(',', ': ')))
