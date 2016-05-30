@@ -94,12 +94,17 @@ class Resource(Element):
         return self.attributes('DependsOn', resource.name)
 
     def properties(self, props):
-        return self.attributes('Properties', props)
+        m = OrderedDict()
+        for p in props:
+            for k, v in p.items():
+                m[k] = v
+        return self.attributes('Properties', m)
 
     def property(self, prop):
         for name, maybe_props in self.attrs.items():
             if name == 'Properties':
-                maybe_props.append(prop)
+                for k, v in prop.items():
+                    maybe_props[k] = v
                 return self
         return self.properties([prop])
 
@@ -121,14 +126,7 @@ class Attributes(object):
     @staticmethod
     def of(name, value):
         if isinstance(value, list):
-            m = OrderedDict()
-            for any in value:
-                if isinstance(any, dict):
-                    for k, v in any.iteritems():
-                        m[k] = v
-                else:
-                    raise ValueError('TODO')
-            return m
+            return {name: value}
         elif isinstance(value, Element):
             return {name: Intrinsics.ref(value)}
         else:
