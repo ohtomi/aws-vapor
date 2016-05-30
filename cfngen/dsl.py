@@ -116,7 +116,7 @@ class Output(Element):
         return self.attributes('Value', value)
 
 
-class Attribute(object):
+class Attributes(object):
 
     @staticmethod
     def of(name, value):
@@ -223,8 +223,8 @@ if __name__ == '__main__':
     )
 
     vpc = Resource('VPC').type('AWS::EC2::VPC').properties([
-        Attribute.of('CidrBlock', Intrinsics.find_in_map('GroupToCIDR', 'VPC', 'CIDR')),
-        Attribute.of('InstanceTenancy', 'default')
+        Attributes.of('CidrBlock', Intrinsics.find_in_map('GroupToCIDR', 'VPC', 'CIDR')),
+        Attributes.of('InstanceTenancy', 'default')
     ])
     t.resources(vpc)
 
@@ -232,86 +232,86 @@ if __name__ == '__main__':
     t.resources(igw)
 
     attach_igw = Resource('AttachInternetGateway').type('AWS::EC2::VPCGatewayAttachment').properties([
-        Attribute.of('VpcId', vpc),
-        Attribute.of('InternetGatewayId', igw)
+        Attributes.of('VpcId', vpc),
+        Attributes.of('InternetGatewayId', igw)
     ])
     t.resources(attach_igw)
 
     t.resources(Resource('NatGatewayEIP').type('AWS::EC2::EIP').dependsOn(attach_igw).properties([
-        Attribute.of('Domain', 'vpc')
+        Attributes.of('Domain', 'vpc')
     ]))
 
     nat_gw = Resource('NatGateway').type('AWS::EC2::NatGateway').properties([
-        Attribute.of('AllocationId', Intrinsics.get_att('NatGatewayEIP', 'AllocationId'))
+        Attributes.of('AllocationId', Intrinsics.get_att('NatGatewayEIP', 'AllocationId'))
     ])
     t.resources(nat_gw)
 
     public_route_table = Resource('PublicRouteTable').type('AWS::EC2::RouteTable').dependsOn(attach_igw).properties([
-        Attribute.of('VpcId', vpc)
+        Attributes.of('VpcId', vpc)
     ])
     t.resources(public_route_table)
 
     private_route_table = Resource('PrivateRouteTable').type('AWS::EC2::RouteTable').dependsOn(attach_igw).properties([
-        Attribute.of('VpcId', vpc)
+        Attributes.of('VpcId', vpc)
     ])
     t.resources(private_route_table)
 
     t.resources(Resource('PublicRoute').type('AWS::EC2::Route').dependsOn(attach_igw).properties([
-        Attribute.of('RouteTableId', public_route_table),
-        Attribute.of('DestinationCidrBlock', '0.0.0.0/0'),
-        Attribute.of('GatewayId', igw)
+        Attributes.of('RouteTableId', public_route_table),
+        Attributes.of('DestinationCidrBlock', '0.0.0.0/0'),
+        Attributes.of('GatewayId', igw)
     ]))
 
     t.resources(Resource('PrivateRoute').type('AWS::EC2::Route').dependsOn(attach_igw).properties([
-        Attribute.of('RouteTableId', private_route_table),
-        Attribute.of('DestinationCidrBlock', '0.0.0.0/0'),
-        Attribute.of('GatewayId', nat_gw)
+        Attributes.of('RouteTableId', private_route_table),
+        Attributes.of('DestinationCidrBlock', '0.0.0.0/0'),
+        Attributes.of('GatewayId', nat_gw)
     ]))
 
     api_server_subnet = Resource('ApiServerSubnet').type('AWS::EC2::Subnet').dependsOn(attach_igw).properties([
-        Attribute.of('VpcId', vpc),
-        Attribute.of('AvailabilityZone', Intrinsics.select('0', Intrinsics.get_azs())),
-        Attribute.of('CidrBlock', Intrinsics.find_in_map('GroupToCIDR', 'ApiServerSubnet', 'CIDR')),
-        Attribute.of('MapPublicIpOnLaunch', 'true')
+        Attributes.of('VpcId', vpc),
+        Attributes.of('AvailabilityZone', Intrinsics.select('0', Intrinsics.get_azs())),
+        Attributes.of('CidrBlock', Intrinsics.find_in_map('GroupToCIDR', 'ApiServerSubnet', 'CIDR')),
+        Attributes.of('MapPublicIpOnLaunch', 'true')
     ])
     t.resources(api_server_subnet)
-    nat_gw.property(Attribute.of('SubnetId', api_server_subnet))
+    nat_gw.property(Attributes.of('SubnetId', api_server_subnet))
 
     computing_server_subnet = Resource('ComputingServerSubnet').type('AWS::EC2::Subnet').dependsOn(attach_igw).properties([
-        Attribute.of('VpcId', vpc),
-        Attribute.of('AvailabilityZone', Intrinsics.select('0', Intrinsics.get_azs())),
-        Attribute.of('CidrBlock', Intrinsics.find_in_map('GroupToCIDR', 'ComputingServerSubnet', 'CIDR')),
-        Attribute.of('MapPublicIpOnLaunch', 'false')
+        Attributes.of('VpcId', vpc),
+        Attributes.of('AvailabilityZone', Intrinsics.select('0', Intrinsics.get_azs())),
+        Attributes.of('CidrBlock', Intrinsics.find_in_map('GroupToCIDR', 'ComputingServerSubnet', 'CIDR')),
+        Attributes.of('MapPublicIpOnLaunch', 'false')
     ])
     t.resources(computing_server_subnet)
 
     mongo_db_subnet = Resource('MongoDBSubnet').type('AWS::EC2::Subnet').dependsOn(attach_igw).properties([
-        Attribute.of('VpcId', vpc),
-        Attribute.of('AvailabilityZone', Intrinsics.select('0', Intrinsics.get_azs())),
-        Attribute.of('CidrBlock', Intrinsics.find_in_map('GroupToCIDR', 'MongoDBSubnet', 'CIDR')),
-        Attribute.of('MapPublicIpOnLaunch', 'false')
+        Attributes.of('VpcId', vpc),
+        Attributes.of('AvailabilityZone', Intrinsics.select('0', Intrinsics.get_azs())),
+        Attributes.of('CidrBlock', Intrinsics.find_in_map('GroupToCIDR', 'MongoDBSubnet', 'CIDR')),
+        Attributes.of('MapPublicIpOnLaunch', 'false')
     ])
     t.resources(mongo_db_subnet)
 
     t.resources(Resource('ApiServerSubnetRouteTableAssociation').type('AWS::EC2::SubnetRouteTableAssociation').properties([
-        Attribute.of('SubnetId', api_server_subnet),
-        Attribute.of('RouteTableId', public_route_table)
+        Attributes.of('SubnetId', api_server_subnet),
+        Attributes.of('RouteTableId', public_route_table)
     ]))
 
     t.resources(Resource('ComputingServerSubnetRouteTableAssociation').type('AWS::EC2::SubnetRouteTableAssociation').properties([
-        Attribute.of('SubnetId', computing_server_subnet),
-        Attribute.of('RouteTableId', private_route_table)
+        Attributes.of('SubnetId', computing_server_subnet),
+        Attributes.of('RouteTableId', private_route_table)
     ]))
 
     t.resources(Resource('MongoDBSubnetRouteTableAssociation').type('AWS::EC2::SubnetRouteTableAssociation').properties([
-        Attribute.of('SubnetId', mongo_db_subnet),
-        Attribute.of('RouteTableId', private_route_table)
+        Attributes.of('SubnetId', mongo_db_subnet),
+        Attributes.of('RouteTableId', private_route_table)
     ]))
 
     vpc_default_security_group = Resource('VPCDefaultSecurityGroup').type('AWS::EC2::SecurityGroup').properties([
-        Attribute.of('VpcId', vpc),
-        Attribute.of('GroupDescription', 'Allow all communications in VPC'),
-        Attribute.of('SecurityGroupIngress', [ # TODO
+        Attributes.of('VpcId', vpc),
+        Attributes.of('GroupDescription', 'Allow all communications in VPC'),
+        Attributes.of('SecurityGroupIngress', [ # TODO
             {'IpProtocol': 'tcp', 'FromPort': '0', 'ToPort': '65535', 'CidrIp': Intrinsics.find_in_map('GroupToCIDR', 'VPC', 'CIDR')},
             {'IpProtocol': 'udp', 'FromPort': '0', 'ToPort': '65535', 'CidrIp': Intrinsics.find_in_map('GroupToCIDR', 'VPC', 'CIDR')},
             {'IpProtocol': 'icmp', 'FromPort': '-1', 'ToPort': '-1', 'CidrIp': Intrinsics.find_in_map('GroupToCIDR', 'VPC', 'CIDR')}
