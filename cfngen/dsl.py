@@ -79,7 +79,10 @@ class Mapping(Element):
         super(Mapping, self).__init__(name)
 
     def define(self, category, tuples):
-        return self.attributes(category, [{k: v} for k, v in tuples])
+        m = OrderedDict()
+        for k, v in tuples:
+            m[k] = v
+        return self.attributes(category, m)
 
 
 class Resource(Element):
