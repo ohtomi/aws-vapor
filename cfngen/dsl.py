@@ -78,11 +78,27 @@ class Mapping(Element):
     def __init__(self, name):
         super(Mapping, self).__init__(name)
 
-    def define(self, category, tuples):
-        m = OrderedDict()
-        for k, v in tuples:
-            m[k] = v
-        return self.attributes(category, m)
+    def category(self, category):
+
+        class _(object):
+
+            def item(_self, key, value):
+                m = OrderedDict()
+                for name, maybe_mappings in self.attrs.items():
+                    if name == category:
+                        m = maybe_mappings
+
+                m[key] = value
+                self.attributes(category, m)
+                return _self
+
+            def end(_self):
+                return self
+
+            def category(_self, category):
+                return self.category(category)
+
+        return _()
 
 
 class Resource(Element):
@@ -209,18 +225,11 @@ if __name__ == '__main__':
     )
 
     t.mappings(Mapping('GroupToCIDR')
-        .define('VPC', [
-            ('CIDR', '10.104.0.0/16')
-        ])
-        .define('ApiServerSubnet', [
-            ('CIDR', '10.104.128.0/24')
-        ])
-        .define('ComputingServerSubnet', [
-            ('CIDR', '10.104.144.0/20')
-        ])
-        .define('MongoDBSubnet', [
-            ('CIDR', '10.104.129.0/24')
-        ])
+        .category('VPC').item('CIDR', '10.104.0.0/16')
+        .category('ApiServerSubnet').item('CIDR', '10.104.128.0/24')
+        .category('ComputingServerSubnet').item('CIDR', '10.104.144.0/20')
+        .category('MongoDBSubnet').item('CIDR', '10.104.129.0/24')
+        .end()
     )
 
     vpc = Resource('VPC').type('AWS::EC2::VPC').properties([
