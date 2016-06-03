@@ -109,12 +109,13 @@ class Resource(Element):
         return self.attributes('Properties', m)
 
     def property(self, prop):
-        for name, maybe_props in self.attrs.items():
-            if name == 'Properties':
-                for k, v in prop.items():
-                    maybe_props[k] = v
-                return self
-        return self.properties([prop])
+        if self.attrs.has_key('Properties'):
+            m = self.attrs['Properties']
+            for k, v in prop.items():
+                m[k] = v
+            return self
+        else:
+            return self.properties([prop])
 
 
 class Output(Element):
