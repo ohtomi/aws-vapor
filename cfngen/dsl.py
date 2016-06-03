@@ -79,26 +79,15 @@ class Mapping(Element):
         super(Mapping, self).__init__(name)
 
     def category(self, category):
+        self._category = category
+        if not self.attrs.has_key(category):
+            self.attributes(category, OrderedDict())
+            return self
 
-        class _(object):
-
-            def item(_self, key, value):
-                m = OrderedDict()
-                for name, maybe_mappings in self.attrs.items():
-                    if name == category:
-                        m = maybe_mappings
-
-                m[key] = value
-                self.attributes(category, m)
-                return _self
-
-            def end(_self):
-                return self
-
-            def category(_self, category):
-                return self.category(category)
-
-        return _()
+    def item(self, key, value):
+        m = self.attrs[self._category]
+        m[key] = value
+        return self
 
 
 class Resource(Element):
@@ -229,7 +218,6 @@ if __name__ == '__main__':
         .category('ApiServerSubnet').item('CIDR', '10.104.128.0/24')
         .category('ComputingServerSubnet').item('CIDR', '10.104.144.0/20')
         .category('MongoDBSubnet').item('CIDR', '10.104.129.0/24')
-        .end()
     )
 
     vpc = Resource('VPC').type('AWS::EC2::VPC').properties([
