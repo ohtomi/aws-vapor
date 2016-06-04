@@ -102,20 +102,14 @@ class Resource(Element):
         return self.attributes('DependsOn', resource.name)
 
     def properties(self, props):
-        m = OrderedDict()
+        m = self.attrs['Properties'] if self.attrs.has_key('Properties') else OrderedDict()
         for p in props:
             for k, v in p.items():
                 m[k] = v
         return self.attributes('Properties', m)
 
     def property(self, prop):
-        if self.attrs.has_key('Properties'):
-            m = self.attrs['Properties']
-            for k, v in prop.items():
-                m[k] = v
-            return self
-        else:
-            return self.properties([prop])
+        return self.properties([prop])
 
 
 class Output(Element):
