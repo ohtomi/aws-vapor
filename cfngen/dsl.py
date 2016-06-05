@@ -169,7 +169,7 @@ class Intrinsics(object):
         elif isinstance(logical_name_or_element, Element):
             return {'Ref': logical_name_or_element.name}
         else:
-            raise ValueError('TODO')
+            raise ValueError('value should be logical name or element. but %r' % logical_name_or_element)
 
 
 class Pseudo(object):
