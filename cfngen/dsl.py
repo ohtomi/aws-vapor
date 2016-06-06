@@ -18,22 +18,22 @@ class Template(object):
     def parameters(self, element):
         section = self.get_section('Parameters')
         section.append(element)
-        return self
+        return element
 
     def mappings(self, element):
         section = self.get_section('Mappings')
         section.append(element)
-        return self
+        return element
 
     def resources(self, element):
         section = self.get_section('Resources')
         section.append(element)
-        return self
+        return element
 
     def outputs(self, element):
         section = self.get_section('Outputs')
         section.append(element)
-        return self
+        return element
 
     def to_template(self):
         template = OrderedDict()
@@ -88,6 +88,14 @@ class Mapping(Element):
         m = self.attrs[self._category]
         m[key] = value
         return self
+
+    def find_in_map(self, top_level_key, second_level_key):
+        if not self.attrs.has_key(top_level_key):
+            raise ValueError('missing top_level_key. top_level_key: %r' % top_level_key)
+        m = self.attrs[top_level_key]
+        if not m.has_key(second_level_key):
+            raise ValueError('missing second_level_key. second_level_key: %r' % second_level_key)
+        return Intrinsics.find_in_map(self, top_level_key, second_level_key)
 
 
 class Resource(Element):
@@ -149,13 +157,7 @@ class Intrinsics(object):
             return {'Fn::FindInMap': [map_name, top_level_key, second_level_key]}
         elif isinstance(map_name_or_mapping, Mapping):
             mapping = map_name_or_mapping
-            if not mapping.attrs.has_key(top_level_key):
-                raise ValueError('missing top_level_key in mapping. mapping: %r, top_level_key: %r'
-                        % (mapping, top_level_key))
             m = mapping.attrs[top_level_key]
-            if not m.has_key(second_level_key):
-                raise ValueError('missing second_level_key in mapping.top_level_key. mapping: %r, second_level_key: %r'
-                        % (mapping, second_level_key))
             return {'Fn::FindInMap': [mapping.name, top_level_key, second_level_key]}
         else:
             raise ValueError('value should be map name or mapping. but %r' % type(map_name_or_mapping))
@@ -223,46 +225,40 @@ if __name__ == '__main__':
         .type('String')
     )
 
-    group_to_cidr = Mapping('GroupToCIDR')
-    group_to_cidr.category('VPC').item('CIDR', '10.104.0.0/16')
-    group_to_cidr.category('ApiServerSubnet').item('CIDR', '10.104.128.0/24')
-    group_to_cidr.category('ComputingServerSubnet').item('CIDR', '10.104.144.0/20')
-    group_to_cidr.category('MongoDBSubnet').item('CIDR', '10.104.129.0/24')
-    t.mappings(group_to_cidr)
+    group_to_cidr = t.mappings(Mapping('GroupToCIDR')
+        .category('VPC').item('CIDR', '10.104.0.0/16')
+        .category('ApiServerSubnet').item('CIDR', '10.104.128.0/24')
+        .category('ComputingServerSubnet').item('CIDR', '10.104.144.0/20')
+        .category('MongoDBSubnet').item('CIDR', '10.104.129.0/24')
+    )
 
-    vpc = Resource('VPC').type('AWS::EC2::VPC').properties([
-        Attributes.of('CidrBlock', Intrinsics.find_in_map(group_to_cidr, 'VPC', 'CIDR')),
+    vpc = t.resources(Resource('VPC').type('AWS::EC2::VPC').properties([
+        Attributes.of('CidrBlock', group_to_cidr.find_in_map('VPC', 'CIDR')),
         Attributes.of('InstanceTenancy', 'default')
-    ])
-    t.resources(vpc)
+    ]))
 
-    igw = Resource('InternetGateway').type('AWS:EC2::InternetGateway')
-    t.resources(igw)
+    igw = t.resources(Resource('InternetGateway').type('AWS:EC2::InternetGateway'))
 
-    attach_igw = Resource('AttachInternetGateway').type('AWS::EC2::VPCGatewayAttachment').properties([
+    attach_igw = t.resources(Resource('AttachInternetGateway').type('AWS::EC2::VPCGatewayAttachment').properties([
         Attributes.of('VpcId', vpc),
         Attributes.of('InternetGatewayId', igw)
-    ])
-    t.resources(attach_igw)
+    ]))
 
     t.resources(Resource('NatGatewayEIP').type('AWS::EC2::EIP').dependsOn(attach_igw).properties([
         Attributes.of('Domain', 'vpc')
     ]))
 
-    nat_gw = Resource('NatGateway').type('AWS::EC2::NatGateway').properties([
+    nat_gw = t.resources(Resource('NatGateway').type('AWS::EC2::NatGateway').properties([
         Attributes.of('AllocationId', Intrinsics.get_att('NatGatewayEIP', 'AllocationId'))
-    ])
-    t.resources(nat_gw)
+    ]))
 
-    public_route_table = Resource('PublicRouteTable').type('AWS::EC2::RouteTable').dependsOn(attach_igw).properties([
+    public_route_table = t.resources(Resource('PublicRouteTable').type('AWS::EC2::RouteTable').dependsOn(attach_igw).properties([
         Attributes.of('VpcId', vpc)
-    ])
-    t.resources(public_route_table)
+    ]))
 
-    private_route_table = Resource('PrivateRouteTable').type('AWS::EC2::RouteTable').dependsOn(attach_igw).properties([
+    private_route_table = t.resources(Resource('PrivateRouteTable').type('AWS::EC2::RouteTable').dependsOn(attach_igw).properties([
         Attributes.of('VpcId', vpc)
-    ])
-    t.resources(private_route_table)
+    ]))
 
     t.resources(Resource('PublicRoute').type('AWS::EC2::Route').dependsOn(attach_igw).properties([
         Attributes.of('RouteTableId', public_route_table),
@@ -276,30 +272,27 @@ if __name__ == '__main__':
         Attributes.of('GatewayId', nat_gw)
     ]))
 
-    api_server_subnet = Resource('ApiServerSubnet').type('AWS::EC2::Subnet').dependsOn(attach_igw).properties([
+    api_server_subnet = t.resources(Resource('ApiServerSubnet').type('AWS::EC2::Subnet').dependsOn(attach_igw).properties([
         Attributes.of('VpcId', vpc),
         Attributes.of('AvailabilityZone', Intrinsics.select('0', Intrinsics.get_azs())),
-        Attributes.of('CidrBlock', Intrinsics.find_in_map(group_to_cidr, 'ApiServerSubnet', 'CIDR')),
+        Attributes.of('CidrBlock', group_to_cidr.find_in_map('ApiServerSubnet', 'CIDR')),
         Attributes.of('MapPublicIpOnLaunch', 'true')
-    ])
-    t.resources(api_server_subnet)
+    ]))
     nat_gw.property(Attributes.of('SubnetId', api_server_subnet))
 
-    computing_server_subnet = Resource('ComputingServerSubnet').type('AWS::EC2::Subnet').dependsOn(attach_igw).properties([
+    computing_server_subnet = t.resources(Resource('ComputingServerSubnet').type('AWS::EC2::Subnet').dependsOn(attach_igw).properties([
         Attributes.of('VpcId', vpc),
         Attributes.of('AvailabilityZone', Intrinsics.select('0', Intrinsics.get_azs())),
-        Attributes.of('CidrBlock', Intrinsics.find_in_map(group_to_cidr, 'ComputingServerSubnet', 'CIDR')),
+        Attributes.of('CidrBlock', group_to_cidr.find_in_map('ComputingServerSubnet', 'CIDR')),
         Attributes.of('MapPublicIpOnLaunch', 'false')
-    ])
-    t.resources(computing_server_subnet)
+    ]))
 
-    mongo_db_subnet = Resource('MongoDBSubnet').type('AWS::EC2::Subnet').dependsOn(attach_igw).properties([
+    mongo_db_subnet = t.resources(Resource('MongoDBSubnet').type('AWS::EC2::Subnet').dependsOn(attach_igw).properties([
         Attributes.of('VpcId', vpc),
         Attributes.of('AvailabilityZone', Intrinsics.select('0', Intrinsics.get_azs())),
-        Attributes.of('CidrBlock', Intrinsics.find_in_map(group_to_cidr, 'MongoDBSubnet', 'CIDR')),
+        Attributes.of('CidrBlock', group_to_cidr.find_in_map('MongoDBSubnet', 'CIDR')),
         Attributes.of('MapPublicIpOnLaunch', 'false')
-    ])
-    t.resources(mongo_db_subnet)
+    ]))
 
     t.resources(Resource('ApiServerSubnetRouteTableAssociation').type('AWS::EC2::SubnetRouteTableAssociation').properties([
         Attributes.of('SubnetId', api_server_subnet),
@@ -316,16 +309,15 @@ if __name__ == '__main__':
         Attributes.of('RouteTableId', private_route_table)
     ]))
 
-    vpc_default_security_group = Resource('VPCDefaultSecurityGroup').type('AWS::EC2::SecurityGroup').properties([
+    vpc_default_security_group = t.resources(Resource('VPCDefaultSecurityGroup').type('AWS::EC2::SecurityGroup').properties([
         Attributes.of('VpcId', vpc),
         Attributes.of('GroupDescription', 'Allow all communications in VPC'),
         Attributes.of('SecurityGroupIngress', [
-            {'IpProtocol': 'tcp', 'FromPort': '0', 'ToPort': '65535', 'CidrIp': Intrinsics.find_in_map(group_to_cidr, 'VPC', 'CIDR')},
-            {'IpProtocol': 'udp', 'FromPort': '0', 'ToPort': '65535', 'CidrIp': Intrinsics.find_in_map(group_to_cidr, 'VPC', 'CIDR')},
-            {'IpProtocol': 'icmp', 'FromPort': '-1', 'ToPort': '-1', 'CidrIp': Intrinsics.find_in_map(group_to_cidr, 'VPC', 'CIDR')}
+            {'IpProtocol': 'tcp', 'FromPort': '0', 'ToPort': '65535', 'CidrIp': group_to_cidr.find_in_map('VPC', 'CIDR')},
+            {'IpProtocol': 'udp', 'FromPort': '0', 'ToPort': '65535', 'CidrIp': group_to_cidr.find_in_map('VPC', 'CIDR')},
+            {'IpProtocol': 'icmp', 'FromPort': '-1', 'ToPort': '-1', 'CidrIp': group_to_cidr.find_in_map('VPC', 'CIDR')}
         ])
-    ])
-    t.resources(vpc_default_security_group)
+    ]))
 
     t.outputs(Output('VpcId').description('-').value(Intrinsics.ref(vpc)))
     t.outputs(Output('ApiServerSubnet').description('-').value(Intrinsics.ref(api_server_subnet)))
