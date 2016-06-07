@@ -72,6 +72,9 @@ class Parameter(Element):
     def type(self, name):
         return self.attributes('Type', name)
 
+    def default(self, value):
+        return self.attributes('Default', value)
+
 
 class Mapping(Element):
 
@@ -221,6 +224,7 @@ if __name__ == '__main__':
     t.parameters(Parameter('KeyName')
         .description('Name of an existing EC2 KeyPair to enable SSH access to the server')
         .type('String')
+        .default('Key')
     )
 
     group_to_cidr = t.mappings(Mapping('GroupToCIDR')
