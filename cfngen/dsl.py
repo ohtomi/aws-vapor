@@ -136,9 +136,7 @@ class Attributes(object):
 
     @staticmethod
     def of(name, value):
-        if isinstance(value, list):
-            return {name: value}
-        elif isinstance(value, Element):
+        if isinstance(value, Element):
             return {name: Intrinsics.ref(value)}
         else:
             return {name: value}
