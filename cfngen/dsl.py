@@ -180,15 +180,15 @@ class Intrinsics(object):
         return {'Fn::Select': [index, list_of_objects]}
 
     @staticmethod
-    def ref(logical_name_or_resource):
-        if isinstance(logical_name_or_resource, str):
-            logical_name = logical_name_or_resource
+    def ref(logical_name_or_element):
+        if isinstance(logical_name_or_element, str):
+            logical_name = logical_name_or_element
             return {'Ref': logical_name}
-        elif isinstance(logical_name_or_resource, Resource):
-            resource = logical_name_or_resource
+        elif isinstance(logical_name_or_element, Element):
+            resource = logical_name_or_element
             return {'Ref': resource.name}
         else:
-            raise ValueError('value should be logical name or resource. but %r' % type(logical_name_or_resource))
+            raise ValueError('value should be logical name or resource. but %r' % type(logical_name_or_element))
 
 
 class Pseudo(object):
@@ -221,7 +221,7 @@ class Pseudo(object):
 if __name__ == '__main__':
     t = Template(description='Sample Template')
 
-    t.parameters(Parameter('KeyName')
+    key_name = t.parameters(Parameter('KeyName')
         .description('Name of an existing EC2 KeyPair to enable SSH access to the server')
         .type('String')
         .default('Key')
@@ -318,6 +318,28 @@ if __name__ == '__main__':
             {'IpProtocol': 'tcp', 'FromPort': '0', 'ToPort': '65535', 'CidrIp': group_to_cidr.find_in_map('VPC', 'CIDR')},
             {'IpProtocol': 'udp', 'FromPort': '0', 'ToPort': '65535', 'CidrIp': group_to_cidr.find_in_map('VPC', 'CIDR')},
             {'IpProtocol': 'icmp', 'FromPort': '-1', 'ToPort': '-1', 'CidrIp': group_to_cidr.find_in_map('VPC', 'CIDR')}
+        ])
+    ]))
+
+    api_server_security_group = t.resources(Resource('ApiServerSecurityGroup').type('AWS::EC2::SecurityGroup').properties([
+        Attributes.of('VpcId', vpc),
+        Attributes.of('GroupDescription', 'Enable Web access to the api server via port 80'),
+        Attributes.of('SecurityGroupIngress', [
+            {'IpProtocol': 'tcp', 'FromPort': '80', 'ToPort': '80', 'CidrIp': '0.0.0.0/0'}
+        ])
+    ]))
+
+    api_server = t.resources(Resource('ApiServer').type('AWS::EC2::Instance').properties([
+        Attributes.of('ImageId', 'ami-12345678'),
+        Attributes.of('InstanceType', 't2.micro'),
+        Attributes.of('SecurityGroupIds', [
+            Intrinsics.ref(vpc_default_security_group),
+            Intrinsics.ref(api_server_security_group)
+        ]),
+        Attributes.of('KeyName', key_name),
+        Attributes.of('SubnetId', 'subnet-12345678'),
+        Attributes.of('Tags', [
+            {'Key': 'ServerRole', 'Value': 'ApiServer'}
         ])
     ]))
 
