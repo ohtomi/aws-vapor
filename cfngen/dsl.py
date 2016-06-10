@@ -218,6 +218,13 @@ class Pseudo(object):
         return {'Ref': 'AWS::StackName'}
 
 
+class UserData(object):
+
+    @staticmethod
+    def of(values):
+        return {'UserData': Intrinsics.join('', values)}
+
+
 if __name__ == '__main__':
     t = Template(description='Sample Template')
 
@@ -341,6 +348,18 @@ if __name__ == '__main__':
         Attributes.of('Tags', [
             {'Key': 'ServerRole', 'Value': 'ApiServer'}
         ])
+    ]))
+    api_server.property(UserData.of([
+        'yum update -y\n',
+        'yum update -y aws-cfn-bootstrap\n'
+        '/opt/aws/bin/cfn-init -v ',
+        '    --stack ', Pseudo.stack_id(),
+        '    --resource ', api_server.name,
+        '    --region ', Pseudo.region(), '\n',
+        '/opt/aws/bin/cfn-signal -e $? ',
+        '    --stack ', Pseudo.stack_id(),
+        '    --resource ', api_server.name,
+        '    --region ', Pseudo.region(), '\n'
     ]))
 
     t.outputs(Output('VpcId').description('-').value(Intrinsics.ref(vpc)))
