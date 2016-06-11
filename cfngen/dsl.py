@@ -222,7 +222,7 @@ class UserData(object):
 
     @staticmethod
     def of(values):
-        return {'UserData': Intrinsics.join('', values)}
+        return {'UserData': Intrinsics.base64(Intrinsics.join('', values))}
 
 
 if __name__ == '__main__':
