@@ -56,4 +56,4 @@ def build_multi_part_user_data(files):
         sub_message.add_header('Content-Disposition', 'attachment; filename="%s"' % (filename))
         combined_message.attach(sub_message)
 
-    return combined_message.split('\n')
+    return [s + '\n' for s in str(combined_message).split('\n')]
