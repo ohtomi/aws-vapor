@@ -115,6 +115,21 @@ class Condition(Element):
         self.cond = cond
         return self
 
+    def fn_and(self, condions):
+        return self.cond({'Fn::And': condions})
+
+    def fn_equals(self, value_1, value_2):
+        return self.cond({'Fn::Equals': [value_1, value_2]})
+
+    def fn_if(self, condition_name, value_if_true, value_if_false):
+        return self.cond({'Fn::If': [condition_name, value_if_true, value_if_false]})
+
+    def fn_not(self, conditions):
+        return self.cond({'Fn::Not': conditions})
+
+    def fn_or(self, conditions):
+        return self.cond({'Fn::Or': conditions})
+
     def to_template(self, template):
         template[self.name] = self.cond
 
@@ -260,7 +275,7 @@ if __name__ == '__main__':
     )
 
     t.conditions(Condition('CreateProdResources')
-        .cond({"Fn::Equals" : [{"Ref" : "EnvType"}, "prod"]})
+        .fn_equals(Intrinsics.ref('EnvType'), 'prod')
     )
 
     vpc = t.resources(Resource('VPC').type('AWS::EC2::VPC').properties([
