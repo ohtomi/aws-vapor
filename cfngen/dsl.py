@@ -25,6 +25,11 @@ class Template(object):
         section.append(element)
         return element
 
+    def conditions(self, element):
+        section = self.get_section('Conditions')
+        section.append(element)
+        return element
+
     def resources(self, element):
         section = self.get_section('Resources')
         section.append(element)
@@ -99,6 +104,19 @@ class Mapping(Element):
         if not m.has_key(second_level_key):
             raise ValueError('missing second_level_key. second_level_key: %r' % second_level_key)
         return Intrinsics.find_in_map(self, top_level_key, second_level_key)
+
+
+class Condition(Element):
+
+    def __init__(self, name):
+        super(Condition, self).__init__(name)
+
+    def cond(self, cond):
+        self.cond = cond
+        return self
+
+    def to_template(self, template):
+        template[self.name] = self.cond
 
 
 class Resource(Element):
@@ -239,6 +257,10 @@ if __name__ == '__main__':
         .category('ApiServerSubnet').item('CIDR', '10.104.128.0/24')
         .category('ComputingServerSubnet').item('CIDR', '10.104.144.0/20')
         .category('MongoDBSubnet').item('CIDR', '10.104.129.0/24')
+    )
+
+    t.conditions(Condition('CreateProdResources')
+        .cond({"Fn::Equals" : [{"Ref" : "EnvType"}, "prod"]})
     )
 
     vpc = t.resources(Resource('VPC').type('AWS::EC2::VPC').properties([
