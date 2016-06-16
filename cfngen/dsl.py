@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 
 from collections import OrderedDict
+from cfngen.utils import build_multi_part_user_data
 
 
 class Template(object):
@@ -251,11 +252,30 @@ class Pseudo(object):
         return {'Ref': 'AWS::StackName'}
 
 
+def _replace_params(line, params):
+    for k, v in params.items():
+        key = '{{ %s }}' % k
+        if line.find(key) != -1:
+            pos = line.index(key)
+            l_line = line[:pos]
+            r_line = line[pos + len(key):]
+            return _replace_params(l_line, params) + [v] + _replace_params(r_line, params)
+    return [line]
+
+
 class UserData(object):
 
     @staticmethod
     def of(values):
         return {'UserData': Intrinsics.base64(Intrinsics.join('', values))}
+
+    @staticmethod
+    def from_files(files, params):
+        multi_part_user_data = []
+        for line in build_multi_part_user_data(files):
+            for token in _replace_params(line, params):
+                multi_part_user_data.append(token)
+        return {'UserData': Intrinsics.base64(Intrinsics.join('', multi_part_user_data))}
 
 
 if __name__ == '__main__':
@@ -386,18 +406,28 @@ if __name__ == '__main__':
             {'Key': 'ServerRole', 'Value': 'ApiServer'}
         ])
     ]))
-    api_server.property(UserData.of([
-        'yum update -y\n',
-        'yum update -y aws-cfn-bootstrap\n'
-        '/opt/aws/bin/cfn-init -v ',
-        '    --stack ', Pseudo.stack_id(),
-        '    --resource ', api_server.name,
-        '    --region ', Pseudo.region(), '\n',
-        '/opt/aws/bin/cfn-signal -e $? ',
-        '    --stack ', Pseudo.stack_id(),
-        '    --resource ', api_server.name,
-        '    --region ', Pseudo.region(), '\n'
-    ]))
+
+    with open('my_script.sh', 'w') as f:
+        f.write('#!/bin/bash -xe\n')
+        f.write('yum update -y\n')
+        f.write('yum update -y aws-cfn-bootstrap\n')
+        f.write('/opt/aws/bin/cfn-init -v ')
+        f.write('    --stack {{ stack_id }}')
+        f.write('    --resource {{ resource_name }}')
+        f.write('    --region {{ region }}\n')
+        f.write('/opt/aws/bin/cfn-signal -e $? ')
+        f.write('    --stack {{ stack_id }}')
+        f.write('    --resource {{ resource_name }}')
+        f.write('    --region {{ region }}\n')
+    api_server.property(UserData.from_files([
+        ('my_script.sh', 'x-shellscript')
+    ], {
+        'stack_id': Pseudo.stack_id(),
+        'resource_name': api_server.name,
+        'region': Pseudo.region()
+    }))
+    from os import remove
+    remove('my_script.sh')
 
     t.outputs(Output('VpcId').description('-').value(Intrinsics.ref(vpc)))
     t.outputs(Output('ApiServerSubnet').description('-').value(Intrinsics.ref(api_server_subnet)))
