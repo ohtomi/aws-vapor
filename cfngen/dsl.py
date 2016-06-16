@@ -271,11 +271,12 @@ class UserData(object):
 
     @staticmethod
     def from_files(files, params):
-        multi_part_user_data = []
-        for line in build_multi_part_user_data(files):
+        user_data = []
+        for line in build_multi_part_user_data(files).split('\n'):
+            line += '\n'
             for token in _replace_params(line, params):
-                multi_part_user_data.append(token)
-        return {'UserData': Intrinsics.base64(Intrinsics.join('', multi_part_user_data))}
+                user_data.append(token)
+        return {'UserData': Intrinsics.base64(Intrinsics.join('', user_data))}
 
 
 if __name__ == '__main__':
