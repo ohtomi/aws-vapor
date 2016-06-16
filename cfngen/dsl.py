@@ -420,15 +420,23 @@ if __name__ == '__main__':
         f.write('    --stack {{ stack_id }}')
         f.write('    --resource {{ resource_name }}')
         f.write('    --region {{ region }}\n')
+    with open('my_config.yml', 'w') as f:
+        f.write('#cloud-config\n')
+        f.write('timezone: Asia/Tokyo\n')
+        f.write('locale: ja_JP.UTF-8\n')
+
     api_server.property(UserData.from_files([
-        ('my_script.sh', 'x-shellscript')
+        ('my_script.sh', 'x-shellscript'),
+        ('my_config.yml', 'cloud-config')
     ], {
         'stack_id': Pseudo.stack_id(),
         'resource_name': api_server.name,
         'region': Pseudo.region()
     }))
+
     from os import remove
     remove('my_script.sh')
+    remove('my_config.yml')
 
     t.outputs(Output('VpcId').description('-').value(Intrinsics.ref(vpc)))
     t.outputs(Output('ApiServerSubnet').description('-').value(Intrinsics.ref(api_server_subnet)))
