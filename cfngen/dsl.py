@@ -195,7 +195,6 @@ class Intrinsics(object):
             return {'Fn::FindInMap': [map_name, top_level_key, second_level_key]}
         elif isinstance(map_name_or_mapping, Mapping):
             mapping = map_name_or_mapping
-            m = mapping.attrs[top_level_key]
             return {'Fn::FindInMap': [mapping.name, top_level_key, second_level_key]}
         else:
             raise ValueError('value should be map name or mapping. but %r' % type(map_name_or_mapping))
@@ -370,7 +369,7 @@ if __name__ == '__main__':
     ]))
 
     api_server = t.resources(Resource('ApiServer').type('AWS::EC2::Instance').properties([
-        Attributes.of('ImageId', region_to_ami.find_in_map('ap-northeast-1', 'AMI')), # TODO use Intrinsics.region()
+        Attributes.of('ImageId', Intrinsics.find_in_map(region_to_ami, Pseudo.region(), 'AMI')), # TODO use region_to_ami.find_in_map()
         Attributes.of('InstanceType', instance_type),
         Attributes.of('SecurityGroupIds', [
             Intrinsics.ref(vpc_default_security_group),
