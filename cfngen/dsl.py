@@ -445,10 +445,53 @@ if __name__ == '__main__':
     }))
 
     api_server.metadata(Metadata.of({
-        'config': {
+        'configSets': {
+            'default': ['SetupRepos', 'Install', 'Configure', 'Start']
+        },
+        'SetupRepos': {
+            'commands': {
+                'import_td-agent_GPG-KEY': {
+                    'command': 'rpm --import https://packages.treasuredata.com/GPG-KEY-td-agent'
+                }
+            }
+        },
+        'Install': {
             'packages': {
                 'yum': {
-                    'dstat': []
+                    'dstat': [],
+                    'td-agent': []
+                }
+            },
+            'commands': {
+                'install_plugins': {
+                    'command': 'td-agent-gem install fluent-plugin-dstat'
+                }
+            }
+        },
+        'Configure': {
+            'files': {
+                '/etc/td-agent/td-agent.conf': {
+                    'content': Intrinsics.join('', [
+                        '<source>\n',
+                        '  type dstat\n',
+                        '  tag dstat\n',
+                        '  option -cdnm --tcp --udp\n',
+                        '  delay 10\n',
+                        '</source>\n'
+                    ]),
+                    'mode': '000644',
+                    'owner': 'root',
+                    'group': 'root'
+                }
+            }
+        },
+        'Start': {
+            'services': {
+                'sysvinit': {
+                    'td-agent': {
+                        'enabled': 'true',
+                        'ensureRunning': 'true'
+                    }
                 }
             }
         }
