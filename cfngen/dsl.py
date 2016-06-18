@@ -293,14 +293,24 @@ if __name__ == '__main__':
     t = Template(description='Sample Template')
 
     key_name = t.parameters(Parameter('KeyName')
-        .description('Name of an existing EC2 KeyPair to enable SSH access to the server')
+        .description('Name of an existing EC2 KeyPair to enable SSH access to the api server')
         .type('String')
         .default('Key')
+    )
+
+    instance_type = t.parameters(Parameter('InstanceType')
+        .description('EC2 instance type of the api server')
+        .type('String')
+        .default('t2.micro')
     )
 
     group_to_cidr = t.mappings(Mapping('GroupToCIDR')
         .category('VPC').item('CIDR', '10.104.0.0/16')
         .category('ApiServerSubnet').item('CIDR', '10.104.128.0/24')
+    )
+
+    region_to_ami = t.mappings(Mapping('RegionToAMI')
+        .category('ap-northeast-1').item('AMI', 'ami-a1bec3a0')
     )
 
     t.conditions(Condition('CreateProdResources')
@@ -360,8 +370,8 @@ if __name__ == '__main__':
     ]))
 
     api_server = t.resources(Resource('ApiServer').type('AWS::EC2::Instance').properties([
-        Attributes.of('ImageId', 'ami-12345678'),
-        Attributes.of('InstanceType', 't2.micro'),
+        Attributes.of('ImageId', region_to_ami.find_in_map('ap-northeast-1', 'AMI')), # TODO use Intrinsics.region()
+        Attributes.of('InstanceType', instance_type),
         Attributes.of('SecurityGroupIds', [
             Intrinsics.ref(vpc_default_security_group),
             Intrinsics.ref(api_server_security_group)
@@ -405,9 +415,7 @@ if __name__ == '__main__':
         },
         'SetupRepos': {
             'commands': {
-                'import_td-agent_GPG-KEY': {
-                    'command': 'rpm --import https://packages.treasuredata.com/GPG-KEY-td-agent'
-                }
+                'import_td-agent_GPG-KEY': {'command': 'rpm --import https://packages.treasuredata.com/GPG-KEY-td-agent'}
             }
         },
         'Install': {
@@ -418,9 +426,7 @@ if __name__ == '__main__':
                 }
             },
             'commands': {
-                'install_plugins': {
-                    'command': 'td-agent-gem install fluent-plugin-dstat'
-                }
+                'install_plugins': {'command': 'td-agent-gem install fluent-plugin-dstat'}
             }
         },
         'Configure': {
@@ -443,10 +449,7 @@ if __name__ == '__main__':
         'Start': {
             'services': {
                 'sysvinit': {
-                    'td-agent': {
-                        'enabled': 'true',
-                        'ensureRunning': 'true'
-                    }
+                    'td-agent': {'enabled': 'true', 'ensureRunning': 'true'}
                 }
             }
         }
