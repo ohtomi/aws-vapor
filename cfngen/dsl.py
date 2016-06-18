@@ -143,6 +143,9 @@ class Resource(Element):
     def type(self, name):
         return self.attributes('Type', name)
 
+    def metadata(self, metadata):
+        return self.attributes('Metadata', metadata)
+
     def dependsOn(self, resource):
         return self.attributes('DependsOn', resource.name)
 
@@ -277,6 +280,13 @@ class UserData(object):
             for token in _replace_params(line, params):
                 user_data.append(token)
         return {'UserData': Intrinsics.base64(Intrinsics.join('', user_data))}
+
+
+class Metadata(object):
+
+    @staticmethod
+    def of(values):
+        return {'AWS::CloudFormation::Init': values}
 
 
 if __name__ == '__main__':
@@ -432,6 +442,16 @@ if __name__ == '__main__':
         'stack_id': Pseudo.stack_id(),
         'resource_name': api_server.name,
         'region': Pseudo.region()
+    }))
+
+    api_server.metadata(Metadata.of({
+        'config': {
+            'packages': {
+                'yum': {
+                    'dstat': []
+                }
+            }
+        }
     }))
 
     from os import remove
