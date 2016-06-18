@@ -301,8 +301,6 @@ if __name__ == '__main__':
     group_to_cidr = t.mappings(Mapping('GroupToCIDR')
         .category('VPC').item('CIDR', '10.104.0.0/16')
         .category('ApiServerSubnet').item('CIDR', '10.104.128.0/24')
-        .category('ComputingServerSubnet').item('CIDR', '10.104.144.0/20')
-        .category('MongoDBSubnet').item('CIDR', '10.104.129.0/24')
     )
 
     t.conditions(Condition('CreateProdResources')
@@ -321,19 +319,7 @@ if __name__ == '__main__':
         Attributes.of('InternetGatewayId', igw)
     ]))
 
-    t.resources(Resource('NatGatewayEIP').type('AWS::EC2::EIP').dependsOn(attach_igw).properties([
-        Attributes.of('Domain', 'vpc')
-    ]))
-
-    nat_gw = t.resources(Resource('NatGateway').type('AWS::EC2::NatGateway').properties([
-        Attributes.of('AllocationId', Intrinsics.get_att('NatGatewayEIP', 'AllocationId'))
-    ]))
-
     public_route_table = t.resources(Resource('PublicRouteTable').type('AWS::EC2::RouteTable').dependsOn(attach_igw).properties([
-        Attributes.of('VpcId', vpc)
-    ]))
-
-    private_route_table = t.resources(Resource('PrivateRouteTable').type('AWS::EC2::RouteTable').dependsOn(attach_igw).properties([
         Attributes.of('VpcId', vpc)
     ]))
 
@@ -343,47 +329,16 @@ if __name__ == '__main__':
         Attributes.of('GatewayId', igw)
     ]))
 
-    t.resources(Resource('PrivateRoute').type('AWS::EC2::Route').dependsOn(attach_igw).properties([
-        Attributes.of('RouteTableId', private_route_table),
-        Attributes.of('DestinationCidrBlock', '0.0.0.0/0'),
-        Attributes.of('GatewayId', nat_gw)
-    ]))
-
     api_server_subnet = t.resources(Resource('ApiServerSubnet').type('AWS::EC2::Subnet').dependsOn(attach_igw).properties([
         Attributes.of('VpcId', vpc),
         Attributes.of('AvailabilityZone', Intrinsics.select('0', Intrinsics.get_azs())),
         Attributes.of('CidrBlock', group_to_cidr.find_in_map('ApiServerSubnet', 'CIDR')),
         Attributes.of('MapPublicIpOnLaunch', 'true')
     ]))
-    nat_gw.property(Attributes.of('SubnetId', api_server_subnet))
-
-    computing_server_subnet = t.resources(Resource('ComputingServerSubnet').type('AWS::EC2::Subnet').dependsOn(attach_igw).properties([
-        Attributes.of('VpcId', vpc),
-        Attributes.of('AvailabilityZone', Intrinsics.select('0', Intrinsics.get_azs())),
-        Attributes.of('CidrBlock', group_to_cidr.find_in_map('ComputingServerSubnet', 'CIDR')),
-        Attributes.of('MapPublicIpOnLaunch', 'false')
-    ]))
-
-    mongo_db_subnet = t.resources(Resource('MongoDBSubnet').type('AWS::EC2::Subnet').dependsOn(attach_igw).properties([
-        Attributes.of('VpcId', vpc),
-        Attributes.of('AvailabilityZone', Intrinsics.select('0', Intrinsics.get_azs())),
-        Attributes.of('CidrBlock', group_to_cidr.find_in_map('MongoDBSubnet', 'CIDR')),
-        Attributes.of('MapPublicIpOnLaunch', 'false')
-    ]))
 
     t.resources(Resource('ApiServerSubnetRouteTableAssociation').type('AWS::EC2::SubnetRouteTableAssociation').properties([
         Attributes.of('SubnetId', api_server_subnet),
         Attributes.of('RouteTableId', public_route_table)
-    ]))
-
-    t.resources(Resource('ComputingServerSubnetRouteTableAssociation').type('AWS::EC2::SubnetRouteTableAssociation').properties([
-        Attributes.of('SubnetId', computing_server_subnet),
-        Attributes.of('RouteTableId', private_route_table)
-    ]))
-
-    t.resources(Resource('MongoDBSubnetRouteTableAssociation').type('AWS::EC2::SubnetRouteTableAssociation').properties([
-        Attributes.of('SubnetId', mongo_db_subnet),
-        Attributes.of('RouteTableId', private_route_table)
     ]))
 
     vpc_default_security_group = t.resources(Resource('VPCDefaultSecurityGroup').type('AWS::EC2::SecurityGroup').properties([
@@ -503,8 +458,6 @@ if __name__ == '__main__':
 
     t.outputs(Output('VpcId').description('-').value(Intrinsics.ref(vpc)))
     t.outputs(Output('ApiServerSubnet').description('-').value(Intrinsics.ref(api_server_subnet)))
-    t.outputs(Output('ComputingServerSubnet').description('-').value(Intrinsics.ref(computing_server_subnet)))
-    t.outputs(Output('MongoDBSubnet').description('-').value(Intrinsics.ref(mongo_db_subnet)))
     t.outputs(Output('VPCDefaultSecurityGroup').description('-').value(Intrinsics.ref(vpc_default_security_group)))
 
     from json import dumps
