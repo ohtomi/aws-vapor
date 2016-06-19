@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 
 from collections import OrderedDict
-from cfngen.utils import combile_user_data
+from cfngen.utils import (combile_user_data, inject_params)
 
 
 class Template(object):
@@ -264,17 +264,6 @@ class Pseudos(object):
         return {'Ref': 'AWS::StackName'}
 
 
-def _replace_params(line, params):
-    for k, v in params.items():
-        key = '{{ %s }}' % k
-        if line.find(key) != -1:
-            pos = line.index(key)
-            l_line = line[:pos]
-            r_line = line[pos + len(key):]
-            return _replace_params(l_line, params) + [v] + _replace_params(r_line, params)
-    return [line]
-
-
 class UserData(object):
 
     @staticmethod
@@ -283,11 +272,7 @@ class UserData(object):
 
     @staticmethod
     def from_files(files, params):
-        user_data = []
-        for line in combile_user_data(files).split('\n'):
-            line += '\n'
-            for token in _replace_params(line, params):
-                user_data.append(token)
+        user_data = inject_params(combile_user_data(files), params)
         return {'UserData': Intrinsics.base64(Intrinsics.join('', user_data))}
 
 

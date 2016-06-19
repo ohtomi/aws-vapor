@@ -57,3 +57,23 @@ def combile_user_data(files):
         combined_message.attach(sub_message)
 
     return str(combined_message)
+
+
+def _replace_params(line, params):
+    for k, v in params.items():
+        key = '{{ %s }}' % k
+        if line.find(key) != -1:
+            pos = line.index(key)
+            l_line = line[:pos]
+            r_line = line[pos + len(key):]
+            return _replace_params(l_line, params) + [v] + _replace_params(r_line, params)
+    return [line]
+
+
+def inject_params(lines, params):
+    user_data = []
+    for line in lines.split('\n'):
+        line += '\n'
+        for token in _replace_params(line, params):
+            user_data.append(token)
+    return user_data
