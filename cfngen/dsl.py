@@ -112,27 +112,27 @@ class Condition(Element):
     def __init__(self, name):
         super(Condition, self).__init__(name)
 
-    def cond(self, cond):
-        self.cond = cond
+    def condition(self, condition):
+        self.condition = condition
         return self
 
     def fn_and(self, condions):
-        return self.cond({'Fn::And': condions})
+        return self.condition({'Fn::And': condions})
 
     def fn_equals(self, value_1, value_2):
-        return self.cond({'Fn::Equals': [value_1, value_2]})
+        return self.condition({'Fn::Equals': [value_1, value_2]})
 
     def fn_if(self, condition_name, value_if_true, value_if_false):
-        return self.cond({'Fn::If': [condition_name, value_if_true, value_if_false]})
+        return self.condition({'Fn::If': [condition_name, value_if_true, value_if_false]})
 
     def fn_not(self, conditions):
-        return self.cond({'Fn::Not': conditions})
+        return self.condition({'Fn::Not': conditions})
 
     def fn_or(self, conditions):
-        return self.cond({'Fn::Or': conditions})
+        return self.condition({'Fn::Or': conditions})
 
     def to_template(self, template):
-        template[self.name] = self.cond
+        template[self.name] = self.condition
 
 
 class Resource(Element):
@@ -156,7 +156,7 @@ class Resource(Element):
                 m[k] = v
         return self.attributes('Properties', m)
 
-    def property(self, prop):
+    def add_property(self, prop):
         return self.properties([prop])
 
 
@@ -281,7 +281,7 @@ class UserData(object):
         return {'UserData': Intrinsics.base64(Intrinsics.join('', user_data))}
 
 
-class Metadata(object):
+class CfnInitMetadata(object):
 
     @staticmethod
     def of(values):
@@ -399,7 +399,7 @@ if __name__ == '__main__':
         f.write('timezone: Asia/Tokyo\n')
         f.write('locale: ja_JP.UTF-8\n')
 
-    api_server.property(UserData.from_files([
+    api_server.add_property(UserData.from_files([
         ('my_script.sh', 'x-shellscript'),
         ('my_config.yml', 'cloud-config')
     ], {
@@ -408,7 +408,7 @@ if __name__ == '__main__':
         'region': Pseudo.region()
     }))
 
-    api_server.metadata(Metadata.of({
+    api_server.metadata(CfnInitMetadata.of({
         'configSets': {
             'default': ['SetupRepos', 'Install', 'Configure', 'Start']
         },
