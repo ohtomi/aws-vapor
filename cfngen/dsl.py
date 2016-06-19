@@ -232,7 +232,7 @@ class Intrinsics(object):
             raise ValueError('value should be logical name or resource. but %r' % type(logical_name_or_element))
 
 
-class Pseudo(object):
+class Pseudos(object):
 
     @staticmethod
     def account_id():
@@ -372,7 +372,7 @@ if __name__ == '__main__':
     ]))
 
     api_server = t.resources(Resource('ApiServer').type('AWS::EC2::Instance').properties([
-        Attributes.of('ImageId', Intrinsics.find_in_map(region_to_ami, Pseudo.region(), 'AMI')), # TODO use region_to_ami.find_in_map()
+        Attributes.of('ImageId', Intrinsics.find_in_map(region_to_ami, Pseudos.region(), 'AMI')), # TODO use region_to_ami.find_in_map()
         Attributes.of('InstanceType', instance_type),
         Attributes.of('SecurityGroupIds', [
             Intrinsics.ref(vpc_default_security_group),
@@ -406,9 +406,9 @@ if __name__ == '__main__':
         ('my_script.sh', 'x-shellscript'),
         ('my_config.yml', 'cloud-config')
     ], {
-        'stack_id': Pseudo.stack_id(),
+        'stack_id': Pseudos.stack_id(),
         'resource_name': api_server.name,
-        'region': Pseudo.region()
+        'region': Pseudos.region()
     }))
 
     api_server.metadata(CfnInitMetadata.of({
