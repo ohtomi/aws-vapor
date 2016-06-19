@@ -11,6 +11,9 @@ class Template(object):
         self.description = description
         self.elements = OrderedDict()
 
+    def description(self, description):
+        self.description = description
+
     def get_section(self, section_name):
         if not self.elements.has_key(section_name):
             self.elements[section_name] = []
