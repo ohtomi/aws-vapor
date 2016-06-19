@@ -71,9 +71,9 @@ def _replace_params(line, params):
 
 
 def inject_params(lines, params):
-    user_data = []
+    tokens = []
     for line in lines.split('\n'):
         line += '\n'
         for token in _replace_params(line, params):
-            user_data.append(token)
-    return user_data
+            tokens.append(token)
+    return tokens
