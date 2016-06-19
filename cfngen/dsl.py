@@ -112,12 +112,12 @@ class Condition(Element):
     def __init__(self, name):
         super(Condition, self).__init__(name)
 
-    def condition(self, condition):
-        self.condition = condition
+    def expression(self, expression):
+        self.expression = expression
         return self
 
     def to_template(self, template):
-        template[self.name] = self.condition
+        template[self.name] = self.expression
 
 
 class Resource(Element):
@@ -317,7 +317,7 @@ if __name__ == '__main__':
         .category('ap-northeast-1').item('AMI', 'ami-a1bec3a0')
     )
 
-    t.conditions(Condition('CreateProdResources').condition(Intrinsics.fn_equals(Intrinsics.ref('EnvType'), 'prod')))
+    t.conditions(Condition('CreateProdResources').expression(Intrinsics.fn_equals(Intrinsics.ref('EnvType'), 'prod')))
 
     vpc = t.resources(Resource('VPC').type('AWS::EC2::VPC').properties([
         Attributes.of('CidrBlock', group_to_cidr.find_in_map('VPC', 'CIDR')),
