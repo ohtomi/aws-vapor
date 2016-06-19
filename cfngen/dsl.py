@@ -109,31 +109,12 @@ class Mapping(Element):
 
 class Condition(Element):
 
-    @staticmethod
-    def of(name, condition):
-        return Condition(name).condition(condition)
-
     def __init__(self, name):
         super(Condition, self).__init__(name)
 
     def condition(self, condition):
         self.condition = condition
         return self
-
-    def fn_and(self, condions):
-        return self.condition(Intrinsics.fn_and(conditions))
-
-    def fn_equals(self, value_1, value_2):
-        return self.condition(Intrinsics.fn_equals(value_1, value_2))
-
-    def fn_if(self, condition_name, value_if_true, value_if_false):
-        return self.condition(Intrinsics.fn_if(condition_name, value_if_true, value_if_false))
-
-    def fn_not(self, conditions):
-        return self.condition(Intrinsics.fn_not(conditions))
-
-    def fn_or(self, conditions):
-        return self.condition(Intrinsics.fn_or(conditions))
 
     def to_template(self, template):
         template[self.name] = self.condition
@@ -336,9 +317,7 @@ if __name__ == '__main__':
         .category('ap-northeast-1').item('AMI', 'ami-a1bec3a0')
     )
 
-    t.conditions(Condition('CreateProdResources')
-        .fn_equals(Intrinsics.ref('EnvType'), 'prod')
-    )
+    t.conditions(Condition('CreateProdResources').condition(Intrinsics.fn_equals(Intrinsics.ref('EnvType'), 'prod')))
 
     vpc = t.resources(Resource('VPC').type('AWS::EC2::VPC').properties([
         Attributes.of('CidrBlock', group_to_cidr.find_in_map('VPC', 'CIDR')),
