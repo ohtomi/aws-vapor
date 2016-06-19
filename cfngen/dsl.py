@@ -87,23 +87,25 @@ class Mapping(Element):
     def __init__(self, name):
         super(Mapping, self).__init__(name)
 
-    def category(self, category):
+    def add_category(self, category):
         self._category = category
         if not self.attrs.has_key(category):
             self.attributes(category, OrderedDict())
             return self
 
-    def item(self, key, value):
+    def add_item(self, key, value):
         m = self.attrs[self._category]
         m[key] = value
         return self
 
     def find_in_map(self, top_level_key, second_level_key):
-        if not self.attrs.has_key(top_level_key):
-            raise ValueError('missing top_level_key. top_level_key: %r' % top_level_key)
-        m = self.attrs[top_level_key]
-        if not m.has_key(second_level_key):
-            raise ValueError('missing second_level_key. second_level_key: %r' % second_level_key)
+        if isinstance(top_level_key, str):
+            if not self.attrs.has_key(top_level_key):
+                raise ValueError('missing top_level_key. top_level_key: %r' % top_level_key)
+            if isinstance(second_level_key, str):
+                if not self.attrs[top_level_key].has_key(second_level_key):
+                    raise ValueError('missing second_level_key. second_level_key: %r' % second_level_key)
+
         return Intrinsics.find_in_map(self, top_level_key, second_level_key)
 
 
@@ -309,12 +311,12 @@ if __name__ == '__main__':
     )
 
     group_to_cidr = t.mappings(Mapping('GroupToCIDR')
-        .category('VPC').item('CIDR', '10.104.0.0/16')
-        .category('ApiServerSubnet').item('CIDR', '10.104.128.0/24')
+        .add_category('VPC').add_item('CIDR', '10.104.0.0/16')
+        .add_category('ApiServerSubnet').add_item('CIDR', '10.104.128.0/24')
     )
 
     region_to_ami = t.mappings(Mapping('RegionToAMI')
-        .category('ap-northeast-1').item('AMI', 'ami-a1bec3a0')
+        .add_category('ap-northeast-1').add_item('AMI', 'ami-a1bec3a0')
     )
 
     t.conditions(Condition('CreateProdResources').expression(Intrinsics.fn_equals(Intrinsics.ref('EnvType'), 'prod')))
@@ -372,7 +374,7 @@ if __name__ == '__main__':
     ]))
 
     api_server = t.resources(Resource('ApiServer').type('AWS::EC2::Instance').properties([
-        Attributes.of('ImageId', Intrinsics.find_in_map(region_to_ami, Pseudos.region(), 'AMI')), # TODO use region_to_ami.find_in_map()
+        Attributes.of('ImageId', region_to_ami.find_in_map(Pseudos.region(), 'AMI')),
         Attributes.of('InstanceType', instance_type),
         Attributes.of('SecurityGroupIds', [
             Intrinsics.ref(vpc_default_security_group),
