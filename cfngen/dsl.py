@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 
 from collections import OrderedDict
-from cfngen.utils import build_multi_part_user_data
+from cfngen.utils import combile_user_data
 
 
 class Template(object):
@@ -284,7 +284,7 @@ class UserData(object):
     @staticmethod
     def from_files(files, params):
         user_data = []
-        for line in build_multi_part_user_data(files).split('\n'):
+        for line in combile_user_data(files).split('\n'):
             line += '\n'
             for token in _replace_params(line, params):
                 user_data.append(token)
