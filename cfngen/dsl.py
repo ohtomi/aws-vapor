@@ -109,6 +109,10 @@ class Mapping(Element):
 
 class Condition(Element):
 
+    @staticmethod
+    def of(name, condition):
+        return Condition(name).condition(condition)
+
     def __init__(self, name):
         super(Condition, self).__init__(name)
 
@@ -117,19 +121,19 @@ class Condition(Element):
         return self
 
     def fn_and(self, condions):
-        return self.condition({'Fn::And': condions})
+        return self.condition(Intrinsics.fn_and(conditions))
 
     def fn_equals(self, value_1, value_2):
-        return self.condition({'Fn::Equals': [value_1, value_2]})
+        return self.condition(Intrinsics.fn_equals(value_1, value_2))
 
     def fn_if(self, condition_name, value_if_true, value_if_false):
-        return self.condition({'Fn::If': [condition_name, value_if_true, value_if_false]})
+        return self.condition(Intrinsics.fn_if(condition_name, value_if_true, value_if_false))
 
     def fn_not(self, conditions):
-        return self.condition({'Fn::Not': conditions})
+        return self.condition(Intrinsics.fn_not(conditions))
 
     def fn_or(self, conditions):
-        return self.condition({'Fn::Or': conditions})
+        return self.condition(Intrinsics.fn_or(conditions))
 
     def to_template(self, template):
         template[self.name] = self.condition
@@ -198,6 +202,26 @@ class Intrinsics(object):
             return {'Fn::FindInMap': [mapping.name, top_level_key, second_level_key]}
         else:
             raise ValueError('value should be map name or mapping. but %r' % type(map_name_or_mapping))
+
+    @staticmethod
+    def fn_and(condions):
+        return {'Fn::And': condions}
+
+    @staticmethod
+    def fn_equals(value_1, value_2):
+        return {'Fn::Equals': [value_1, value_2]}
+
+    @staticmethod
+    def fn_if(condition_name, value_if_true, value_if_false):
+        return {'Fn::If': [condition_name, value_if_true, value_if_false]}
+
+    @staticmethod
+    def fn_not(conditions):
+        return {'Fn::Not': conditions}
+
+    @staticmethod
+    def fn_or(conditions):
+        return {'Fn::Or': conditions}
 
     @staticmethod
     def get_att(logical_name_of_resource, attribute_name):
