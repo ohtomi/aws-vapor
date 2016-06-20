@@ -46,7 +46,7 @@ def save_to_config_file(props):
         config.write(configfile)
 
 
-def combile_user_data(files):
+def combine_user_data(files):
     combined_message = MIMEMultipart()
 
     for filename, format_type in files:

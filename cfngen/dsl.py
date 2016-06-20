@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 
 from collections import OrderedDict
-from cfngen.utils import (combile_user_data, inject_params)
+from cfngen.utils import (combine_user_data, inject_params)
 
 
 class Template(object):
@@ -272,7 +272,7 @@ class UserData(object):
 
     @staticmethod
     def from_files(files, params):
-        user_data = inject_params(combile_user_data(files), params)
+        user_data = inject_params(combine_user_data(files), params)
         return {'UserData': Intrinsics.base64(Intrinsics.join('', user_data))}
 
 
