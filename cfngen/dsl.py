@@ -282,6 +282,19 @@ class CfnInitMetadata(object):
     def of(values):
         return {'AWS::CloudFormation::Init': values}
 
+    class Files(object):
+
+        @staticmethod
+        def of(filename, content_params, file_params):
+            m = OrderedDict()
+            with open(filename) as fh:
+                c = fh.read()
+            content = inject_params(c, content_params)
+            m['content'] = Intrinsics.join('', content)
+            for k, v in file_params.items():
+                m[k] = v
+            return m
+
 
 if __name__ == '__main__':
     t = Template(description='Sample Template')
@@ -401,6 +414,14 @@ if __name__ == '__main__':
         'region': Pseudos.region()
     }))
 
+    with open('td-agent.conf', 'w') as f:
+        f.write('<source>\n')
+        f.write('  type dstat\n')
+        f.write('  tag dstat\n')
+        f.write('  option -cdnm --tcp --udp\n')
+        f.write('  delay 10\n')
+        f.write('</source>\n')
+
     api_server.metadata(CfnInitMetadata.of({
         'configSets': {
             'default': ['SetupRepos', 'Install', 'Configure', 'Start']
@@ -423,19 +444,11 @@ if __name__ == '__main__':
         },
         'Configure': {
             'files': {
-                '/etc/td-agent/td-agent.conf': {
-                    'content': Intrinsics.join('', [
-                        '<source>\n',
-                        '  type dstat\n',
-                        '  tag dstat\n',
-                        '  option -cdnm --tcp --udp\n',
-                        '  delay 10\n',
-                        '</source>\n'
-                    ]),
+                '/etc/td-agent/td-agent.conf': CfnInitMetadata.Files.of('td-agent.conf', {}, {
                     'mode': '000644',
                     'owner': 'root',
                     'group': 'root'
-                }
+                })
             }
         },
         'Start': {
@@ -450,6 +463,7 @@ if __name__ == '__main__':
     from os import remove
     remove('my_script.sh')
     remove('my_config.yml')
+    remove('td-agent.conf')
 
     t.outputs(Output('VpcId').description('-').value(Intrinsics.ref(vpc)))
     t.outputs(Output('ApiServerSubnet').description('-').value(Intrinsics.ref(api_server_subnet)))
