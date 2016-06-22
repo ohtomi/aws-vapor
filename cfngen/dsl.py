@@ -282,6 +282,9 @@ class CfnInitMetadata(object):
     def of(values):
         return {'AWS::CloudFormation::Init': values}
 
+    class Commands(object):
+        pass # TODO
+
     class Files(object):
 
         @staticmethod
@@ -294,6 +297,21 @@ class CfnInitMetadata(object):
             for k, v in file_params.items():
                 m[k] = v
             return m
+
+    class Groups(object):
+        pass # TODO
+
+    class Packages(object):
+        pass # TODO
+
+    class Services(object):
+        pass # TODO
+
+    class Sources(object):
+        pass # TODO
+
+    class Users(object):
+        pass # TODO
 
 
 if __name__ == '__main__':
