@@ -298,6 +298,10 @@ class CfnInitMetadata(object):
                 m[k] = v
             return m
 
+        @staticmethod
+        def from_file(filepath, filename, content_params, file_params):
+            return {filepath: CfnInitMetadata.Files.of(filename, content_params, file_params)}
+
     class Groups(object):
         pass # TODO
 
@@ -461,13 +465,11 @@ if __name__ == '__main__':
             }
         },
         'Configure': {
-            'files': {
-                '/etc/td-agent/td-agent.conf': CfnInitMetadata.Files.of('td-agent.conf', {}, {
-                    'mode': '000644',
-                    'owner': 'root',
-                    'group': 'root'
-                })
-            }
+            'files': CfnInitMetadata.Files.from_file('/etc/td-agent/td-agent.conf', 'td-agent.conf', {}, {
+                'mode': '000644',
+                'owner': 'root',
+                'group': 'root'
+            })
         },
         'Start': {
             'services': {
