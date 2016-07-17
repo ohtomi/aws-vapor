@@ -462,42 +462,39 @@ if __name__ == '__main__':
         f.write('  delay 10\n')
         f.write('</source>\n')
 
-    config_of_setup_repos = CfnInitMetadata.Config('SetupRepos', {
-        'commands': {
-            'import_td-agent_GPG-KEY': {'command': 'rpm --import https://packages.treasuredata.com/GPG-KEY-td-agent'}
-        }
-    })
-
-    config_of_install = CfnInitMetadata.Config('Install', {
-        'packages': {
-            'yum': {
-                'dstat': [],
-                'td-agent': []
-            }
-        },
-        'commands': {
-            'install_plugins': {'command': 'td-agent-gem install fluent-plugin-dstat'}
-        }
-    })
-
-    config_of_configure = CfnInitMetadata.Config('Configure', {
-        'files': CfnInitMetadata.Files.from_file('/etc/td-agent/td-agent.conf', 'td-agent.conf', {}, {
-            'mode': '000644',
-            'owner': 'root',
-            'group': 'root'
-        })
-    })
-
-    config_of_start = CfnInitMetadata.Config('Start', {
-        'services': {
-            'sysvinit': {
-                'td-agent': {'enabled': 'true', 'ensureRunning': 'true'}
-            }
-        }
-    })
-
     api_server.metadata(CfnInitMetadata.of([
-        CfnInitMetadata.ConfigSet('default', [config_of_setup_repos, config_of_install, config_of_configure, config_of_start])
+        CfnInitMetadata.ConfigSet('default', [
+            CfnInitMetadata.Config('SetupRepos', {
+                'commands': {
+                    'import_td-agent_GPG-KEY': {'command': 'rpm --import https://packages.treasuredata.com/GPG-KEY-td-agent'}
+                }
+            }),
+            CfnInitMetadata.Config('Install', {
+                'packages': {
+                    'yum': {
+                        'dstat': [],
+                        'td-agent': []
+                    }
+                },
+                'commands': {
+                    'install_plugins': {'command': 'td-agent-gem install fluent-plugin-dstat'}
+                }
+            }),
+            CfnInitMetadata.Config('Configure', {
+                'files': CfnInitMetadata.Files.from_file('/etc/td-agent/td-agent.conf', 'td-agent.conf', {}, {
+                    'mode': '000644',
+                    'owner': 'root',
+                    'group': 'root'
+                })
+            }),
+            CfnInitMetadata.Config('Start', {
+                'services': {
+                    'sysvinit': {
+                        'td-agent': {'enabled': 'true', 'ensureRunning': 'true'}
+                    }
+                }
+            })
+        ])
     ]))
 
     from os import remove
