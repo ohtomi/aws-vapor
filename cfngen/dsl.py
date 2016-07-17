@@ -279,27 +279,20 @@ class UserData(object):
 class CfnInitMetadata(object):
 
     @classmethod
-    def of(cls, config_sets=None, configs=[]):
+    def of(cls, config_sets):
         m = OrderedDict()
-        if config_sets is not None:
-            m['configSets'] = config_sets.sets
-        for config in configs:
-            m[config.name] = config.value
+        cs = m['configSets'] = OrderedDict()
+        for config_set in config_sets:
+            cs[config_set.name] = [config.name for config in config_set.configs]
+            for config in config_set.configs:
+                m[config.name] = config.value
         return {'AWS::CloudFormation::Init': m}
-
-    class ConfigSets(object):
-
-        def __init__(self, sets):
-            m = OrderedDict()
-            for set in sets:
-                m[set.name] = set.configs
-            self.sets = m
 
     class ConfigSet(object):
 
         def __init__(self, name, configs):
             self.name = name
-            self.configs = [config.name for config in configs]
+            self.configs = configs
 
     class Config(object):
 
@@ -474,6 +467,7 @@ if __name__ == '__main__':
             'import_td-agent_GPG-KEY': {'command': 'rpm --import https://packages.treasuredata.com/GPG-KEY-td-agent'}
         }
     })
+
     config_of_install = CfnInitMetadata.Config('Install', {
         'packages': {
             'yum': {
@@ -485,6 +479,7 @@ if __name__ == '__main__':
             'install_plugins': {'command': 'td-agent-gem install fluent-plugin-dstat'}
         }
     })
+
     config_of_configure = CfnInitMetadata.Config('Configure', {
         'files': CfnInitMetadata.Files.from_file('/etc/td-agent/td-agent.conf', 'td-agent.conf', {}, {
             'mode': '000644',
@@ -492,6 +487,7 @@ if __name__ == '__main__':
             'group': 'root'
         })
     })
+
     config_of_start = CfnInitMetadata.Config('Start', {
         'services': {
             'sysvinit': {
@@ -499,9 +495,10 @@ if __name__ == '__main__':
             }
         }
     })
-    config_set_of_default = CfnInitMetadata.ConfigSet('default', [config_of_setup_repos, config_of_install, config_of_configure, config_of_start])
-    config_sets = CfnInitMetadata.ConfigSets([config_set_of_default])
-    api_server.metadata(CfnInitMetadata.of(config_sets, [config_of_setup_repos, config_of_install, config_of_configure, config_of_start]))
+
+    api_server.metadata(CfnInitMetadata.of([
+        CfnInitMetadata.ConfigSet('default', [config_of_setup_repos, config_of_install, config_of_configure, config_of_start])
+    ]))
 
     from os import remove
     remove('my_script.sh')
