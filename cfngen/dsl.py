@@ -301,7 +301,22 @@ class CfnInitMetadata(object):
             self.value = value
 
     class Commands(object):
-        pass # TODO
+
+        @classmethod
+        def of(cls, command, env=None, cwd=None, test=None, ignore_errors=None, wait_after_completion=None):
+            m = OrderedDict()
+            m['command'] = command
+            if env is not None:
+                m['env'] = env
+            if cwd is not None:
+                m['cwd'] = cwd
+            if test is not None:
+                m['test'] = test
+            if ignore_errors is not None:
+                m['ignoreErrors'] = ignore_errors
+            if wait_after_completion is not None:
+                m['waitAfterCompletion'] = wait_after_completion
+            return m
 
     class Files(object):
 
@@ -321,19 +336,44 @@ class CfnInitMetadata(object):
             return {filepath: CfnInitMetadata.Files.of(filename, content_params, file_params)}
 
     class Groups(object):
-        pass # TODO
+
+        @classmethod
+        def of(cls, gid=None):
+            if gid is not None:
+                return {'gid': str(gid)}
+            else:
+                return {}
 
     class Packages(object):
         pass # TODO
 
     class Services(object):
-        pass # TODO
+
+        @classmethod
+        def of(cls, ensure_running=None, enabled=None, files=None, sources=None, packages=None, commands=None):
+            m = OrderedDict()
+            if ensure_running is not None:
+                m['ensureRunning'] = 'true' if ensure_running else 'false'
+            if enabled is not None:
+                m['enabled'] = 'true' if enabled else 'false'
+            if files is not None:
+                m['files'] = files
+            if sources is not None:
+                m['sources'] = sources
+            if packages is not None:
+                m['packages'] = packages
+            if commands is not None:
+                m['commands'] = commands
+            return m
 
     class Sources(object):
         pass # TODO
 
     class Users(object):
-        pass # TODO
+
+        @classmethod
+        def of(cls, uid, groups, home_dir):
+            return {'groups': groups, 'uid': uid, 'homeDir': home_dir}
 
 
 if __name__ == '__main__':
@@ -466,7 +506,7 @@ if __name__ == '__main__':
         CfnInitMetadata.ConfigSet('default', [
             CfnInitMetadata.Config('SetupRepos', {
                 'commands': {
-                    'import_td-agent_GPG-KEY': {'command': 'rpm --import https://packages.treasuredata.com/GPG-KEY-td-agent'}
+                    'import_td-agent_GPG-KEY': CfnInitMetadata.Commands.of('rpm --import https://packages.treasuredata.com/GPG-KEY-td-agent')
                 }
             }),
             CfnInitMetadata.Config('Install', {
@@ -477,7 +517,7 @@ if __name__ == '__main__':
                     }
                 },
                 'commands': {
-                    'install_plugins': {'command': 'td-agent-gem install fluent-plugin-dstat'}
+                    'install_plugins': CfnInitMetadata.Commands.of('td-agent-gem install fluent-plugin-dstat')
                 }
             }),
             CfnInitMetadata.Config('Configure', {
@@ -490,7 +530,7 @@ if __name__ == '__main__':
             CfnInitMetadata.Config('Start', {
                 'services': {
                     'sysvinit': {
-                        'td-agent': {'enabled': 'true', 'ensureRunning': 'true'}
+                        'td-agent': CfnInitMetadata.Services.of(enabled=True, ensure_running=True)
                     }
                 }
             })
