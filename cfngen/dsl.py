@@ -279,8 +279,33 @@ class UserData(object):
 class CfnInitMetadata(object):
 
     @classmethod
-    def of(cls, values):
-        return {'AWS::CloudFormation::Init': values}
+    def of(cls, config_sets=None, configs=[]):
+        m = OrderedDict()
+        if config_sets is not None:
+            m['configSets'] = config_sets.sets
+        for config in configs:
+            m[config.name] = config.value
+        return {'AWS::CloudFormation::Init': m}
+
+    class ConfigSets(object):
+
+        def __init__(self, sets):
+            m = OrderedDict()
+            for set in sets:
+                m[set.name] = set.configs
+            self.sets = m
+
+    class ConfigSet(object):
+
+        def __init__(self, name, configs):
+            self.name = name
+            self.configs = [config.name for config in configs]
+
+    class Config(object):
+
+        def __init__(self, name, value):
+            self.name = name
+            self.value = value
 
     class Commands(object):
         pass # TODO
@@ -444,41 +469,39 @@ if __name__ == '__main__':
         f.write('  delay 10\n')
         f.write('</source>\n')
 
-    api_server.metadata(CfnInitMetadata.of({
-        'configSets': {
-            'default': ['SetupRepos', 'Install', 'Configure', 'Start']
-        },
-        'SetupRepos': {
-            'commands': {
-                'import_td-agent_GPG-KEY': {'command': 'rpm --import https://packages.treasuredata.com/GPG-KEY-td-agent'}
+    config_of_setup_repos = CfnInitMetadata.Config('SetupRepos', {
+        'commands': {
+            'import_td-agent_GPG-KEY': {'command': 'rpm --import https://packages.treasuredata.com/GPG-KEY-td-agent'}
+        }
+    })
+    config_of_install = CfnInitMetadata.Config('Install', {
+        'packages': {
+            'yum': {
+                'dstat': [],
+                'td-agent': []
             }
         },
-        'Install': {
-            'packages': {
-                'yum': {
-                    'dstat': [],
-                    'td-agent': []
-                }
-            },
-            'commands': {
-                'install_plugins': {'command': 'td-agent-gem install fluent-plugin-dstat'}
-            }
-        },
-        'Configure': {
-            'files': CfnInitMetadata.Files.from_file('/etc/td-agent/td-agent.conf', 'td-agent.conf', {}, {
-                'mode': '000644',
-                'owner': 'root',
-                'group': 'root'
-            })
-        },
-        'Start': {
-            'services': {
-                'sysvinit': {
-                    'td-agent': {'enabled': 'true', 'ensureRunning': 'true'}
-                }
+        'commands': {
+            'install_plugins': {'command': 'td-agent-gem install fluent-plugin-dstat'}
+        }
+    })
+    config_of_configure = CfnInitMetadata.Config('Configure', {
+        'files': CfnInitMetadata.Files.from_file('/etc/td-agent/td-agent.conf', 'td-agent.conf', {}, {
+            'mode': '000644',
+            'owner': 'root',
+            'group': 'root'
+        })
+    })
+    config_of_start = CfnInitMetadata.Config('Start', {
+        'services': {
+            'sysvinit': {
+                'td-agent': {'enabled': 'true', 'ensureRunning': 'true'}
             }
         }
-    }))
+    })
+    config_set_of_default = CfnInitMetadata.ConfigSet('default', [config_of_setup_repos, config_of_install, config_of_configure, config_of_start])
+    config_sets = CfnInitMetadata.ConfigSets([config_set_of_default])
+    api_server.metadata(CfnInitMetadata.of(config_sets, [config_of_setup_repos, config_of_install, config_of_configure, config_of_start]))
 
     from os import remove
     remove('my_script.sh')
