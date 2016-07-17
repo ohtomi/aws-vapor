@@ -164,8 +164,8 @@ class Output(Element):
 
 class Attributes(object):
 
-    @staticmethod
-    def of(name, value):
+    @classmethod
+    def of(cls, name, value):
         if isinstance(value, Element):
             return {name: Intrinsics.ref(value)}
         else:
@@ -174,12 +174,12 @@ class Attributes(object):
 
 class Intrinsics(object):
 
-    @staticmethod
-    def base64(value_to_encode):
+    @classmethod
+    def base64(cls, value_to_encode):
         return {'Fn::Base64': value_to_encode}
 
-    @staticmethod
-    def find_in_map(map_name_or_mapping, top_level_key, second_level_key):
+    @classmethod
+    def find_in_map(cls, map_name_or_mapping, top_level_key, second_level_key):
         if isinstance(map_name_or_mapping, str):
             map_name = map_name_or_mapping
             return {'Fn::FindInMap': [map_name, top_level_key, second_level_key]}
@@ -189,44 +189,44 @@ class Intrinsics(object):
         else:
             raise ValueError('value should be map name or mapping. but %r' % type(map_name_or_mapping))
 
-    @staticmethod
-    def fn_and(condions):
+    @classmethod
+    def fn_and(cls, condions):
         return {'Fn::And': condions}
 
-    @staticmethod
-    def fn_equals(value_1, value_2):
+    @classmethod
+    def fn_equals(cls, value_1, value_2):
         return {'Fn::Equals': [value_1, value_2]}
 
-    @staticmethod
-    def fn_if(condition_name, value_if_true, value_if_false):
+    @classmethod
+    def fn_if(cls, condition_name, value_if_true, value_if_false):
         return {'Fn::If': [condition_name, value_if_true, value_if_false]}
 
-    @staticmethod
-    def fn_not(conditions):
+    @classmethod
+    def fn_not(cls, conditions):
         return {'Fn::Not': conditions}
 
-    @staticmethod
-    def fn_or(conditions):
+    @classmethod
+    def fn_or(cls, conditions):
         return {'Fn::Or': conditions}
 
-    @staticmethod
-    def get_att(logical_name_of_resource, attribute_name):
+    @classmethod
+    def get_att(cls, logical_name_of_resource, attribute_name):
         return {'Fn::GetAtt': [logical_name_of_resource, attribute_name]}
 
-    @staticmethod
-    def get_azs(region=''):
+    @classmethod
+    def get_azs(cls, region=''):
         return {'Fn::GetAZs': region}
 
-    @staticmethod
-    def join(delimiter, list_of_values):
+    @classmethod
+    def join(cls, delimiter, list_of_values):
         return {'Fn::Join': [delimiter, list_of_values]}
 
-    @staticmethod
-    def select(index, list_of_objects):
+    @classmethod
+    def select(cls, index, list_of_objects):
         return {'Fn::Select': [index, list_of_objects]}
 
-    @staticmethod
-    def ref(logical_name_or_element):
+    @classmethod
+    def ref(cls, logical_name_or_element):
         if isinstance(logical_name_or_element, str):
             logical_name = logical_name_or_element
             return {'Ref': logical_name}
@@ -239,47 +239,47 @@ class Intrinsics(object):
 
 class Pseudos(object):
 
-    @staticmethod
-    def account_id():
+    @classmethod
+    def account_id(cls):
         return {'Ref': 'AWS::AccountId'}
 
-    @staticmethod
-    def notification_arns():
+    @classmethod
+    def notification_arns(cls):
         return {'Ref': 'AWS::NotificationARNs'}
 
-    @staticmethod
-    def no_value():
+    @classmethod
+    def no_value(cls):
         return {'Ref': 'AWS::NoValue'}
 
-    @staticmethod
-    def region():
+    @classmethod
+    def region(cls):
         return {'Ref': 'AWS::Region'}
 
-    @staticmethod
-    def stack_id():
+    @classmethod
+    def stack_id(cls):
         return {'Ref': 'AWS::StackId'}
 
-    @staticmethod
-    def stack_name():
+    @classmethod
+    def stack_name(cls):
         return {'Ref': 'AWS::StackName'}
 
 
 class UserData(object):
 
-    @staticmethod
-    def of(values):
+    @classmethod
+    def of(cls, values):
         return {'UserData': Intrinsics.base64(Intrinsics.join('', values))}
 
-    @staticmethod
-    def from_files(files, params):
+    @classmethod
+    def from_files(cls, files, params):
         user_data = inject_params(combine_user_data(files), params)
         return {'UserData': Intrinsics.base64(Intrinsics.join('', user_data))}
 
 
 class CfnInitMetadata(object):
 
-    @staticmethod
-    def of(values):
+    @classmethod
+    def of(cls, values):
         return {'AWS::CloudFormation::Init': values}
 
     class Commands(object):
@@ -287,8 +287,8 @@ class CfnInitMetadata(object):
 
     class Files(object):
 
-        @staticmethod
-        def of(filename, content_params, file_params):
+        @classmethod
+        def of(cls, filename, content_params, file_params):
             m = OrderedDict()
             with open(filename) as fh:
                 c = fh.read()
@@ -298,8 +298,8 @@ class CfnInitMetadata(object):
                 m[k] = v
             return m
 
-        @staticmethod
-        def from_file(filepath, filename, content_params, file_params):
+        @classmethod
+        def from_file(cls, filepath, filename, content_params, file_params):
             return {filepath: CfnInitMetadata.Files.of(filename, content_params, file_params)}
 
     class Groups(object):
