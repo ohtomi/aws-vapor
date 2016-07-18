@@ -325,6 +325,11 @@ class CfnInitMetadata(object):
             self.value['groups'] = {key: m}
             return self
 
+        def packages(self, package_manager, key, versions=[]):
+            self.value['packages'] = self.value['packages'] if self.value.has_key('packages') else OrderedDict()
+            self.value['packages'][package_manager] = {key: versions}
+            return self
+
         def services(self, service_manager, key, ensure_running=None, enabled=None, files=None, sources=None, packages=None, commands=None):
             m = OrderedDict()
             if ensure_running is not None:
@@ -369,12 +374,6 @@ class CfnInitMetadata(object):
         @classmethod
         def from_file(cls, filepath, filename, content_params, file_params):
             return {filepath: CfnInitMetadata.Files.of(filename, content_params, file_params)}
-
-    class Packages(object):
-        pass # TODO
-
-    class Sources(object):
-        pass # TODO
 
 
 if __name__ == '__main__':
@@ -508,16 +507,12 @@ if __name__ == '__main__':
             CfnInitMetadata.Config('SetupRepos', {}).commands(
                 'import_td-agent_GPG-KEY', 'rpm --import https://packages.treasuredata.com/GPG-KEY-td-agent'
             ),
-            CfnInitMetadata.Config('Install', {
-                'packages': {
-                    'yum': {
-                        'dstat': [],
-                        'td-agent': []
-                    }
-                }
-            }).commands(
-                'install_plugins', 'td-agent-gem install fluent-plugin-dstat'
-            ),
+            CfnInitMetadata.Config('Install', {})
+                .packages('yum', 'dstat')
+                .packages('yum', 'td-agent')
+                .commands(
+                    'install_plugins', 'td-agent-gem install fluent-plugin-dstat'
+                ),
             CfnInitMetadata.Config('Configure', {
                 'files': CfnInitMetadata.Files.from_file('/etc/td-agent/td-agent.conf', 'td-agent.conf', {}, {
                     'mode': '000644',
