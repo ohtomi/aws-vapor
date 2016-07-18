@@ -300,10 +300,7 @@ class CfnInitMetadata(object):
             self.name = name
             self.value = value
 
-    class Commands(object):
-
-        @classmethod
-        def of(cls, command, env=None, cwd=None, test=None, ignore_errors=None, wait_after_completion=None):
+        def commands(self, key, command, env=None, cwd=None, test=None, ignore_errors=None, wait_after_completion=None):
             m = OrderedDict()
             m['command'] = command
             if env is not None:
@@ -316,7 +313,45 @@ class CfnInitMetadata(object):
                 m['ignoreErrors'] = ignore_errors
             if wait_after_completion is not None:
                 m['waitAfterCompletion'] = wait_after_completion
-            return m
+
+            self.value['commands'] = {key: m}
+            return self
+
+        def groups(self, key, gid=None):
+            m = OrderedDict()
+            if gid is not None:
+                m['gid'] = str(gid)
+
+            self.value['groups'] = {key: m}
+            return self
+
+        def services(self, service_manager, key, ensure_running=None, enabled=None, files=None, sources=None, packages=None, commands=None):
+            m = OrderedDict()
+            if ensure_running is not None:
+                m['ensureRunning'] = 'true' if ensure_running else 'false'
+            if enabled is not None:
+                m['enabled'] = 'true' if enabled else 'false'
+            if files is not None:
+                m['files'] = files
+            if sources is not None:
+                m['sources'] = sources
+            if packages is not None:
+                m['packages'] = packages
+            if commands is not None:
+                m['commands'] = commands
+
+            self.value['services'] = self.value['services'] if self.value.has_key('services') else OrderedDict()
+            self.value['services'][service_manager] = {key: m}
+            return self
+
+        def users(self, key, uid, groups, home_dir):
+            m = OrderedDict()
+            m['groups'] = groups
+            m['uid'] =  uid
+            m['homeDir'] = home_dir
+
+            self.value['users'] = {key: m}
+            return self
 
     class Files(object):
 
@@ -335,45 +370,11 @@ class CfnInitMetadata(object):
         def from_file(cls, filepath, filename, content_params, file_params):
             return {filepath: CfnInitMetadata.Files.of(filename, content_params, file_params)}
 
-    class Groups(object):
-
-        @classmethod
-        def of(cls, gid=None):
-            if gid is not None:
-                return {'gid': str(gid)}
-            else:
-                return {}
-
     class Packages(object):
         pass # TODO
 
-    class Services(object):
-
-        @classmethod
-        def of(cls, ensure_running=None, enabled=None, files=None, sources=None, packages=None, commands=None):
-            m = OrderedDict()
-            if ensure_running is not None:
-                m['ensureRunning'] = 'true' if ensure_running else 'false'
-            if enabled is not None:
-                m['enabled'] = 'true' if enabled else 'false'
-            if files is not None:
-                m['files'] = files
-            if sources is not None:
-                m['sources'] = sources
-            if packages is not None:
-                m['packages'] = packages
-            if commands is not None:
-                m['commands'] = commands
-            return m
-
     class Sources(object):
         pass # TODO
-
-    class Users(object):
-
-        @classmethod
-        def of(cls, uid, groups, home_dir):
-            return {'groups': groups, 'uid': uid, 'homeDir': home_dir}
 
 
 if __name__ == '__main__':
@@ -504,22 +505,19 @@ if __name__ == '__main__':
 
     api_server.metadata(CfnInitMetadata.of([
         CfnInitMetadata.ConfigSet('default', [
-            CfnInitMetadata.Config('SetupRepos', {
-                'commands': {
-                    'import_td-agent_GPG-KEY': CfnInitMetadata.Commands.of('rpm --import https://packages.treasuredata.com/GPG-KEY-td-agent')
-                }
-            }),
+            CfnInitMetadata.Config('SetupRepos', {}).commands(
+                'import_td-agent_GPG-KEY', 'rpm --import https://packages.treasuredata.com/GPG-KEY-td-agent'
+            ),
             CfnInitMetadata.Config('Install', {
                 'packages': {
                     'yum': {
                         'dstat': [],
                         'td-agent': []
                     }
-                },
-                'commands': {
-                    'install_plugins': CfnInitMetadata.Commands.of('td-agent-gem install fluent-plugin-dstat')
                 }
-            }),
+            }).commands(
+                'install_plugins', 'td-agent-gem install fluent-plugin-dstat'
+            ),
             CfnInitMetadata.Config('Configure', {
                 'files': CfnInitMetadata.Files.from_file('/etc/td-agent/td-agent.conf', 'td-agent.conf', {}, {
                     'mode': '000644',
@@ -527,13 +525,9 @@ if __name__ == '__main__':
                     'group': 'root'
                 })
             }),
-            CfnInitMetadata.Config('Start', {
-                'services': {
-                    'sysvinit': {
-                        'td-agent': CfnInitMetadata.Services.of(enabled=True, ensure_running=True)
-                    }
-                }
-            })
+            CfnInitMetadata.Config('Start', {}).services(
+                'sysvinit', 'td-agent', enabled=True, ensure_running=True
+            )
         ])
     ]))
 
