@@ -296,9 +296,9 @@ class CfnInitMetadata(object):
 
     class Config(object):
 
-        def __init__(self, name, value):
+        def __init__(self, name):
             self.name = name
-            self.value = value
+            self.value = OrderedDict()
 
         def _create_and_get_map(self, keys):
             m = self.value
@@ -534,18 +534,18 @@ if __name__ == '__main__':
 
     api_server.metadata(CfnInitMetadata.of([
         CfnInitMetadata.ConfigSet('default', [
-            CfnInitMetadata.Config('SetupRepos', {})
+            CfnInitMetadata.Config('SetupRepos')
                 .commands('import_td-agent_GPG-KEY', 'rpm --import https://packages.treasuredata.com/GPG-KEY-td-agent')
             ,
-            CfnInitMetadata.Config('Install', {})
+            CfnInitMetadata.Config('Install')
                 .packages('yum', 'dstat')
                 .packages('yum', 'td-agent')
                 .commands('install_plugins', 'td-agent-gem install fluent-plugin-dstat')
             ,
-            CfnInitMetadata.Config('Configure', {})
+            CfnInitMetadata.Config('Configure')
                 .files('/etc/td-agent/td-agent.conf', CfnInitMetadata.from_file('td-agent.conf', {}), mode='000644', owner='root', group='root')
             ,
-            CfnInitMetadata.Config('Start', {})
+            CfnInitMetadata.Config('Start')
                 .services('sysvinit', 'td-agent', enabled=True, ensure_running=True)
         ])
     ]))
