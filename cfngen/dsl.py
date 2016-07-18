@@ -367,7 +367,7 @@ class CfnInitMetadata(object):
         def users(self, key, uid, groups, home_dir):
             m = OrderedDict()
             m['groups'] = groups
-            m['uid'] =  uid
+            m['uid'] =  str(uid)
             m['homeDir'] = home_dir
 
             v = self._create_and_get_map(['users'])
