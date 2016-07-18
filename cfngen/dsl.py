@@ -359,6 +359,11 @@ class CfnInitMetadata(object):
             v[key] = m
             return self
 
+        def sources(self, key, url):
+            v = self._create_and_get_map(['sources'])
+            v[key] = url
+            return self
+
         def users(self, key, uid, groups, home_dir):
             m = OrderedDict()
             m['groups'] = groups
