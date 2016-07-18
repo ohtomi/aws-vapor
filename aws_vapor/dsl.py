@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 
 from collections import OrderedDict
-from cfngen.utils import (combine_user_data, inject_params)
+from aws_vapor.utils import (combine_user_data, inject_params)
 
 
 class Template(object):

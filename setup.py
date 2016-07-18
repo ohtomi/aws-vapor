@@ -1,16 +1,16 @@
 from setuptools import setup, find_packages
 
 setup(
-    name='cfngen',
-    version='1.0',
+    name='aws-vapor',
+    version='0.0.1',
     packages=find_packages(),
     install_requires=['cliff'],
     entry_points={
         'console_scripts':
-            'cfngen = cfngen.main:main',
-        'cfngen.command': [
-            'config = cfngen.configure:Configure',
-            'template = cfngen.generator:Generator',
+            'aws-vapor = aws_vapor.main:main',
+        'vapor.command': [
+            'config = aws_vapor.configure:Configure',
+            'template = aws_vapor.generator:Generator',
         ]
     },
     zip_safe=False,

@@ -2,7 +2,7 @@
 
 from cliff.command import Command
 
-import cfngen.utils as utils
+import aws_vapor.utils as utils
 
 
 class Configure(Command):
