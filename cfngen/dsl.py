@@ -326,6 +326,29 @@ class CfnInitMetadata(object):
             v[key] = m
             return self
 
+        def files(self, key, content=None, source=None, encoding=None, group=None, owner=None, mode=None, authentication=None, context=None):
+            m = OrderedDict()
+            if content is not None:
+                m['content'] = content
+            if source is not None:
+                m['source'] = source
+            if encoding is not None:
+                m['encoding'] = encoding
+            if group is not None:
+                m['group'] = group
+            if owner is not None:
+                m['owner'] = owner
+            if mode is not None:
+                m['mode'] = mode
+            if authentication is not None:
+                m['authentication'] = authentication
+            if context is not None:
+                m['context'] = context
+
+            v = self._create_and_get_map(['files'])
+            v[key] = m
+            return self
+
         def groups(self, key, gid=None):
             m = OrderedDict()
             if gid is not None:
@@ -374,22 +397,13 @@ class CfnInitMetadata(object):
             v[key] = m
             return self
 
-    class Files(object):
-
-        @classmethod
-        def of(cls, filename, content_params, file_params):
-            m = OrderedDict()
-            with open(filename) as fh:
-                c = fh.read()
-            content = inject_params(c, content_params)
-            m['content'] = Intrinsics.join('', content)
-            for k, v in file_params.items():
-                m[k] = v
-            return m
-
-        @classmethod
-        def from_file(cls, filepath, filename, content_params, file_params):
-            return {filepath: CfnInitMetadata.Files.of(filename, content_params, file_params)}
+    @classmethod
+    def from_file(cls, filename, params):
+        with open(filename) as fh:
+            c = fh.read()
+        content = inject_params(c, params)
+        joined_content = Intrinsics.join('', content)
+        return joined_content
 
 
 if __name__ == '__main__':
@@ -528,13 +542,9 @@ if __name__ == '__main__':
                 .packages('yum', 'td-agent')
                 .commands('install_plugins', 'td-agent-gem install fluent-plugin-dstat')
             ,
-            CfnInitMetadata.Config('Configure', {
-                'files': CfnInitMetadata.Files.from_file('/etc/td-agent/td-agent.conf', 'td-agent.conf', {}, {
-                    'mode': '000644',
-                    'owner': 'root',
-                    'group': 'root'
-                })
-            }),
+            CfnInitMetadata.Config('Configure', {})
+                .files('/etc/td-agent/td-agent.conf', CfnInitMetadata.from_file('td-agent.conf', {}), mode='000644', owner='root', group='root')
+            ,
             CfnInitMetadata.Config('Start', {})
                 .services('sysvinit', 'td-agent', enabled=True, ensure_running=True)
         ])
