@@ -300,6 +300,14 @@ class CfnInitMetadata(object):
             self.name = name
             self.value = value
 
+        def _create_and_get_map(self, keys):
+            m = self.value
+            for key in keys:
+                if not m.has_key(key):
+                    m[key] = OrderedDict()
+                m = m[key]
+            return m
+
         def commands(self, key, command, env=None, cwd=None, test=None, ignore_errors=None, wait_after_completion=None):
             m = OrderedDict()
             m['command'] = command
@@ -314,7 +322,8 @@ class CfnInitMetadata(object):
             if wait_after_completion is not None:
                 m['waitAfterCompletion'] = wait_after_completion
 
-            self.value['commands'] = {key: m}
+            v = self._create_and_get_map(['commands'])
+            v[key] = m
             return self
 
         def groups(self, key, gid=None):
@@ -322,12 +331,13 @@ class CfnInitMetadata(object):
             if gid is not None:
                 m['gid'] = str(gid)
 
-            self.value['groups'] = {key: m}
+            v = self._create_and_get_map(['groups'])
+            v[key] = m
             return self
 
         def packages(self, package_manager, key, versions=[]):
-            self.value['packages'] = self.value['packages'] if self.value.has_key('packages') else OrderedDict()
-            self.value['packages'][package_manager] = {key: versions}
+            v = self._create_and_get_map(['packages', package_manager])
+            v[key] = versions
             return self
 
         def services(self, service_manager, key, ensure_running=None, enabled=None, files=None, sources=None, packages=None, commands=None):
@@ -345,8 +355,8 @@ class CfnInitMetadata(object):
             if commands is not None:
                 m['commands'] = commands
 
-            self.value['services'] = self.value['services'] if self.value.has_key('services') else OrderedDict()
-            self.value['services'][service_manager] = {key: m}
+            v = self._create_and_get_map(['service_manager', service_manager])
+            v[key] = m
             return self
 
         def users(self, key, uid, groups, home_dir):
@@ -355,7 +365,8 @@ class CfnInitMetadata(object):
             m['uid'] =  uid
             m['homeDir'] = home_dir
 
-            self.value['users'] = {key: m}
+            v = self._create_and_get_map(['users'])
+            v[key] = m
             return self
 
     class Files(object):
