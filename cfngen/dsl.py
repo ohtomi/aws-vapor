@@ -398,7 +398,7 @@ class CfnInitMetadata(object):
             return self
 
     @classmethod
-    def from_file(cls, filename, params):
+    def from_file(cls, filename, params={}):
         with open(filename) as fh:
             c = fh.read()
         content = inject_params(c, params)
@@ -543,7 +543,7 @@ if __name__ == '__main__':
                 .commands('install_plugins', 'td-agent-gem install fluent-plugin-dstat')
             ,
             CfnInitMetadata.Config('Configure')
-                .files('/etc/td-agent/td-agent.conf', CfnInitMetadata.from_file('td-agent.conf', {}), mode='000644', owner='root', group='root')
+                .files('/etc/td-agent/td-agent.conf', CfnInitMetadata.from_file('td-agent.conf'), mode='000644', owner='root', group='root')
             ,
             CfnInitMetadata.Config('Start')
                 .services('sysvinit', 'td-agent', enabled=True, ensure_running=True)
