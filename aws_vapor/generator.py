@@ -15,6 +15,8 @@ class Generator(Command):
         parser = super(Generator, self).get_parser(prog_name)
         parser.add_argument('vaporfile', help='file path of vaporfile')
         parser.add_argument('task', nargs='?', help='task name within vaporfile')
+        parser.add_argument('--contrib', help='contrib repository url')
+        parser.add_argument('--recipe', nargs='+', help='file paths of recipe on contrib repository')
         return parser
 
     def take_action(self, args):
@@ -24,6 +26,12 @@ class Generator(Command):
 
         chdir(directory)
         template = task()
+
+        if args.recipe is not None:
+            contrib = args.contrib # TODO use default value within config file if missing parameter
+            recipes = args.recipe
+            self._apply_recipes(template, contrib, recipes)
+
         json_document = dumps(template.to_template(), indent=2, separators=(',', ': '))
         self.app.stdout.write('{0}\n'.format(json_document))
 
@@ -38,3 +46,12 @@ class Generator(Command):
         task = getattr(vaporfile, task_name)
 
         return (vaporfile, task, directory)
+
+    def _apply_recipes(self, template, contrib, recipes):
+        if contrib not in sys.path:
+            sys.path.insert(0, contrib)
+        for recipe in recipes:
+            recipefile = __import__(path.splitext(recipe)[0])
+            task = getattr(recipefile, 'recipe')
+            task(template)
+        del sys.path[0]
