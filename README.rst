@@ -15,9 +15,9 @@ Requirements
 How to install
 ========================================
 
-```bash
-$ pip install git+https://github.com/ohtomi/aws-cloudformation-generator
-```
+.. code-block:: bash
+
+   $ pip install git+https://github.com/ohtomi/aws-cloudformation-generator
 
 How to use
 ========================================
