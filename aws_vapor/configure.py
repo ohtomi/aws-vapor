@@ -6,44 +6,36 @@ import aws_vapor.utils as utils
 
 
 class Configure(Command):
-    '''configures this tool'''
+    '''shows current configuration or sets new configuration'''
 
     def get_parser(self, prog_name):
         parser = super(Configure, self).get_parser(prog_name)
-        parser.add_argument('mode', choices=['show', 'create'])
+        subparsers = parser.add_subparsers(help='sub-command', title='sub-commands')
+        list_subparser = subparsers.add_parser('list', help='lists all values within config file')
+        list_subparser.set_defaults(func=self.list_configuration)
+        set_subparser = subparsers.add_parser('set', help='sets key to specified value')
+        set_subparser.set_defaults(func=self.set_configuration)
+        set_subparser.add_argument('section')
+        set_subparser.add_argument('key')
+        set_subparser.add_argument('value')
         return parser
 
-    def take_action(self, parsed_args):
-        if parsed_args.mode == 'show':
-            self.show_current_configuration()
-        elif parsed_args.mode == 'create':
-            self.create_new_configuration()
-        else:
-            raise ValueError('unknown mode')
+    def take_action(self, args):
+        args.func(args)
 
-    def show_current_configuration(self):
+    def list_configuration(self, args):
         props = utils.load_from_config_file()
         for section, entries in props.items():
             self.app.stdout.write(u'[{0}]\n'.format(section))
             for key, value in entries.items():
                 self.app.stdout.write(u'{0} = {1}\n'.format(key, value))
 
-    def create_new_configuration(self):
-        props = {}
+    def set_configuration(self, args):
+        props = utils.load_from_config_file()
 
-        # TODO
-        props['vocabulary'] = {}
-
-        # TODO
-        props['variables'] = {}
-        props['variables']['username'] = self.read_user_input('username: ')
+        if not props.has_key(args.section):
+            props[args.section] = {}
+        section = props[args.section]
+        section[args.key] = args.value
 
         utils.save_to_config_file(props)
-
-    def read_user_input(self, prompt, default_value=None):
-        while True:
-            value = raw_input(prompt)
-            if value is not '':
-                return value
-            elif default_value is not None:
-                return default_value
