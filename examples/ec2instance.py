@@ -1,11 +1,9 @@
 # -*- coding: utf-8 -*-
 
 from json import dumps
-from aws_vapor.dsl.basic import (
+from aws_vapor.dsl import (
     Template, Parameter, Mapping, Condition, Resource, Output,
-    Attributes, Intrinsics, Pseudos
-)
-from aws_vapor.dsl.metadata import (
+    Attributes, Intrinsics, Pseudos,
     UserData, CfnInitMetadata
 )
 
