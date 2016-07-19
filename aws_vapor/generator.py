@@ -2,7 +2,7 @@
 
 from cliff.command import Command
 from json import dumps
-from os import path
+from os import (chdir, path)
 
 import aws_vapor.utils as utils
 import sys
@@ -19,19 +19,22 @@ class Generator(Command):
 
     def take_action(self, args):
         file_path = args.vaporfile
-        vaporfile = self._load_vaporfile(file_path)
+        task_name = args.task
+        (vaporfile, task, directory) = self._load_vaporfile(file_path, task_name)
 
-        task_name = args.task or 'generate'
-        task = getattr(vaporfile, task_name)
-
+        chdir(directory)
         template = task()
         json_document = dumps(template.to_template(), indent=2, separators=(',', ': '))
         self.app.stdout.write('{0}\n'.format(json_document))
 
-    def _load_vaporfile(self, file_path):
+    def _load_vaporfile(self, file_path, task_name):
         directory, filename = path.split(file_path)
         if directory not in sys.path:
             sys.path.insert(0, directory)
-        imported = __import__(path.splitext(filename)[0])
+        vaporfile = __import__(path.splitext(filename)[0])
         del sys.path[0]
-        return imported
+
+        task_name = task_name or 'generate'
+        task = getattr(vaporfile, task_name)
+
+        return (vaporfile, task, directory)
