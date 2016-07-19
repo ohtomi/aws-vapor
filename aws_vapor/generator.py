@@ -6,7 +6,7 @@ import aws_vapor.utils as utils
 
 
 class Generator(Command):
-    '''generate AWS cloudformation template from python object'''
+    '''generates AWS CloudFormation template from python object'''
 
     def get_parser(self, prog_name):
         parser = super(Generator, self).get_parser(prog_name)

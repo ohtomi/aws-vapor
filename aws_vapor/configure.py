@@ -6,7 +6,7 @@ import aws_vapor.utils as utils
 
 
 class Configure(Command):
-    '''configure this tool'''
+    '''configures this tool'''
 
     def get_parser(self, prog_name):
         parser = super(Configure, self).get_parser(prog_name)

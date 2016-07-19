@@ -2,7 +2,7 @@
 
 ## Description
 
-This tool generates AWS Cloudformation template from python object.
+This tool generates AWS CloudFormation template from python object.
 
 ## Requirements
 
