@@ -1,7 +1,6 @@
 # -*- coding: utf-8 -*-
 
-from os import mkdir
-from os.path import (exists, expanduser)
+from os import (mkdir, path)
 from sys import getdefaultencoding
 from email.mime.multipart import MIMEMultipart
 from email.mime.text import MIMEText
@@ -9,18 +8,18 @@ from email.mime.text import MIMEText
 import ConfigParser
 
 
-CONFIG_DIRECTORY = expanduser('~/.aws-vapor')
+CONFIG_DIRECTORY = path.expanduser('~/.aws-vapor')
 CONFIG_FILE_NAME = 'config'
 
 
 def load_from_config_file():
     props = {}
 
-    if not exists(CONFIG_DIRECTORY + '/' + CONFIG_FILE_NAME):
+    if not path.exists(path.join(CONFIG_DIRECTORY, CONFIG_FILE_NAME)):
         return props
 
     config = ConfigParser.RawConfigParser()
-    config.read(CONFIG_DIRECTORY + '/' + CONFIG_FILE_NAME)
+    config.read(path.join(CONFIG_DIRECTORY, CONFIG_FILE_NAME))
 
     for section in config.sections():
         for key, value in config.items(section):
@@ -39,10 +38,10 @@ def save_to_config_file(props):
         for key, value in entries.items():
             config.set(section, key, value)
 
-    if not exists(CONFIG_DIRECTORY):
+    if not path.exists(CONFIG_DIRECTORY):
         mkdir(CONFIG_DIRECTORY)
 
-    with open(CONFIG_DIRECTORY + '/' + CONFIG_FILE_NAME, 'wb') as configfile:
+    with open(path.join(CONFIG_DIRECTORY, CONFIG_FILE_NAME), 'wb') as configfile:
         config.write(configfile)
 
 
