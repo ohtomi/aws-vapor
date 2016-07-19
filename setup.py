@@ -26,7 +26,7 @@ setup(
             'aws-vapor = aws_vapor.main:main',
         'aws_vapor.command': [
             'config = aws_vapor.configure:Configure',
-            'template = aws_vapor.generator:Generator',
+            'generate = aws_vapor.generator:Generator',
         ]
     },
     zip_safe=False,
