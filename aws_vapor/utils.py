@@ -9,7 +9,7 @@ from email.mime.text import MIMEText
 import ConfigParser
 
 
-CONFIG_DIRECTORY = expanduser('~/.cfngen')
+CONFIG_DIRECTORY = expanduser('~/.aws-vapor')
 CONFIG_FILE_NAME = 'config'
 
 

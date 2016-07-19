@@ -8,7 +8,7 @@ setup(
     entry_points={
         'console_scripts':
             'aws-vapor = aws_vapor.main:main',
-        'vapor.command': [
+        'aws_vapor.command': [
             'config = aws_vapor.configure:Configure',
             'template = aws_vapor.generator:Generator',
         ]

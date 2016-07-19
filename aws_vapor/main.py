@@ -11,7 +11,7 @@ class CliApp(App):
         super(CliApp, self).__init__(
             description='AWS Cloudformation Template Generator',
             version='0.0.1',
-            command_manager=CommandManager('vapor.command'),
+            command_manager=CommandManager('aws_vapor.command'),
         )
 
 
