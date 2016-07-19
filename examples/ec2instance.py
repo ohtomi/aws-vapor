@@ -99,39 +99,14 @@ api_server = t.resources(Resource('ApiServer').type('AWS::EC2::Instance').proper
     ])
 ]))
 
-with open('my_script.sh', 'w') as f:
-    f.write('#!/bin/bash -xe\n')
-    f.write('yum update -y\n')
-    f.write('yum update -y aws-cfn-bootstrap\n')
-    f.write('/opt/aws/bin/cfn-init -v ')
-    f.write('    --stack {{ stack_id }}')
-    f.write('    --resource {{ resource_name }}')
-    f.write('    --region {{ region }}\n')
-    f.write('/opt/aws/bin/cfn-signal -e $? ')
-    f.write('    --stack {{ stack_id }}')
-    f.write('    --resource {{ resource_name }}')
-    f.write('    --region {{ region }}\n')
-with open('my_config.yml', 'w') as f:
-    f.write('#cloud-config\n')
-    f.write('timezone: Asia/Tokyo\n')
-    f.write('locale: ja_JP.UTF-8\n')
-
 api_server.add_property(UserData.from_files([
-    ('my_script.sh', 'x-shellscript'),
-    ('my_config.yml', 'cloud-config')
+    ('examples/my_script.sh', 'x-shellscript'),
+    ('examples/my_config.yml', 'cloud-config')
 ], {
     'stack_id': Pseudos.stack_id(),
     'resource_name': api_server.name,
     'region': Pseudos.region()
 }))
-
-with open('td-agent.conf', 'w') as f:
-    f.write('<source>\n')
-    f.write('  type dstat\n')
-    f.write('  tag dstat\n')
-    f.write('  option -cdnm --tcp --udp\n')
-    f.write('  delay 10\n')
-    f.write('</source>\n')
 
 api_server.metadata(CfnInitMetadata.of([
     CfnInitMetadata.ConfigSet('default', [
@@ -144,17 +119,12 @@ api_server.metadata(CfnInitMetadata.of([
             .commands('install_plugins', 'td-agent-gem install fluent-plugin-dstat')
         ,
         CfnInitMetadata.Config('Configure')
-            .files('/etc/td-agent/td-agent.conf', CfnInitMetadata.from_file('td-agent.conf'), mode='000644', owner='root', group='root')
+            .files('/etc/td-agent/td-agent.conf', CfnInitMetadata.from_file('examples/my_td-agent.conf'), mode='000644', owner='root', group='root')
         ,
         CfnInitMetadata.Config('Start')
             .services('sysvinit', 'td-agent', enabled=True, ensure_running=True)
     ])
 ]))
-
-from os import remove
-remove('my_script.sh')
-remove('my_config.yml')
-remove('td-agent.conf')
 
 t.outputs(Output('VpcId').description('-').value(Intrinsics.ref(vpc)))
 t.outputs(Output('ApiServerSubnet').description('-').value(Intrinsics.ref(api_server_subnet)))

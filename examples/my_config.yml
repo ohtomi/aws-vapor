@@ -1,0 +1,3 @@
+#cloud-config
+timezone: Asia/Tokyo
+locale: ja_JP.UTF-8
