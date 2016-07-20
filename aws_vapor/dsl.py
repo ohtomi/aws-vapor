@@ -19,30 +19,41 @@ class Template(object):
             self.elements[section_name] = []
         return self.elements[section_name]
 
-    def parameters(self, element):
-        section = self.get_section('Parameters')
-        section.append(element)
+    def index_of_section(self, section, element_name):
+        if len(filter(lambda item: item.name == element_name, section)) >= 1:
+            return map(lambda item: item.name, section).index(element_name)
+        else:
+            return -1
+
+    def merge_or_replace_element(self, section_name, element, merge):
+        section = self.get_section(section_name)
+        index = self.index_of_section(section, element.name)
+
+        if index == -1:
+            section.append(element)
+        elif merge:
+            existing = section[index]
+            for k, v in element.attrs.items():
+                existing.attrs[k] = v
+        else:
+            section[index] = element
+
         return element
 
-    def mappings(self, element):
-        section = self.get_section('Mappings')
-        section.append(element)
-        return element
+    def parameters(self, element, merge=False):
+        return self.merge_or_replace_element('Parameters', element, merge)
 
-    def conditions(self, element):
-        section = self.get_section('Conditions')
-        section.append(element)
-        return element
+    def mappings(self, element, merge=False):
+        return self.merge_or_replace_element('Mappings', element, merge)
 
-    def resources(self, element):
-        section = self.get_section('Resources')
-        section.append(element)
-        return element
+    def conditions(self, element, merge=False):
+        return self.merge_or_replace_element('Conditions', element, merge)
 
-    def outputs(self, element):
-        section = self.get_section('Outputs')
-        section.append(element)
-        return element
+    def resources(self, element, merge=False):
+        return self.merge_or_replace_element('Resources', element, merge)
+
+    def outputs(self, element, merge=False):
+        return self.merge_or_replace_element('Outputs', element, merge)
 
     def to_template(self):
         template = OrderedDict()
