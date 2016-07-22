@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-from os import (mkdir, path)
+from os import (getcwd, mkdir, path)
 from sys import getdefaultencoding
 from email.mime.multipart import MIMEMultipart
 from email.mime.text import MIMEText
@@ -8,18 +8,19 @@ from email.mime.text import MIMEText
 import ConfigParser
 
 
+CURRENT_DIRECTORY = getcwd()
 CONFIG_DIRECTORY = path.expanduser('~/.aws-vapor')
 CONFIG_FILE_NAME = 'config'
 
 
-def load_from_config_file():
+def load_from_config_file(config_directory=CONFIG_DIRECTORY):
     props = {}
 
-    if not path.exists(path.join(CONFIG_DIRECTORY, CONFIG_FILE_NAME)):
+    if not path.exists(path.join(config_directory, CONFIG_FILE_NAME)):
         return props
 
     config = ConfigParser.RawConfigParser()
-    config.read(path.join(CONFIG_DIRECTORY, CONFIG_FILE_NAME))
+    config.read(path.join(config_directory, CONFIG_FILE_NAME))
 
     for section in config.sections():
         for key, value in config.items(section):
@@ -28,6 +29,36 @@ def load_from_config_file():
             props[section][key] = value
 
     return props
+
+
+def get_property_from_config_file(config_directory, section, key):
+    props = load_from_config_file(config_directory)
+    if not props.has_key(section):
+        return
+
+    section = props[section]
+    if not section.has_key(key):
+        return
+
+    value = section[key]
+    if value is None:
+        return
+
+    return value
+
+
+def get_property_from_config_files(section, key, default_value):
+    # search a config file under the current directory
+    value = get_property_from_config_file(CURRENT_DIRECTORY, section, key)
+    if value is not None:
+        return value
+
+    # search a config file under the user home directory
+    value = get_property_from_config_file(CONFIG_DIRECTORY, section, key)
+    if value is not None:
+        return value
+
+    return default_value
 
 
 def save_to_config_file(props):
