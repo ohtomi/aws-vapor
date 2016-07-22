@@ -47,7 +47,7 @@ def get_property_from_config_file(config_directory, section, key):
     return value
 
 
-def get_property_from_config_files(section, key, default_value):
+def get_property_from_config_files(section, key, default_value=None):
     # search a config file under the current directory
     value = get_property_from_config_file(CURRENT_DIRECTORY, section, key)
     if value is not None:
