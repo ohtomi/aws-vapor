@@ -31,34 +31,34 @@ def load_from_config_file(config_directory=CONFIG_DIRECTORY):
     return props
 
 
-def get_property_from_config_file(config_directory, section, key):
-    props = load_from_config_file(config_directory)
-    if not props.has_key(section):
-        return
+def load_from_config_files():
+    # load from a config file under the user home directory
+    props = load_from_config_file(CONFIG_DIRECTORY)
 
-    section = props[section]
-    if not section.has_key(key):
-        return
+    # overwrite properties from a config file under the current directory
+    for name, section in load_from_config_file(CURRENT_DIRECTORY).items():
+        if not props.has_key(name):
+            props[name] = {}
+        for k, v in section.items():
+            props[name][k] = v
 
-    value = section[key]
-    if value is None:
-        return
-
-    return value
+    return props
 
 
 def get_property_from_config_files(section, key, default_value=None):
-    # search a config file under the current directory
-    value = get_property_from_config_file(CURRENT_DIRECTORY, section, key)
-    if value is not None:
-        return value
+    props = load_from_config_files()
+    if not props.has_key(section):
+        return default_value
 
-    # search a config file under the user home directory
-    value = get_property_from_config_file(CONFIG_DIRECTORY, section, key)
-    if value is not None:
-        return value
+    section = props[section]
+    if not section.has_key(key):
+        return default_value
 
-    return default_value
+    value = section[key]
+    if value is None:
+        return default_value
+
+    return value
 
 
 def save_to_config_file(props):

@@ -27,7 +27,7 @@ class Configure(Command):
         args.func(args)
 
     def list_configuration(self, args):
-        props = utils.load_from_config_file()
+        props = utils.load_from_config_files()
         for section, entries in props.items():
             self.app.stdout.write(u'[{0}]\n'.format(section))
             for key, value in entries.items():
