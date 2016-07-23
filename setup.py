@@ -14,8 +14,8 @@ setup(
     ).read(),
     author='Kenichi Ohtomi',
     author_email='ohtomi.kenichi@gmail.com',
-    url='https://github.com/ohtomi/aws-cloudformation-generator/',
-    #download_url='https://github.com/ohtomi/aws-cloudformation-generator/tarball/0.0.1',
+    url='https://github.com/ohtomi/aws-vapor/',
+    download_url='https://github.com/ohtomi/aws-vapor/tarball/v0.0.1',
     keywords='aws cloudformation template generator',
     packages=find_packages(),
     install_requires=[
