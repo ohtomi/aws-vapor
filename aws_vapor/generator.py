@@ -17,6 +17,7 @@ class Generator(Command):
         parser.add_argument('task', nargs='?', help='task name within vaporfile')
         parser.add_argument('--contrib', help='contrib repository url')
         parser.add_argument('--recipe', nargs='+', help='file paths of recipe on contrib repository')
+        parser.add_argument('--output', help='output file name')
         return parser
 
     def take_action(self, args):
@@ -32,8 +33,7 @@ class Generator(Command):
             recipes = args.recipe
             self._apply_recipes(template, contrib, recipes)
 
-        json_document = dumps(template.to_template(), indent=2, separators=(',', ': '))
-        self.app.stdout.write('{0}\n'.format(json_document))
+        self._output_template(template, args.output)
 
     def _load_vaporfile(self, file_path, task_name):
         directory, filename = path.split(file_path)
@@ -66,3 +66,12 @@ class Generator(Command):
 
         if edited_module_search_path:
             del sys.path[0]
+
+    def _output_template(self, template, relative_file_path=None):
+        json_document = dumps(template.to_template(), indent=2, separators=(',', ': '))
+
+        if relative_file_path is None:
+            self.app.stdout.write('{0}\n'.format(json_document))
+        else:
+            with utils.open_outputfile(relative_file_path) as outputfile:
+                outputfile.write('{0}\n'.format(json_document))

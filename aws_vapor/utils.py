@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 
+from contextlib import contextmanager
 from os import (getcwd, mkdir, path)
 from sys import getdefaultencoding
 from email.mime.multipart import MIMEMultipart
@@ -107,3 +108,15 @@ def inject_params(lines, params):
         for token in _replace_params(line, params):
             tokens.append(token)
     return tokens
+
+
+@contextmanager
+def open_outputfile(relative_file_path):
+    file_path = path.join(CURRENT_DIRECTORY, relative_file_path)
+    directory, filename = path.split(file_path)
+
+    if not path.exists(directory):
+        mkdir(directory)
+
+    with open(file_path, 'wb') as outputfile:
+        yield outputfile
