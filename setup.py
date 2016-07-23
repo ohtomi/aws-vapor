@@ -5,7 +5,7 @@ import codecs
 
 setup(
     name='aws-vapor',
-    version='0.0.1',
+    version='0.0.2',
     description='Generates AWS CloudFormation template from python object',
     long_description=codecs.open(
         path.join(path.abspath(path.dirname(__file__)), 'README.rst'),
@@ -15,7 +15,7 @@ setup(
     author='Kenichi Ohtomi',
     author_email='ohtomi.kenichi@gmail.com',
     url='https://github.com/ohtomi/aws-vapor/',
-    download_url='https://github.com/ohtomi/aws-vapor/tarball/v0.0.1',
+    download_url='https://github.com/ohtomi/aws-vapor/tarball/v0.0.2',
     keywords='aws cloudformation template generator',
     packages=find_packages(),
     install_requires=[

@@ -10,7 +10,7 @@ class CliApp(App):
     def __init__(self):
         super(CliApp, self).__init__(
             description='AWS CloudFormation Template Generator',
-            version='0.0.1',
+            version='0.0.2',
             command_manager=CommandManager('aws_vapor.command'),
         )
 
