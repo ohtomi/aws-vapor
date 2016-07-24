@@ -1,5 +1,5 @@
 ****************************************
-aws-cloudformation-generator
+aws-vapor
 ****************************************
 
 Description
@@ -53,6 +53,11 @@ generates AWS CloudFormation template
    [defaults]
    contrib = /path/to/template-dir
    $ aws-vapor generate 'template-file' --output '/path/to/json-file'
+
+Examples
+========================================
+
+See https://github.com/ohtomi/aws-vapor/tree/master/examples/
 
 Contributing
 ========================================
