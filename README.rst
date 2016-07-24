@@ -17,7 +17,7 @@ How to install
 
 .. code-block:: bash
 
-   $ pip install git+https://github.com/ohtomi/aws-vapor
+   $ pip install aws-vapor
 
 How to use
 ========================================
