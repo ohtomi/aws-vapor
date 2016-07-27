@@ -15,7 +15,7 @@ class Template(object):
         self.description = description
 
     def get_section(self, section_name):
-        if not self.elements.has_key(section_name):
+        if section_name not in self.elements:
             self.elements[section_name] = []
         return self.elements[section_name]
 
@@ -103,7 +103,7 @@ class Mapping(Element):
 
     def add_category(self, category):
         self._category = category
-        if not self.attrs.has_key(category):
+        if category not in self.attrs:
             self.attributes(category, OrderedDict())
             return self
 
@@ -114,10 +114,10 @@ class Mapping(Element):
 
     def find_in_map(self, top_level_key, second_level_key):
         if isinstance(top_level_key, str):
-            if not self.attrs.has_key(top_level_key):
+            if top_level_key not in self.attr:
                 raise ValueError('missing top_level_key. top_level_key: %r' % top_level_key)
             if isinstance(second_level_key, str):
-                if not self.attrs[top_level_key].has_key(second_level_key):
+                if second_level_key not in self.attrs[top_level_key]:
                     raise ValueError('missing second_level_key. second_level_key: %r' % second_level_key)
 
         return Intrinsics.find_in_map(self, top_level_key, second_level_key)
@@ -151,7 +151,7 @@ class Resource(Element):
         return self.attributes('DependsOn', resource.name)
 
     def properties(self, props):
-        m = self.attrs['Properties'] if self.attrs.has_key('Properties') else OrderedDict()
+        m = self.attrs['Properties'] if 'Properties' in self.attrs else OrderedDict()
         for p in props:
             for k, v in p.items():
                 m[k] = v
@@ -314,7 +314,7 @@ class CfnInitMetadata(object):
         def _create_and_get_map(self, keys):
             m = self.value
             for key in keys:
-                if not m.has_key(key):
+                if key not in m:
                     m[key] = OrderedDict()
                 m = m[key]
             return m
