@@ -33,7 +33,7 @@ class Template(object):
             section.append(element)
         elif merge:
             existing = section[index]
-            for k, v in element.attrs.items():
+            for k, v in list(element.attrs.items()):
                 existing.attrs[k] = v
         else:
             section[index] = element
@@ -59,7 +59,7 @@ class Template(object):
         template = OrderedDict()
         template['AWSTemplateFormatVersion'] = self.version
         template['Description'] = self.description
-        for section_name, entries in self.elements.items():
+        for section_name, entries in list(self.elements.items()):
             section = template[section_name] = OrderedDict()
             for element in entries:
                 element.to_template(section)
@@ -153,7 +153,7 @@ class Resource(Element):
     def properties(self, props):
         m = self.attrs['Properties'] if 'Properties' in self.attrs else OrderedDict()
         for p in props:
-            for k, v in p.items():
+            for k, v in list(p.items()):
                 m[k] = v
         return self.attributes('Properties', m)
 
