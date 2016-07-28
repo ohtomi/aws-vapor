@@ -36,7 +36,7 @@ class Configure(Command):
     def set_configuration(self, args):
         props = utils.load_from_config_file()
 
-        if not props.has_key(args.section):
+        if args.section not in props:
             props[args.section] = {}
         section = props[args.section]
         section[args.key] = args.value

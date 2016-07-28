@@ -38,7 +38,7 @@ def load_from_config_files():
 
     # overwrite properties from a config file under the current directory
     for name, section in load_from_config_file(CURRENT_DIRECTORY).items():
-        if not props.has_key(name):
+        if name not in props:
             props[name] = {}
         for k, v in section.items():
             props[name][k] = v
@@ -48,11 +48,11 @@ def load_from_config_files():
 
 def get_property_from_config_files(section, key, default_value=None):
     props = load_from_config_files()
-    if not props.has_key(section):
+    if section not in props:
         return default_value
 
     section = props[section]
-    if not section.has_key(key):
+    if key not in section:
         return default_value
 
     value = section[key]
