@@ -37,10 +37,10 @@ def load_from_config_files():
     props = load_from_config_file(CONFIG_DIRECTORY)
 
     # overwrite properties from a config file under the current directory
-    for name, section in load_from_config_file(CURRENT_DIRECTORY).items():
+    for name, section in list(load_from_config_file(CURRENT_DIRECTORY).items()):
         if name not in props:
             props[name] = {}
-        for k, v in section.items():
+        for k, v in list(section.items()):
             props[name][k] = v
 
     return props
@@ -65,9 +65,9 @@ def get_property_from_config_files(section, key, default_value=None):
 def save_to_config_file(props):
     config = ConfigParser.RawConfigParser()
 
-    for section, entries in props.items():
+    for section, entries in list(props.items()):
         config.add_section(section)
-        for key, value in entries.items():
+        for key, value in list(entries.items()):
             config.set(section, key, value)
 
     if not path.exists(CONFIG_DIRECTORY):
@@ -91,7 +91,7 @@ def combine_user_data(files):
 
 
 def _replace_params(line, params):
-    for k, v in params.items():
+    for k, v in list(params.items()):
         key = '{{ %s }}' % k
         if line.find(key) != -1:
             pos = line.index(key)
