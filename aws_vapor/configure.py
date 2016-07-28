@@ -29,9 +29,9 @@ class Configure(Command):
     def list_configuration(self, args):
         props = utils.load_from_config_files()
         for section, entries in list(props.items()):
-            self.app.stdout.write(u'[{0}]\n'.format(section))
+            self.app.stdout.write('[{0}]\n'.format(section))
             for key, value in list(entries.items()):
-                self.app.stdout.write(u'{0} = {1}\n'.format(key, value))
+                self.app.stdout.write('{0} = {1}\n'.format(key, value))
 
     def set_configuration(self, args):
         props = utils.load_from_config_file()
