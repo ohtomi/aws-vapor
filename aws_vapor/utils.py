@@ -6,7 +6,7 @@ from sys import getdefaultencoding
 from email.mime.multipart import MIMEMultipart
 from email.mime.text import MIMEText
 
-import ConfigParser
+from six.moves import configparser
 
 
 CURRENT_DIRECTORY = getcwd()
@@ -20,7 +20,7 @@ def load_from_config_file(config_directory=CONFIG_DIRECTORY):
     if not path.exists(path.join(config_directory, CONFIG_FILE_NAME)):
         return props
 
-    config = ConfigParser.RawConfigParser()
+    config = configparser.RawConfigParser()
     config.read(path.join(config_directory, CONFIG_FILE_NAME))
 
     for section in config.sections():
