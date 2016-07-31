@@ -25,31 +25,20 @@ def generate():
 
     c = t.conditions(Condition('CreateProdResources').expression(Intrinsics.fn_equals(Intrinsics.ref('EnvType'), 'prod')))
 
-    r = t.resources(Resource('EC2Instance').type('AWS::EC2::Instance').properties([
+    r_ec2instance = t.resources(Resource('EC2Instance').type('AWS::EC2::Instance').properties([
         Attributes.of('ImageId', m.find_in_map(Pseudos.region(), 'AMI'))
     ]))
 
-    new_volume = {
-        'Type': 'AWS:EC2::Volume',
-        'Condition': c.name,
-        'Properties': {
-            'Size': '100',
-            'AvailabilityZone': Intrinsics.get_att(r.name, 'AvailabilityZone')
-        }
-    }
+    r_new_volume = t.resources(Resource('NewVolume').type('AWS:EC2::Volume').properties([
+        Attributes.of('Size', '100'),
+        Attributes.of('AvailabilityZone', Intrinsics.get_att(r_ec2instance.name, 'AvailabilityZone'))
+    ])).attributes('Condition', c.name)
 
-    mount_point = {
-        'Type': 'AWS::EC2::VolumeAttachment',
-        'Condition': c.name,
-        'Properties': {
-            'InstanceId': Intrinsics.ref(r),
-            'VolumeId': Intrinsics.ref('NewVolume'),
-            'Device': '/dev/sdh'
-        }
-    }
-
-    r.attributes('MountPoint', mount_point)
-    r.attributes('NewVolume', new_volume)
+    r_mount_point = t.resources(Resource('MountPoint').type('AWS::EC2::VolumeAttachment').properties([
+        Attributes.of('InstanceId', Intrinsics.ref(r_ec2instance)),
+        Attributes.of('VolumeId', Intrinsics.ref('NewVolume')),
+        Attributes.of('Device', '/dev/sdh')
+    ])).attributes('Condition', c.name)
 
     o = t.outputs(Output('VolumeId').value(Intrinsics.ref('NewVolume')).attributes('Condition', c.name))
 
