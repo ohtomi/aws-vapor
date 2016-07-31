@@ -63,7 +63,7 @@ def get_property_from_config_files(section, key, default_value=None):
 
 
 def save_to_config_file(props):
-    config = configParser.RawConfigParser()
+    config = configparser.RawConfigParser()
 
     for section, entries in list(props.items()):
         config.add_section(section)
