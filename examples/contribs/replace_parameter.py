@@ -8,7 +8,6 @@ from aws_vapor.dsl import (
 
 
 def recipe(t):
-    t.parameters(Parameter('NewParameter')
-        .description('Added new parameter by this recipe')
-        .type('String')
-    )
+    t.parameters(Parameter('EnvType')
+        .default('prod')
+    , merge=True)
