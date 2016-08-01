@@ -1,17 +1,18 @@
 # -*- coding: utf-8 -*-
 
 from contextlib import contextmanager
-from os import (getcwd, mkdir, path)
-from sys import getdefaultencoding
 from email.mime.multipart import MIMEMultipart
 from email.mime.text import MIMEText
-
+from os import (getcwd, mkdir, path)
+from six import PY3
 from six.moves import configparser
 
 
 CURRENT_DIRECTORY = getcwd()
 CONFIG_DIRECTORY = path.expanduser('~/.aws-vapor')
 CONFIG_FILE_NAME = 'config'
+
+FILE_WRITE_MODE = 'wt' if PY3 else 'wb'
 
 
 def load_from_config_file(config_directory=CONFIG_DIRECTORY):
@@ -73,7 +74,7 @@ def save_to_config_file(props):
     if not path.exists(CONFIG_DIRECTORY):
         mkdir(CONFIG_DIRECTORY)
 
-    with open(path.join(CONFIG_DIRECTORY, CONFIG_FILE_NAME), 'wb') as configfile:
+    with open(path.join(CONFIG_DIRECTORY, CONFIG_FILE_NAME), mode=FILE_WRITE_MODE) as configfile:
         config.write(configfile)
 
 
@@ -83,7 +84,7 @@ def combine_user_data(files):
     for filename, format_type in files:
         with open(filename) as fh:
             contents = fh.read()
-        sub_message = MIMEText(contents, format_type, getdefaultencoding())
+        sub_message = MIMEText(contents, format_type, 'ascii')
         sub_message.add_header('Content-Disposition', 'attachment; filename="%s"' % (filename))
         combined_message.attach(sub_message)
 
@@ -118,5 +119,5 @@ def open_outputfile(relative_file_path):
     if not path.exists(directory):
         mkdir(directory)
 
-    with open(file_path, 'wb') as outputfile:
+    with open(file_path, mode=FILE_WRITE_MODE) as outputfile:
         yield outputfile
