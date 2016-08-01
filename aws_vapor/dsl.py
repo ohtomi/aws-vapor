@@ -21,7 +21,7 @@ class Template(object):
 
     def index_of_section(self, section, element_name):
         if len([item for item in section if item.name == element_name]) >= 1:
-            return map(lambda item: item.name, section).index(element_name)
+            return [item.name for item in section].index(element_name)
         else:
             return -1
 
