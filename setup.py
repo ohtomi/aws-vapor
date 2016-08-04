@@ -5,6 +5,8 @@ from os import path
 from setuptools import find_packages
 from setuptools import setup
 
+VERSION = '0.0.6'
+
 
 def load_long_description():
     return codecs.open(
@@ -25,19 +27,32 @@ def load_install_requires():
     ]
 
 
+def load_test_require():
+    return [
+        name.rstrip()
+        for name in codecs.open(
+            path.join(path.abspath(path.dirname(__file__)), 'test-requirements.txt'),
+            mode='r',
+            encoding='utf-8'
+        ).readlines()
+    ]
+
+
 def main():
     setup(
         name='aws-vapor',
-        version='0.0.6',
+        version=VERSION,
         description='Generates AWS CloudFormation template from python object',
         long_description=load_long_description(),
         author='Kenichi Ohtomi',
         author_email='ohtomi.kenichi@gmail.com',
         url='https://github.com/ohtomi/aws-vapor/',
-        download_url='https://github.com/ohtomi/aws-vapor/tarball/v0.0.6',
+        download_url='https://github.com/ohtomi/aws-vapor/tarball/v{0}'.format(VERSION),
         keywords='aws cloudformation template generator',
         packages=find_packages(),
         install_requires=load_install_requires(),
+        test_require=load_test_require(),
+        test_suite='nose.collector',
         entry_points={
             'console_scripts':
                 'aws-vapor = aws_vapor.main:main',
