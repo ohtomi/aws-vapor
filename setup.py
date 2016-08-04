@@ -1,46 +1,66 @@
-from os import path
-from setuptools import setup, find_packages
+# -*- coding: utf-8 -*-
+
 import codecs
+from os import path
+from setuptools import find_packages
+from setuptools import setup
 
 
-setup(
-    name='aws-vapor',
-    version='0.0.6',
-    description='Generates AWS CloudFormation template from python object',
-    long_description=codecs.open(
+def load_long_description():
+    return codecs.open(
         path.join(path.abspath(path.dirname(__file__)), 'README.rst'),
         mode='r',
         encoding='utf-8'
-    ).read(),
-    author='Kenichi Ohtomi',
-    author_email='ohtomi.kenichi@gmail.com',
-    url='https://github.com/ohtomi/aws-vapor/',
-    download_url='https://github.com/ohtomi/aws-vapor/tarball/v0.0.6',
-    keywords='aws cloudformation template generator',
-    packages=find_packages(),
-    install_requires=[
-        'cliff',
-        'six',
-    ],
-    entry_points={
-        'console_scripts':
-            'aws-vapor = aws_vapor.main:main',
-        'aws_vapor.command': [
-            'config = aws_vapor.configure:Configure',
-            'generate = aws_vapor.generator:Generator',
-        ]
-    },
-    zip_safe=False,
-    classifiers=[
-        'Development Status :: 4 - Beta',
-        'Environment :: Console',
-        'Intended Audience :: Developers',
-        'License :: OSI Approved :: MIT License',
-        'Operating System :: MacOS :: MacOS X',
-        'Operating System :: Microsoft :: Windows',
-        'Operating System :: POSIX',
-        'Programming Language :: Python',
-        'Programming Language :: Python :: 2.7',
-        #'Programming Language :: Python :: 3.4',
-    ],
-)
+    ).read()
+
+
+def load_install_requires():
+    return [
+        name.rstrip()
+        for name in codecs.open(
+            path.join(path.abspath(path.dirname(__file__)), 'requirements.txt'),
+            mode='r',
+            encoding='utf-8'
+        ).readlines()
+    ]
+
+
+def main():
+    setup(
+        name='aws-vapor',
+        version='0.0.6',
+        description='Generates AWS CloudFormation template from python object',
+        long_description=load_long_description(),
+        author='Kenichi Ohtomi',
+        author_email='ohtomi.kenichi@gmail.com',
+        url='https://github.com/ohtomi/aws-vapor/',
+        download_url='https://github.com/ohtomi/aws-vapor/tarball/v0.0.6',
+        keywords='aws cloudformation template generator',
+        packages=find_packages(),
+        install_requires=load_install_requires(),
+        entry_points={
+            'console_scripts':
+                'aws-vapor = aws_vapor.main:main',
+            'aws_vapor.command': [
+                'config = aws_vapor.configure:Configure',
+                'generate = aws_vapor.generator:Generator',
+            ]
+        },
+        zip_safe=False,
+        classifiers=[
+            'Development Status :: 4 - Beta',
+            'Environment :: Console',
+            'Intended Audience :: Developers',
+            'License :: OSI Approved :: MIT License',
+            'Operating System :: MacOS :: MacOS X',
+            'Operating System :: Microsoft :: Windows',
+            'Operating System :: POSIX',
+            'Programming Language :: Python',
+            'Programming Language :: Python :: 2.7',
+            #'Programming Language :: Python :: 3.4',
+        ],
+    )
+
+
+if __name__ == '__main__':
+    main()
