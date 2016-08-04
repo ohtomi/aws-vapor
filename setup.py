@@ -31,7 +31,7 @@ def load_test_require():
     return [
         name.rstrip()
         for name in codecs.open(
-            path.join(path.abspath(path.dirname(__file__)), 'test-requirements.txt'),
+            path.join(path.abspath(path.dirname(__file__)), 'requirements-test.txt'),
             mode='r',
             encoding='utf-8'
         ).readlines()
