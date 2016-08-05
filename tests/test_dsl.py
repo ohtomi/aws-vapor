@@ -55,14 +55,12 @@ def test_intrinsics_fn_and__two_conditions():
     )
 
 
-@nottest # TODO
 @raises(ValueError)
 def test_intrinsics_fn_and__only_one_condition():
     condition = Condition('cond_name').expression(Intrinsics.fn_equals('value_1', 'value_2'))
     Intrinsics.fn_and([condition])
 
 
-@nottest # TODO
 @raises(ValueError)
 def test_intrinsics_fn_and__more_than_ten_conditions():
     conditions = [Condition('cond_name').expression(Intrinsics.fn_equals('value_1', 'value_2')) for _ in range(11)]
@@ -104,14 +102,12 @@ def test_intrinsics_fn_or__two_conditions():
     )
 
 
-@nottest # TODO
 @raises(ValueError)
 def test_intrinsics_fn_or__only_one_condition():
     condition = Condition('cond_name').expression(Intrinsics.fn_equals('value_1', 'value_2'))
     Intrinsics.fn_or([condition])
 
 
-@nottest # TODO
 @raises(ValueError)
 def test_intrinsics_fn_or__more_than_ten_conditions():
     conditions = [Condition('cond_name').expression(Intrinsics.fn_equals('value_1', 'value_2')) for _ in range(11)]

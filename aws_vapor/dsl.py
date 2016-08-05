@@ -201,8 +201,11 @@ class Intrinsics(object):
             raise ValueError('value should be map name or mapping. but %r' % type(map_name_or_mapping))
 
     @classmethod
-    def fn_and(cls, condions):
-        return {'Fn::And': condions}
+    def fn_and(cls, conditions=list()):
+        if 2 <= len(conditions) <= 10:
+            return {'Fn::And': conditions}
+        else:
+            raise ValueError('the minimum number of conditions is 2, and the maximum is 10. but %r' % len(conditions))
 
     @classmethod
     def fn_equals(cls, value_1, value_2):
@@ -217,8 +220,11 @@ class Intrinsics(object):
         return {'Fn::Not': conditions}
 
     @classmethod
-    def fn_or(cls, conditions):
-        return {'Fn::Or': conditions}
+    def fn_or(cls, conditions=list()):
+        if 2 <= len(conditions) <= 10:
+            return {'Fn::Or': conditions}
+        else:
+            raise ValueError('the minimum number of conditions is 2, and the maximum is 10. but %r' % len(conditions))
 
     @classmethod
     def get_att(cls, logical_name_of_resource, attribute_name):
