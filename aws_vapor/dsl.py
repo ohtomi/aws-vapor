@@ -216,8 +216,8 @@ class Intrinsics(object):
         return {'Fn::If': [condition_name, value_if_true, value_if_false]}
 
     @classmethod
-    def fn_not(cls, conditions):
-        return {'Fn::Not': conditions}
+    def fn_not(cls, condition):
+        return {'Fn::Not': [condition.expression]}
 
     @classmethod
     def fn_or(cls, conditions=list()):

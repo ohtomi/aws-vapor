@@ -80,7 +80,6 @@ def test_intrinsics_fn_if():
     )
 
 
-@nottest # TODO
 def test_intrinsics_fn_not():
     condition = Condition('cond_name').expression(Intrinsics.fn_equals('value_1', 'value_2'))
     assert_equal(
