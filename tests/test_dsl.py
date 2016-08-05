@@ -43,7 +43,6 @@ def test_intrinsics_find_in_map__others():
     Intrinsics.find_in_map({}, 'top_key', 'second_key')
 
 
-@nottest # TODO
 def test_intrinsics_fn_and__two_conditions():
     conditions = [Condition('cond_name').expression(Intrinsics.fn_equals('value_1', 'value_2')) for _ in range(2)]
     assert_equal(
@@ -90,7 +89,6 @@ def test_intrinsics_fn_not():
     )
 
 
-@nottest # TODO
 def test_intrinsics_fn_or__two_conditions():
     conditions = [Condition('cond_name').expression(Intrinsics.fn_equals('value_1', 'value_2')) for _ in range(2)]
     assert_equal(

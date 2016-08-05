@@ -203,7 +203,7 @@ class Intrinsics(object):
     @classmethod
     def fn_and(cls, conditions=list()):
         if 2 <= len(conditions) <= 10:
-            return {'Fn::And': conditions}
+            return {'Fn::And': [condition.expression for condition in conditions]}
         else:
             raise ValueError('the minimum number of conditions is 2, and the maximum is 10. but %r' % len(conditions))
 
@@ -222,7 +222,7 @@ class Intrinsics(object):
     @classmethod
     def fn_or(cls, conditions=list()):
         if 2 <= len(conditions) <= 10:
-            return {'Fn::Or': conditions}
+            return {'Fn::Or': [condition.expression for condition in conditions]}
         else:
             raise ValueError('the minimum number of conditions is 2, and the maximum is 10. but %r' % len(conditions))
 
