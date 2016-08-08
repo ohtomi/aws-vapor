@@ -5,6 +5,8 @@ from nose.tools import assert_equal
 from nose.tools import nottest
 from nose.tools import raises
 
+import os
+
 from aws_vapor.dsl import Template
 from aws_vapor.dsl import Element
 from aws_vapor.dsl import Parameter
@@ -17,6 +19,29 @@ from aws_vapor.dsl import Intrinsics
 from aws_vapor.dsl import Pseudos
 from aws_vapor.dsl import UserData
 from aws_vapor.dsl import CfnInitMetadata
+from aws_vapor.utils import FILE_WRITE_MODE
+
+
+TOX_TMP_DIR = '.tox/tmp'
+X_SHELL_SCRIPT_FILE_NAME = os.path.join(TOX_TMP_DIR, 'x-shellscript.txt')
+X_SHELL_SCRIPT_PARAMS = {
+    'param_1': 'value_1',
+    'param_2': 'value_2'
+}
+
+
+def setup():
+    if not os.path.exists(TOX_TMP_DIR):
+        os.mkdir(TOX_TMP_DIR)
+
+    with open(X_SHELL_SCRIPT_FILE_NAME, mode=FILE_WRITE_MODE) as fh:
+        fh.write('ABCDE {{ param_1 }}\n')
+        fh.write('abcde {{ param_2 }}\n')
+
+
+def teardown():
+    if os.path.exists(X_SHELL_SCRIPT_FILE_NAME):
+        os.remove(X_SHELL_SCRIPT_FILE_NAME)
 
 
 def test_intrinsics_base64():
@@ -188,6 +213,18 @@ def test_pseudos_stack_id():
 
 def test_pseudos_stack_name():
     assert_equal(Pseudos.stack_name(), {'Ref': 'AWS::StackName'})
+
+
+def test_user_data_of():
+    assert_equal(
+        UserData.of(['value_1', 'value_2', 'value_3']),
+        {'UserData': {'Fn::Base64': {'Fn::Join': ['', ['value_1', 'value_2', 'value_3']]}}}
+    )
+
+
+@nottest
+def test_user_data_from_files():
+    pass # TODO
 
 
 if __name__ == '__main__':
