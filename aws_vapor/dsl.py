@@ -114,7 +114,7 @@ class Mapping(Element):
 
     def find_in_map(self, top_level_key, second_level_key):
         if isinstance(top_level_key, str):
-            if top_level_key not in self.attr:
+            if top_level_key not in self.attrs:
                 raise ValueError('missing top_level_key. top_level_key: %r' % top_level_key)
             if isinstance(second_level_key, str):
                 if second_level_key not in self.attrs[top_level_key]:

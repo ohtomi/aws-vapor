@@ -88,7 +88,6 @@ def test_mapping__two_categories():
     )
 
 
-@nottest
 def test_mapping__find_in_map__ok():
     mapping = Mapping('abcde')
     mapping.add_category('category_1').add_item('key_1', 'value_1').add_item('key_2', 'value_2')
@@ -98,7 +97,6 @@ def test_mapping__find_in_map__ok():
     )
 
 
-@nottest
 @raises(ValueError)
 def test_mapping__find_in_map__missing_top_level_key():
     mapping = Mapping('abcde')
@@ -106,7 +104,6 @@ def test_mapping__find_in_map__missing_top_level_key():
     mapping.find_in_map('category_X', 'key_1'),
 
 
-@nottest
 @raises(ValueError)
 def test_mapping__find_in_map__missing_second_level_key():
     mapping = Mapping('abcde')
