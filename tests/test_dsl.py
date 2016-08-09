@@ -44,6 +44,215 @@ def teardown():
         os.remove(X_SHELL_SCRIPT_FILE_NAME)
 
 
+def test_element():
+    template = {}
+    Element('abcde').attributes('key_1', 'value_1').attributes('key_2', 'value_2').to_template(template)
+    assert_equal(
+        template,
+        {'abcde': {'key_1': 'value_1', 'key_2': 'value_2'}}
+    )
+
+
+def test_parameter():
+    template = {}
+    Parameter('abcde').description('description').type('type').default('default').to_template(template)
+    assert_equal(
+        template,
+        {'abcde': {'Description': 'description', 'Type': 'type', 'Default': 'default'}}
+    )
+
+
+def test_mapping__one_category():
+    template = {}
+    Mapping('abcde').add_category('category_1').add_item('key_1', 'value_1').add_item('key_2', 'value_2').to_template(template)
+    assert_equal(
+        template,
+        {'abcde': {
+            'category_1': {'key_1': 'value_1', 'key_2': 'value_2'}
+        }}
+    )
+
+
+def test_mapping__two_categories():
+    template = {}
+    mapping = Mapping('abcde')
+    mapping.add_category('category_1').add_item('key_1', 'value_1').add_item('key_2', 'value_2')
+    mapping.add_category('category_2').add_item('key_3', 'value_3').add_item('key_4', 'value_4')
+    mapping.to_template(template)
+    assert_equal(
+        template,
+        {'abcde': {
+            'category_1': {'key_1': 'value_1', 'key_2': 'value_2'},
+            'category_2': {'key_3': 'value_3', 'key_4': 'value_4'}
+        }}
+    )
+
+
+@nottest
+def test_mapping__find_in_map__ok():
+    mapping = Mapping('abcde')
+    mapping.add_category('category_1').add_item('key_1', 'value_1').add_item('key_2', 'value_2')
+    assert_equal(
+        mapping.find_in_map('category_1', 'key_1'),
+        {'Fn::FindInMap': ['abcde', 'category_1', 'key_1']}
+    )
+
+
+@nottest
+@raises(ValueError)
+def test_mapping__find_in_map__missing_top_level_key():
+    mapping = Mapping('abcde')
+    mapping.add_category('category_1').add_item('key_1', 'value_1').add_item('key_2', 'value_2')
+    mapping.find_in_map('category_X', 'key_1'),
+
+
+@nottest
+@raises(ValueError)
+def test_mapping__find_in_map__missing_second_level_key():
+    mapping = Mapping('abcde')
+    mapping.add_category('category_1').add_item('key_1', 'value_1').add_item('key_2', 'value_2')
+    mapping.find_in_map('category_1', 'key_X'),
+
+
+def test_condition():
+    template = {}
+    condition = Condition('abcde').expression(Intrinsics.fn_equals('value_1', 'value_2')).to_template(template)
+    assert_equal(
+        template,
+        {'abcde': {'Fn::Equals': ['value_1', 'value_2']}}
+    )
+
+
+def test_resource__properties():
+    template = {}
+    resource = Resource('abcde').type('type').properties([
+        {'key_1': 'value_1'},
+        {'key_2': 'value_2'}
+    ]).to_template(template)
+    assert_equal(
+        template,
+        {'abcde': {'Type': 'type', 'Properties': {
+            'key_1': 'value_1',
+            'key_2': 'value_2'
+        }}}
+    )
+
+
+def test_resource__add_property():
+    template = {}
+    resource = Resource('abcde').type('type')
+    resource.add_property({'key_1': 'value_1'})
+    resource.add_property({'key_2': 'value_2'})
+    resource.to_template(template)
+    assert_equal(
+        template,
+        {'abcde': {'Type': 'type', 'Properties': {
+            'key_1': 'value_1',
+            'key_2': 'value_2'
+        }}}
+    )
+
+
+def test_resource__depends_on__resource():
+    template = {}
+    resource = Resource('abcde').type('type').dependsOn(Resource('res_name')).to_template(template)
+    assert_equal(
+        template,
+        {'abcde': {'Type': 'type', 'DependsOn': 'res_name'}}
+    )
+
+
+def test_resource__depends_on__named_object():
+    class named_object(object):
+        def __init__(self):
+            self.name = 'res_name'
+    template = {}
+    resource = Resource('abcde').type('type').dependsOn(named_object()).to_template(template)
+    assert_equal(
+        template,
+        {'abcde': {'Type': 'type', 'DependsOn': 'res_name'}}
+    )
+
+
+@nottest
+@raises(ValueError)
+def test_resource__depends_on__other():
+    resource = Resource('abcde').type('type').dependsOn({})
+
+
+def test_resource__user_data():
+    template = {}
+    resource = Resource('abcde').type('type').properties([
+        UserData.of(['value_1', 'value_2', 'value_3'])
+    ]).to_template(template)
+    assert_equal(
+        template,
+        {'abcde': {'Type': 'type', 'Properties': {
+            'UserData': {'Fn::Base64': {'Fn::Join': ['', ['value_1', 'value_2', 'value_3']]}}
+        }}}
+    )
+
+
+@nottest
+def test_resource__metadata__config():
+    template = {}
+    resource = Resource('abcde').type('type')
+    resource.metadata(CfnInitMetadata.of(CfnInitMetadata.Config('config').commands('key_1', 'value_1')))
+    resource.to_template(template)
+    assert_equal(
+        template,
+        {'abcde': {'Type': 'type', 'Metadata': {
+            'AWS::CloudFormation::Init': {
+                'config': {
+                    'commands': {
+                        'key_1': {
+                            'command': 'value_1'
+                        }
+                    }
+                }
+            }
+        }}}
+    )
+
+
+def test_resource__metadata__configsets():
+    template = {}
+    resource = Resource('abcde').type('type')
+    resource.metadata(CfnInitMetadata.of([
+        CfnInitMetadata.ConfigSet('default', [
+            CfnInitMetadata.Config('config')
+                .commands('key_1', 'value_1')
+        ])
+    ]))
+    resource.to_template(template)
+    assert_equal(
+        template,
+        {'abcde': {'Type': 'type', 'Metadata': {
+            'AWS::CloudFormation::Init': {
+                'configSets': {
+                    'default': ['config']
+                },
+                'config': {
+                    'commands': {
+                        'key_1': {
+                            'command': 'value_1'
+                        }
+                    }
+                }
+            }
+        }}}
+    )
+
+
+def test_output():
+    template = {}
+    output = Output('abcde').description('description').value(Intrinsics.get_att('res_name', 'attr_name')).to_template(template)
+    assert_equal(
+        template,
+        {'abcde': {'Description': 'description', 'Value': {'Fn::GetAtt': ['res_name', 'attr_name']}}}
+    )
+
+
 def test_intrinsics_base64():
     assert_equal(Intrinsics.base64('abcde'), {'Fn::Base64': 'abcde'})
 
