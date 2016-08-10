@@ -148,6 +148,8 @@ class Resource(Element):
         return self.attributes('Metadata', metadata)
 
     def dependsOn(self, resource):
+        if not hasattr(resource, 'name'):
+            raise ValueError('missing name of resource. resource: %r' % resource)
         return self.attributes('DependsOn', resource.name)
 
     def properties(self, props):

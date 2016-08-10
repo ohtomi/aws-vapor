@@ -171,10 +171,9 @@ def test_resource__depends_on__named_object():
     )
 
 
-@nottest
 @raises(ValueError)
 def test_resource__depends_on__other():
-    resource = Resource('abcde').type('type').dependsOn({})
+    Resource('abcde').type('type').dependsOn({})
 
 
 def test_resource__user_data():
