@@ -189,7 +189,6 @@ def test_resource__user_data():
     )
 
 
-@nottest
 def test_resource__metadata__config():
     template = {}
     resource = Resource('abcde').type('type')
@@ -211,7 +210,7 @@ def test_resource__metadata__config():
     )
 
 
-def test_resource__metadata__configsets():
+def test_resource__metadata__config_sets():
     template = {}
     resource = Resource('abcde').type('type')
     resource.metadata(CfnInitMetadata.of([

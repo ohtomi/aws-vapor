@@ -298,13 +298,18 @@ class UserData(object):
 class CfnInitMetadata(object):
 
     @classmethod
-    def of(cls, config_sets):
+    def of(cls, config_or_config_sets):
         m = OrderedDict()
-        cs = m['configSets'] = OrderedDict()
-        for config_set in config_sets:
-            cs[config_set.name] = [config.name for config in config_set.configs]
-            for config in config_set.configs:
-                m[config.name] = config.value
+        if isinstance(config_or_config_sets, CfnInitMetadata.Config):
+            config = config_or_config_sets
+            m[config.name] = config.value
+        else:
+            config_sets = config_or_config_sets
+            cs = m['configSets'] = OrderedDict()
+            for config_set in config_sets:
+                cs[config_set.name] = [config.name for config in config_set.configs]
+                for config in config_set.configs:
+                    m[config.name] = config.value
         return {'AWS::CloudFormation::Init': m}
 
     class ConfigSet(object):
