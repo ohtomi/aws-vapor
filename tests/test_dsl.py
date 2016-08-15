@@ -426,10 +426,5 @@ def test_user_data_of():
     )
 
 
-@nottest
-def test_user_data_from_files():
-    pass # TODO
-
-
 if __name__ == '__main__':
     nose.main(argv=['nosetests', '-s', '-v'], defaultTest=__file__)
