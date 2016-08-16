@@ -426,5 +426,19 @@ def test_user_data_of():
     )
 
 
+def test_cfn_init_metadata_of__config():
+    assert_equal(
+        CfnInitMetadata.of(CfnInitMetadata.Config('config').commands('key_1', 'value_1')),
+        {'AWS::CloudFormation::Init': {'config': {'commands': {'key_1': {'command': 'value_1'}}}}}
+    )
+
+
+def test_cfn_init_metadata_of__config_sets():
+    assert_equal(
+        CfnInitMetadata.of([CfnInitMetadata.ConfigSet('default', [CfnInitMetadata.Config('config').commands('key_1', 'value_1')])]),
+        {'AWS::CloudFormation::Init': {'configSets': {'default': ['config']}, 'config': {'commands': {'key_1': {'command': 'value_1'}}}}}
+    )
+
+
 if __name__ == '__main__':
     nose.main(argv=['nosetests', '-s', '-v'], defaultTest=__file__)
