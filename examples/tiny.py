@@ -1,10 +1,17 @@
 # -*- coding: utf-8 -*-
 
-from aws_vapor.dsl import (
-    Template, Parameter, Mapping, Condition, Resource, Output,
-    Attributes, Intrinsics, Pseudos,
-    UserData, CfnInitMetadata
-)
+from aws_vapor.dsl import Template
+from aws_vapor.dsl import Parameter
+from aws_vapor.dsl import Mapping
+from aws_vapor.dsl import Condition
+from aws_vapor.dsl import Resource
+from aws_vapor.dsl import Output
+from aws_vapor.dsl import Attributes
+from aws_vapor.dsl import Intrinsics
+from aws_vapor.dsl import Pseudos
+from aws_vapor.dsl import UserData
+from aws_vapor.dsl import CfnInitMetadata
+
 
 def generate():
     t = Template(description='see. https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/conditions-section-structure.html')
