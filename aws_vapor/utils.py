@@ -3,7 +3,9 @@
 from contextlib import contextmanager
 from email.mime.multipart import MIMEMultipart
 from email.mime.text import MIMEText
-from os import (getcwd, mkdir, path)
+from os import getcwd
+from os import mkdir
+from os import path
 from six import PY3
 from six.moves import configparser
 

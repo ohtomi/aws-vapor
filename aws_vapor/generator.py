@@ -2,7 +2,8 @@
 
 from cliff.command import Command
 from json import dumps
-from os import (chdir, path)
+from os import chdir
+from os import path
 
 import aws_vapor.utils as utils
 import sys
