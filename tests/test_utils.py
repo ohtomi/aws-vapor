@@ -8,7 +8,6 @@ from nose.tools import raises
 import os
 
 from aws_vapor.utils import load_from_config_file
-from aws_vapor.utils import load_from_config_files
 from aws_vapor.utils import get_property_from_config_files
 from aws_vapor.utils import save_to_config_file
 from aws_vapor.utils import combine_user_data
@@ -41,7 +40,7 @@ def teardown():
 
 def test_load_from_config_file():
     assert_equal(
-        load_from_config_file(TOX_TMP_DIR),
+        load_from_config_file([TOX_TMP_DIR]),
         {
             'section_1': {
                 'key_1': 'value_1', 'key_2': 'value_2'

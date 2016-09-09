@@ -17,34 +17,17 @@ CONFIG_FILE_NAME = 'config'
 FILE_WRITE_MODE = 'wt' if PY3 else 'wb'
 
 
-def load_from_config_file(config_directory=CONFIG_DIRECTORY):
+def load_from_config_file(config_directories=[CONFIG_DIRECTORY, CURRENT_DIRECTORY]):
     props = {}
 
-    if not path.exists(path.join(config_directory, CONFIG_FILE_NAME)):
-        return props
-
     config = configparser.RawConfigParser()
-    config.read(path.join(config_directory, CONFIG_FILE_NAME))
+    config.read([path.join(config_directory, CONFIG_FILE_NAME) for config_directory in config_directories])
 
     for section in config.sections():
         for key, value in config.items(section):
             if not section in props:
                 props[section] = {}
             props[section][key] = value
-
-    return props
-
-
-def load_from_config_files():
-    # load from a config file under the user home directory
-    props = load_from_config_file(CONFIG_DIRECTORY)
-
-    # overwrite properties from a config file under the current directory
-    for name, section in list(load_from_config_file(CURRENT_DIRECTORY).items()):
-        if name not in props:
-            props[name] = {}
-        for k, v in list(section.items()):
-            props[name][k] = v
 
     return props
 
