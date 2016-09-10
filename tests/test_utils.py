@@ -19,6 +19,7 @@ from aws_vapor.utils import FILE_WRITE_MODE
 
 TOX_TMP1_DIR = '.tox/tmp1'
 TOX_TMP2_DIR = '.tox/tmp2'
+INVALID_DIR = '.tox/invalid'
 
 
 def setup():
@@ -38,7 +39,6 @@ def setup():
             fh.write('key_5 = value_5\n')
             fh.write('[section_override]\n')
             fh.write('directory = %s\n' % directory)
-
 
     _(TOX_TMP1_DIR)
     _(TOX_TMP2_DIR)
@@ -71,6 +71,56 @@ def test_load_from_config_file__single_file():
                 'directory': TOX_TMP1_DIR
             }
         }
+    )
+
+
+def test_load_from_config_file__multiple_files():
+    assert_equal(
+        load_from_config_file([TOX_TMP1_DIR, TOX_TMP2_DIR]),
+        {
+            'section_1': {
+                'key_1': 'value_1', 'key_2': 'value_2'
+            },
+            'section_2': {
+                'key_3': 'value_3', 'key_4': 'value_4'
+            },
+            'section_tmp1': {
+                'key_5': 'value_5'
+            },
+            'section_tmp2': {
+                'key_5': 'value_5'
+            },
+            'section_override': {
+                'directory': TOX_TMP2_DIR
+            }
+        }
+    )
+
+
+def test_load_from_config_file__invalid_directory():
+    assert_equal(
+        load_from_config_file([TOX_TMP1_DIR, INVALID_DIR]),
+        {
+            'section_1': {
+                'key_1': 'value_1', 'key_2': 'value_2'
+            },
+            'section_2': {
+                'key_3': 'value_3', 'key_4': 'value_4'
+            },
+            'section_tmp1': {
+                'key_5': 'value_5'
+            },
+            'section_override': {
+                'directory': TOX_TMP1_DIR
+            }
+        }
+    )
+
+
+def test_load_from_config_file__not_found_config_files():
+    assert_equal(
+        load_from_config_file([INVALID_DIR]),
+        {}
     )
 
 
