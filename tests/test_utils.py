@@ -34,6 +34,11 @@ def setup():
             fh.write('[section_2]\n')
             fh.write('key_3 = value_3\n')
             fh.write('key_4 = value_4\n')
+            fh.write('[section_%s]\n' % directory[-4:])
+            fh.write('key_5 = value_5\n')
+            fh.write('[section_override]\n')
+            fh.write('directory = %s\n' % directory)
+
 
     _(TOX_TMP1_DIR)
     _(TOX_TMP2_DIR)
@@ -49,7 +54,7 @@ def teardown():
     _(TOX_TMP2_DIR)
 
 
-def test_load_from_config_file():
+def test_load_from_config_file__single_file():
     assert_equal(
         load_from_config_file([TOX_TMP1_DIR]),
         {
@@ -58,6 +63,12 @@ def test_load_from_config_file():
             },
             'section_2': {
                 'key_3': 'value_3', 'key_4': 'value_4'
+            },
+            'section_tmp1': {
+                'key_5': 'value_5'
+            },
+            'section_override': {
+                'directory': TOX_TMP1_DIR
             }
         }
     )
