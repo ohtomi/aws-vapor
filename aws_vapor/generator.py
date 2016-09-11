@@ -30,7 +30,7 @@ class Generator(Command):
         template = task()
 
         if args.recipe is not None:
-            contrib = args.contrib or utils.get_property_from_config_files('defaults', 'contrib')
+            contrib = args.contrib or utils.get_property_from_config_file('defaults', 'contrib')
             recipes = args.recipe
             self._apply_recipes(template, contrib, recipes)
 

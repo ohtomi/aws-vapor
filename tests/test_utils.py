@@ -8,11 +8,12 @@ from nose.tools import raises
 import os
 
 from aws_vapor.utils import load_from_config_file
-from aws_vapor.utils import get_property_from_config_files
+from aws_vapor.utils import get_property_from_config_file
 from aws_vapor.utils import save_to_config_file
 from aws_vapor.utils import combine_user_data
 from aws_vapor.utils import inject_params
 from aws_vapor.utils import open_outputfile
+from aws_vapor.utils import CURRENT_DIRECTORY
 from aws_vapor.utils import CONFIG_FILE_NAME
 from aws_vapor.utils import FILE_WRITE_MODE
 
@@ -40,6 +41,7 @@ def setup():
             fh.write('[section_override]\n')
             fh.write('directory = %s\n' % directory)
 
+    _(CURRENT_DIRECTORY)
     _(TOX_TMP1_DIR)
     _(TOX_TMP2_DIR)
 
@@ -50,6 +52,7 @@ def teardown():
         if os.path.exists(config_file):
             os.remove(config_file)
 
+    _(CURRENT_DIRECTORY)
     _(TOX_TMP1_DIR)
     _(TOX_TMP2_DIR)
 
@@ -121,6 +124,41 @@ def test_load_from_config_file__not_found_config_files():
     assert_equal(
         load_from_config_file([INVALID_DIR]),
         {}
+    )
+
+
+def test_get_property_from_config_file__exists_key():
+    assert_equal(
+        get_property_from_config_file('section_1', 'key_1'),
+        'value_1'
+    )
+
+
+def test_get_property_from_config_file__not_found_section():
+    assert_equal(
+        get_property_from_config_file('section_X', 'key_X'),
+        None
+    )
+
+
+def test_get_property_from_config_file__not_found_section_with_default_value():
+    assert_equal(
+        get_property_from_config_file('section_X', 'key_X', 'value_default'),
+        'value_default'
+    )
+
+
+def test_get_property_from_config_file__not_found_key():
+    assert_equal(
+        get_property_from_config_file('section_1', 'key_X'),
+        None
+    )
+
+
+def test_get_property_from_config_file__not_found_key_with_default_value():
+    assert_equal(
+        get_property_from_config_file('section_1', 'key_X', 'value_default'),
+        'value_default'
     )
 
 

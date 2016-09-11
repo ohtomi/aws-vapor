@@ -32,8 +32,8 @@ def load_from_config_file(config_directories=[CONFIG_DIRECTORY, CURRENT_DIRECTOR
     return props
 
 
-def get_property_from_config_files(section, key, default_value=None):
-    props = load_from_config_files()
+def get_property_from_config_file(section, key, default_value=None):
+    props = load_from_config_file()
     if section not in props:
         return default_value
 
