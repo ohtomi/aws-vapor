@@ -58,6 +58,7 @@ def main():
                 'aws-vapor = aws_vapor.main:main',
             'aws_vapor.command': [
                 'config = aws_vapor.configure:Configure',
+                'get = aws_vapor.downloader:Downloader',
                 'generate = aws_vapor.generator:Generator',
             ]
         },
