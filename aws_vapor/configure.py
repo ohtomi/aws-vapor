@@ -1,8 +1,7 @@
 # -*- coding: utf-8 -*-
 
+from aws_vapor import utils
 from cliff.command import Command
-
-import aws_vapor.utils as utils
 
 
 class Configure(Command):

@@ -1,11 +1,10 @@
 # -*- coding: utf-8 -*-
 
+from aws_vapor import utils
 from cliff.command import Command
 from os import path
 from six.moves.urllib import parse
 from six.moves.urllib import request
-
-import aws_vapor.utils as utils
 
 
 class Downloader(Command):

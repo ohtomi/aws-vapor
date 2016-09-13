@@ -1,8 +1,7 @@
 # -*- coding: utf-8 -*-
 
+from aws_vapor import utils
 from collections import OrderedDict
-from aws_vapor.utils import combine_user_data
-from aws_vapor.utils import inject_params
 
 
 class Template(object):
@@ -292,7 +291,7 @@ class UserData(object):
 
     @classmethod
     def from_files(cls, files, params):
-        user_data = inject_params(combine_user_data(files), params)
+        user_data = utils.inject_params(utils.combine_user_data(files), params)
         return {'UserData': Intrinsics.base64(Intrinsics.join('', user_data))}
 
 
@@ -426,6 +425,6 @@ class CfnInitMetadata(object):
     def from_file(cls, filename, params={}):
         with open(filename) as fh:
             c = fh.read()
-        content = inject_params(c, params)
+        content = utils.inject_params(c, params)
         joined_content = Intrinsics.join('', content)
         return joined_content

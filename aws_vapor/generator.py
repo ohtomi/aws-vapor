@@ -1,11 +1,10 @@
 # -*- coding: utf-8 -*-
 
+from aws_vapor import utils
 from cliff.command import Command
 from json import dumps
-from os import chdir
-from os import path
 
-import aws_vapor.utils as utils
+import os
 import sys
 
 
@@ -26,7 +25,7 @@ class Generator(Command):
         task_name = args.task
         (vaporfile, task, directory) = self._load_vaporfile(file_path, task_name)
 
-        chdir(directory)
+        os.chdir(directory)
         template = task()
 
         if args.recipe is not None:
@@ -37,14 +36,14 @@ class Generator(Command):
         self._output_template(template, args.output)
 
     def _load_vaporfile(self, file_path, task_name):
-        directory, filename = path.split(file_path)
+        directory, filename = os.path.split(file_path)
 
         edited_module_search_path = False
         if directory not in sys.path:
             sys.path.insert(0, directory)
             edited_module_search_path = True
 
-        vaporfile = __import__(path.splitext(filename)[0])
+        vaporfile = __import__(os.path.splitext(filename)[0])
 
         if edited_module_search_path:
             del sys.path[0]
@@ -61,7 +60,7 @@ class Generator(Command):
             edited_module_search_path = True
 
         for recipe in recipes:
-            recipefile = __import__(path.splitext(recipe)[0])
+            recipefile = __import__(os.path.splitext(recipe)[0])
             task = getattr(recipefile, 'recipe')
             task(template)
 

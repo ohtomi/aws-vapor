@@ -3,15 +3,14 @@
 from contextlib import contextmanager
 from email.mime.multipart import MIMEMultipart
 from email.mime.text import MIMEText
-from os import getcwd
-from os import mkdir
-from os import path
 from six import PY3
 from six.moves import configparser
 
+import os
 
-CURRENT_DIRECTORY = getcwd()
-CONFIG_DIRECTORY = path.expanduser('~/.aws-vapor')
+
+CURRENT_DIRECTORY = os.getcwd()
+CONFIG_DIRECTORY = os.path.expanduser('~/.aws-vapor')
 CONFIG_FILE_NAME = 'config'
 
 FILE_WRITE_MODE = 'wt' if PY3 else 'wb'
@@ -21,7 +20,7 @@ def load_from_config_file(config_directories=[CONFIG_DIRECTORY, CURRENT_DIRECTOR
     props = {}
 
     config = configparser.RawConfigParser()
-    config.read([path.join(config_directory, CONFIG_FILE_NAME) for config_directory in config_directories])
+    config.read([os.path.join(config_directory, CONFIG_FILE_NAME) for config_directory in config_directories])
 
     for section in config.sections():
         for key, value in config.items(section):
@@ -56,10 +55,10 @@ def save_to_config_file(props):
         for key, value in list(entries.items()):
             config.set(section, key, value)
 
-    if not path.exists(CONFIG_DIRECTORY):
-        mkdir(CONFIG_DIRECTORY)
+    if not os.path.exists(CONFIG_DIRECTORY):
+        os.mkdir(CONFIG_DIRECTORY)
 
-    with open(path.join(CONFIG_DIRECTORY, CONFIG_FILE_NAME), mode=FILE_WRITE_MODE) as configfile:
+    with open(os.path.join(CONFIG_DIRECTORY, CONFIG_FILE_NAME), mode=FILE_WRITE_MODE) as configfile:
         config.write(configfile)
 
 
@@ -98,11 +97,11 @@ def inject_params(lines, params):
 
 @contextmanager
 def open_outputfile(relative_file_path):
-    file_path = path.join(CURRENT_DIRECTORY, relative_file_path)
-    directory, filename = path.split(file_path)
+    file_path = os.path.join(CURRENT_DIRECTORY, relative_file_path)
+    directory, filename = os.path.split(file_path)
 
-    if not path.exists(directory):
-        mkdir(directory)
+    if not os.path.exists(directory):
+        os.mkdir(directory)
 
     with open(file_path, mode=FILE_WRITE_MODE) as outputfile:
         yield outputfile
