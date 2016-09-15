@@ -5,7 +5,7 @@ from cliff.command import Command
 
 
 class Configure(Command):
-    '''shows current configuration or sets new configuration'''
+    '''show current configuration or set new configuration'''
 
     def get_parser(self, prog_name):
         parser = super(Configure, self).get_parser(prog_name)
