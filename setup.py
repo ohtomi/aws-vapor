@@ -5,7 +5,7 @@ from os import path
 from setuptools import find_packages
 from setuptools import setup
 
-VERSION = '0.0.8'
+VERSION = '0.0.9'
 
 
 def load_long_description():
