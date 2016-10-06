@@ -375,6 +375,13 @@ def test_intrinsics_select():
     )
 
 
+def test_intrinsics_sub():
+    assert_equal(
+        Intrinsics.sub('template', {'key_1': 'value_1', 'key_2': 'value_2', 'key_3': 'value_3'}),
+        {'Fn::Sub': ['template', {'key_1': 'value_1', 'key_2': 'value_2', 'key_3': 'value_3'}]}
+    )
+
+
 def test_intrinsics_ref__elem_name():
     assert_equal(
         Intrinsics.ref('elem_name'),

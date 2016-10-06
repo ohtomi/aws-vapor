@@ -245,6 +245,10 @@ class Intrinsics(object):
         return {'Fn::Select': [index, list_of_objects]}
 
     @classmethod
+    def sub(cls, template, dict_of_parameters):
+        return {'Fn::Sub': [template, dict_of_parameters]}
+
+    @classmethod
     def ref(cls, logical_name_or_element):
         if isinstance(logical_name_or_element, str):
             logical_name = logical_name_or_element
