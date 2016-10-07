@@ -239,12 +239,21 @@ def test_resource__metadata__config_sets():
     )
 
 
-def test_output():
+def test_output__standard():
     template = {}
     output = Output('abcde').description('description').value(Intrinsics.get_att('res_name', 'attr_name')).to_template(template)
     assert_equal(
         template,
         {'abcde': {'Description': 'description', 'Value': {'Fn::GetAtt': ['res_name', 'attr_name']}}}
+    )
+
+
+def test_output__with_export():
+    template = {}
+    output = Output('abcde').description('description').value(Intrinsics.get_att('res_name', 'attr_name')).export('variable_name').to_template(template)
+    assert_equal(
+        template,
+        {'abcde': {'Description': 'description', 'Value': {'Fn::GetAtt': ['res_name', 'attr_name']}, 'Export': {'Name': 'variable_name'}}}
     )
 
 

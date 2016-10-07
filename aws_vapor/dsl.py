@@ -174,6 +174,9 @@ class Output(Element):
     def value(self, value):
         return self.attributes('Value', value)
 
+    def export(self, name):
+        return self.attributes('Export', {'Name': name})
+
 
 class Attributes(object):
 
