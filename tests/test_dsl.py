@@ -361,6 +361,13 @@ def test_intrinsics_get_azs__without_region():
     )
 
 
+def test_intrinsics_import_value():
+    assert_equal(
+        Intrinsics.import_value('value'),
+        {'Fn::ImportValue': 'value'}
+    )
+
+
 def test_intrinsics_join():
     assert_equal(
         Intrinsics.join('delim', ['value_1', 'value_2', 'value_3']),

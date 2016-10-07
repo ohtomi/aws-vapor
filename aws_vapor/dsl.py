@@ -237,6 +237,10 @@ class Intrinsics(object):
         return {'Fn::GetAZs': region}
 
     @classmethod
+    def import_value(cls, value_to_import):
+        return {'Fn::ImportValue': value_to_import}
+
+    @classmethod
     def join(cls, delimiter, list_of_values):
         return {'Fn::Join': [delimiter, list_of_values]}
 
