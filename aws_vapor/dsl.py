@@ -144,6 +144,9 @@ class Resource(Element):
     def type(self, name):
         return self.attributes('Type', name)
 
+    def condition(self, condition):
+        return self.attributes('Condition', condition)
+
     def metadata(self, metadata):
         return self.attributes('Metadata', metadata)
 
@@ -170,6 +173,9 @@ class Output(Element):
 
     def description(self, desc):
         return self.attributes('Description', desc)
+
+    def condition(self, condition):
+        return self.attributes('Condition', condition)
 
     def value(self, value):
         return self.attributes('Value', value)
