@@ -39,8 +39,9 @@ How to use
 
    Commands:
      complete       print bash completion command
-     config         shows current configuration or sets new configuration
-     generate       generates AWS CloudFormation template from python object
+     config         show current configuration or set new configuration
+     generate       generate AWS CloudFormation template from python object
+     get            download contributed recipe from url
      help           print detailed help for another command
 
 generates AWS CloudFormation template
