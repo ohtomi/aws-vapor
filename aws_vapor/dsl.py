@@ -422,7 +422,7 @@ class CfnInitMetadata(object):
             if commands is not None:
                 m['commands'] = commands
 
-            v = self._create_and_get_map(['service_manager', service_manager])
+            v = self._create_and_get_map(['services', service_manager])
             v[key] = m
             return self
 
