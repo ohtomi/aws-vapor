@@ -59,22 +59,24 @@ def generate():
     }))
 
     mongodb_server.metadata(CfnInitMetadata.of([
-        CfnInitMetadata.ConfigSet('default', [
-            CfnInitMetadata.Config('SetupRepos')
-                .files('/etc/yum.repos.d/mongodb-org.3.2.repo', CfnInitMetadata.from_file('files/mongodb-org-3.2.repo'), mode='00644', owner='root', group='root')
-                .commands('import_mongodb_public_key', 'rpm --import https://www.mongodb.org/static/pgp/server-3.2.asc')
-            ,
-            CfnInitMetadata.Config('Install')
-                .packages('yum', 'mongodb-org-server')
-                .packages('yum', 'mongodb-org-shell')
-                .packages('yum', 'mongodb-org-tools')
-            ,
-            CfnInitMetadata.Config('Configure')
-                .files('/etc/mongod.conf', CfnInitMetadata.from_file('files/mongod.conf'), mode='000644', owner='root', group='root')
-                .commands('make_data_directory', 'mkdir -p /data/db; chmod 777 /data/db')
-            ,
-            CfnInitMetadata.Config('Start')
-                .services('sysvinit', 'mongod', enabled=True, ensure_running=True)
+        CfnInitMetadata.Init([
+            CfnInitMetadata.ConfigSet('default', [
+                CfnInitMetadata.Config('SetupRepos')
+                    .files('/etc/yum.repos.d/mongodb-org.3.2.repo', CfnInitMetadata.from_file('files/mongodb-org-3.2.repo'), mode='00644', owner='root', group='root')
+                    .commands('import_mongodb_public_key', 'rpm --import https://www.mongodb.org/static/pgp/server-3.2.asc')
+                ,
+                CfnInitMetadata.Config('Install')
+                    .packages('yum', 'mongodb-org-server')
+                    .packages('yum', 'mongodb-org-shell')
+                    .packages('yum', 'mongodb-org-tools')
+                ,
+                CfnInitMetadata.Config('Configure')
+                    .files('/etc/mongod.conf', CfnInitMetadata.from_file('files/mongod.conf'), mode='000644', owner='root', group='root')
+                    .commands('make_data_directory', 'mkdir -p /data/db; chmod 777 /data/db')
+                ,
+                CfnInitMetadata.Config('Start')
+                    .services('sysvinit', 'mongod', enabled=True, ensure_running=True)
+            ])
         ])
     ]))
 

@@ -59,20 +59,22 @@ def generate():
     }))
 
     sample_server.metadata(CfnInitMetadata.of([
-        CfnInitMetadata.ConfigSet('default', [
-            CfnInitMetadata.Config('SetupRepos')
-                .commands('import_td-agent_GPG-KEY', 'rpm --import https://packages.treasuredata.com/GPG-KEY-td-agent')
-            ,
-            CfnInitMetadata.Config('Install')
-                .packages('yum', 'dstat')
-                .packages('yum', 'td-agent')
-                .commands('install_td-agent_plugin', 'td-agnet-gem install fluent-plugin-dstat fluent-plugin-map fluent-plugin-forest')
-            ,
-            CfnInitMetadata.Config('Configure')
-                .files('/etc/td-agent/td-agent.conf', CfnInitMetadata.from_file('files/td-agent.conf'), mode='000644', owner='root', group='root')
-            ,
-            CfnInitMetadata.Config('Start')
-                .services('sysvinit', 'td-agent', enabled=True, ensure_running=True)
+        CfnInitMetadata.Init([
+            CfnInitMetadata.ConfigSet('default', [
+                CfnInitMetadata.Config('SetupRepos')
+                    .commands('import_td-agent_GPG-KEY', 'rpm --import https://packages.treasuredata.com/GPG-KEY-td-agent')
+                ,
+                CfnInitMetadata.Config('Install')
+                    .packages('yum', 'dstat')
+                    .packages('yum', 'td-agent')
+                    .commands('install_td-agent_plugin', 'td-agnet-gem install fluent-plugin-dstat fluent-plugin-map fluent-plugin-forest')
+                ,
+                CfnInitMetadata.Config('Configure')
+                    .files('/etc/td-agent/td-agent.conf', CfnInitMetadata.from_file('files/td-agent.conf'), mode='000644', owner='root', group='root')
+                ,
+                CfnInitMetadata.Config('Start')
+                    .services('sysvinit', 'td-agent', enabled=True, ensure_running=True)
+            ])
         ])
     ]))
 

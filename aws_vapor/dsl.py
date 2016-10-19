@@ -318,19 +318,37 @@ class UserData(object):
 class CfnInitMetadata(object):
 
     @classmethod
-    def of(cls, config_or_config_sets):
+    def of(cls, list_of_metadata):
         m = OrderedDict()
-        if isinstance(config_or_config_sets, CfnInitMetadata.Config):
-            config = config_or_config_sets
-            m[config.name] = config.value
-        else:
-            config_sets = config_or_config_sets
-            cs = m['configSets'] = OrderedDict()
-            for config_set in config_sets:
-                cs[config_set.name] = [config.name for config in config_set.configs]
-                for config in config_set.configs:
-                    m[config.name] = config.value
-        return {'AWS::CloudFormation::Init': m}
+        for metadata in list_of_metadata:
+            if isinstance(metadata, CfnInitMetadata.Init):
+                im = m['AWS::CloudFormation::Init'] = OrderedDict()
+                for config_or_config_set in metadata.config_or_config_sets:
+                    if isinstance(config_or_config_set, CfnInitMetadata.Config):
+                        config = config_or_config_set
+                        im[config.name] = config.value
+                    elif isinstance(config_or_config_set, CfnInitMetadata.ConfigSet):
+                        config_set = config_or_config_set
+                        if 'configSets' not in im:
+                            csm = im['configSets'] = OrderedDict()
+                        else:
+                            csm = im['configSets']
+                        csm[config_set.name] = [config.name for config in config_set.configs]
+                        for config in config_set.configs:
+                            im[config.name] = config.value
+                    else:
+                        raise ValueError('unknown config. config: %r' % metadata.config_or_config_sets)
+            elif isinstance(metadata, CfnInitMetadata.Authentication):
+                am = m['AWS::CloudFormation::Authentication'] = OrderedDict()
+                am[metadata.name] = metadata.value
+            else:
+                raise ValueError('unknown metadata. metadata: %r' % metadata)
+        return m
+
+    class Init(object):
+
+        def __init__(self, config_or_config_sets):
+            self.config_or_config_sets = config_or_config_sets
 
     class ConfigSet(object):
 
@@ -439,6 +457,56 @@ class CfnInitMetadata(object):
 
             v = self._create_and_get_map(['users'])
             v[key] = m
+            return self
+
+    class Authentication(object):
+
+        def __init__(self, name, type):
+            self.name = name
+            self.type = type
+
+            if type != 'basic' and type != 'S3':
+                raise ValueError('unknown authentication type. type: %r' % type)
+            self.value = OrderedDict({'type': type})
+
+        def access_key_id(self, value):
+            if self.type != 'S3':
+                raise ValueError('illegal authentication type. type: %r' % self.type)
+            self.value['accessKeyId'] = value
+            return self
+
+        def buckets(self, list_of_values):
+            if self.type != 'S3':
+                raise ValueError('illegal authentication type. type: %r' % self.type)
+            self.value['buckets'] = list_of_values
+            return self
+
+        def password(self, value):
+            if self.type != 'basic':
+                raise ValueError('illegal authentication type. type: %r' % self.type)
+            self.value['password'] = value
+            return self
+
+        def secret_key(self, value):
+            if self.type != 'S3':
+                raise ValueError('illegal authentication type. type: %r' % self.type)
+            self.value['secretKey'] = value
+            return self
+
+        def uris(self, list_of_values):
+            if self.type != 'basic':
+                raise ValueError('illegal authentication type. type: %r' % self.type)
+            self.value['uris'] = list_of_values
+            return self
+
+        def username(self, value):
+            if self.type != 'basic':
+                raise ValueError('illegal authentication type. type: %r' % self.type)
+            self.value['username'] = value
+            return self
+
+        def role_name(self, value):
+            self.value['roleName'] = value
             return self
 
     @classmethod
