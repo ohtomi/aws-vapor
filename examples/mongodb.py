@@ -65,6 +65,9 @@ def generate():
                     .files('/etc/yum.repos.d/mongodb-org.3.2.repo', CfnInitMetadata.from_file('files/mongodb-org-3.2.repo'), mode='00644', owner='root', group='root')
                     .commands('import_mongodb_public_key', 'rpm --import https://www.mongodb.org/static/pgp/server-3.2.asc')
                 ,
+                CfnInitMetadata.Config('DownloadFromS3')
+                    .files('/path/to', source='https://s3.amazonaws.com/bucket/object', mode='000644', owner='root', group='root', authentication='s3credentials')
+                ,
                 CfnInitMetadata.Config('Install')
                     .packages('yum', 'mongodb-org-server')
                     .packages('yum', 'mongodb-org-shell')
@@ -77,7 +80,8 @@ def generate():
                 CfnInitMetadata.Config('Start')
                     .services('sysvinit', 'mongod', enabled=True, ensure_running=True)
             ])
-        ])
+        ]),
+        CfnInitMetadata.Authentication('s3credentials', 'S3').role_name('some-role')
     ]))
 
     return t
