@@ -192,7 +192,11 @@ def test_resource__user_data():
 def test_resource__metadata__config():
     template = {}
     resource = Resource('abcde').type('type')
-    resource.metadata(CfnInitMetadata.of(CfnInitMetadata.Config('config').commands('key_1', 'value_1')))
+    resource.metadata(CfnInitMetadata.of([
+        CfnInitMetadata.Init([
+            CfnInitMetadata.Config('config').commands('key_1', 'value_1')
+        ])
+    ]))
     resource.to_template(template)
     assert_equal(
         template,
@@ -214,9 +218,11 @@ def test_resource__metadata__config_sets():
     template = {}
     resource = Resource('abcde').type('type')
     resource.metadata(CfnInitMetadata.of([
-        CfnInitMetadata.ConfigSet('default', [
-            CfnInitMetadata.Config('config')
-                .commands('key_1', 'value_1')
+        CfnInitMetadata.Init([
+            CfnInitMetadata.ConfigSet('default', [
+                CfnInitMetadata.Config('config')
+                    .commands('key_1', 'value_1')
+            ])
         ])
     ]))
     resource.to_template(template)
@@ -458,14 +464,14 @@ def test_user_data_of():
 
 def test_cfn_init_metadata_of__config():
     assert_equal(
-        CfnInitMetadata.of(CfnInitMetadata.Config('config').commands('key_1', 'value_1')),
+        CfnInitMetadata.of([CfnInitMetadata.Init([CfnInitMetadata.Config('config').commands('key_1', 'value_1')])]),
         {'AWS::CloudFormation::Init': {'config': {'commands': {'key_1': {'command': 'value_1'}}}}}
     )
 
 
 def test_cfn_init_metadata_of__config_sets():
     assert_equal(
-        CfnInitMetadata.of([CfnInitMetadata.ConfigSet('default', [CfnInitMetadata.Config('config').commands('key_1', 'value_1')])]),
+        CfnInitMetadata.of([CfnInitMetadata.Init([CfnInitMetadata.ConfigSet('default', [CfnInitMetadata.Config('config').commands('key_1', 'value_1')])])]),
         {'AWS::CloudFormation::Init': {'configSets': {'default': ['config']}, 'config': {'commands': {'key_1': {'command': 'value_1'}}}}}
     )
 
