@@ -53,12 +53,30 @@ def test_element():
     )
 
 
-def test_parameter():
+def test_parameter__any():
     template = {}
-    Parameter('abcde').description('description').type('type').default('default').to_template(template)
+    Parameter('abcde').description('description').type('type').default('default').allowed_values(['value_1', 'value_2']).no_echo().to_template(template)
     assert_equal(
         template,
-        {'abcde': {'Description': 'description', 'Type': 'type', 'Default': 'default'}}
+        {'abcde': {'Description': 'description', 'Type': 'type', 'Default': 'default', 'AllowedValues': ['value_1', 'value_2'], 'NoEcho': 'true'}}
+    )
+
+
+def test_parameter__string():
+    template = {}
+    Parameter('abcde').type('type').allowed_pattern('pattern').max_length(100).min_length(10).to_template(template)
+    assert_equal(
+        template,
+        {'abcde': {'Type': 'type', 'AllowedPattern': 'pattern', 'MaxLength': '100', 'MinLength': '10'}}
+    )
+
+
+def test_parameter__number():
+    template = {}
+    Parameter('abcde').type('type').max_value(100).min_value(10).to_template(template)
+    assert_equal(
+        template,
+        {'abcde': {'Type': 'type', 'MaxValue': '100', 'MinValue': '10'}}
     )
 
 

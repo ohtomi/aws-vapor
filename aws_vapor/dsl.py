@@ -89,11 +89,35 @@ class Parameter(Element):
     def description(self, desc):
         return self.attributes('Description', desc)
 
+    def constraint_description(self, desc):
+        return self.attributes('ConstraintDescription', desc)
+
     def type(self, name):
         return self.attributes('Type', name)
 
     def default(self, value):
         return self.attributes('Default', value)
+
+    def allowed_values(self, list_of_values):
+        return self.attributes('AllowedValues', list_of_values)
+
+    def no_echo(self):
+        return self.attributes('NoEcho', 'true')
+
+    def allowed_pattern(self, pattern):
+        return self.attributes('AllowedPattern', pattern)
+
+    def max_length(self, length):
+        return self.attributes('MaxLength', str(length))
+
+    def min_length(self, length):
+        return self.attributes('MinLength', str(length))
+
+    def max_value(self, value):
+        return self.attributes('MaxValue', str(value))
+
+    def min_value(self, value):
+        return self.attributes('MinValue', str(value))
 
 
 class Mapping(Element):
