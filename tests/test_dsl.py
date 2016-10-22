@@ -9,6 +9,7 @@ import os
 
 from aws_vapor.dsl import Template
 from aws_vapor.dsl import Element
+from aws_vapor.dsl import Metadata
 from aws_vapor.dsl import Parameter
 from aws_vapor.dsl import Mapping
 from aws_vapor.dsl import Condition

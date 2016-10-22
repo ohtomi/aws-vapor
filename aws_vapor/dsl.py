@@ -40,6 +40,9 @@ class Template(object):
 
         return element
 
+    def metadata(self, element, merge=False):
+        return self.merge_or_replace_element('Metadata', element, merge)
+
     def parameters(self, element, merge=False):
         return self.merge_or_replace_element('Parameters', element, merge)
 
@@ -79,6 +82,12 @@ class Element(object):
 
     def to_template(self, template):
         template[self.name] = self.attrs
+
+
+class Metadata(Element):
+
+    def __init__(self, name):
+        super(Metadata, self).__init__(name)
 
 
 class Parameter(Element):

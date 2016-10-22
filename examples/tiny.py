@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 
 from aws_vapor.dsl import Template
+from aws_vapor.dsl import Metadata
 from aws_vapor.dsl import Parameter
 from aws_vapor.dsl import Mapping
 from aws_vapor.dsl import Condition
@@ -15,6 +16,8 @@ from aws_vapor.dsl import CfnInitMetadata
 
 def generate():
     t = Template(description='see. https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/conditions-section-structure.html')
+
+    meta = t.metadata(Metadata('MetadataKey').attributes('name', 'value'))
 
     m = t.mappings(Mapping('RegionMap')
         .add_category('us-east-1').add_item('AMI', 'ami-7f418316').add_item('TestAZ', 'us-east-1a')
