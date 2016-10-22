@@ -26,8 +26,8 @@ def generate():
         .description('Environment type.')
         .type('String')
         .default('test')
-        .attributes('AllowedValues', ['prod', 'test'])
-        .attributes('ConstraintDescription', 'must specify prod or test.')
+        .allowed_values(['prod', 'test'])
+        .constraint_description('must specify prod or test.')
     )
 
     c = t.conditions(Condition('CreateProdResources').expression(Intrinsics.fn_equals(Intrinsics.ref('EnvType'), 'prod')))
