@@ -54,6 +54,15 @@ def test_element():
     )
 
 
+def test_metadata():
+    template = {}
+    Metadata('abcde').attributes('key_1', 'value_1').attributes('key_2', 'value_2').to_template(template)
+    assert_equal(
+        template,
+        {'abcde': {'key_1': 'value_1', 'key_2': 'value_2'}}
+    )
+
+
 def test_parameter__any():
     template = {}
     Parameter('abcde').description('description').type('type').default('default').allowed_values(['value_1', 'value_2']).no_echo().to_template(template)
