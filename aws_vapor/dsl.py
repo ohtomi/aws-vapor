@@ -84,10 +84,10 @@ class Element(object):
         template[self.name] = self.attrs
 
 
-class Metadata(Element):
+class Metadatum(Element):
 
     def __init__(self, name):
-        super(Metadata, self).__init__(name)
+        super(Metadatum, self).__init__(name)
 
 
 class Parameter(Element):

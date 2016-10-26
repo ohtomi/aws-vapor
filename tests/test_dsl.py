@@ -9,7 +9,7 @@ import os
 
 from aws_vapor.dsl import Template
 from aws_vapor.dsl import Element
-from aws_vapor.dsl import Metadata
+from aws_vapor.dsl import Metadatum
 from aws_vapor.dsl import Parameter
 from aws_vapor.dsl import Mapping
 from aws_vapor.dsl import Condition
@@ -56,7 +56,7 @@ def test_element():
 
 def test_metadata():
     template = {}
-    Metadata('abcde').attributes('key_1', 'value_1').attributes('key_2', 'value_2').to_template(template)
+    Metadatum('abcde').attributes('key_1', 'value_1').attributes('key_2', 'value_2').to_template(template)
     assert_equal(
         template,
         {'abcde': {'key_1': 'value_1', 'key_2': 'value_2'}}
