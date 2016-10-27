@@ -421,7 +421,7 @@ class CfnInitMetadata(object):
             v[key] = m
             return self
 
-        def files(self, key, content=None, source=None, encoding=None, group=None, owner=None, mode=None, authentication=None, context=None):
+        def files(self, key, content=None, source=None, local_file_path=None, encoding=None, group=None, owner=None, mode=None, authentication=None, context=None, local_file_params={}):
             m = OrderedDict()
             if content is not None:
                 m['content'] = content
@@ -439,6 +439,11 @@ class CfnInitMetadata(object):
                 m['authentication'] = authentication
             if context is not None:
                 m['context'] = context
+            if local_file_path is not None:
+                with open(local_file_path) as fh:
+                    c = fh.read()
+                init_file_content = utils.inject_params(c, local_file_params)
+                m['content'] = Intrinsics.join('', init_file_content)
 
             v = self._create_and_get_map(['files'])
             v[key] = m
@@ -541,11 +546,3 @@ class CfnInitMetadata(object):
         def role_name(self, value):
             self.value['roleName'] = value
             return self
-
-    @classmethod
-    def from_file(cls, filename, params={}):
-        with open(filename) as fh:
-            c = fh.read()
-        content = utils.inject_params(c, params)
-        joined_content = Intrinsics.join('', content)
-        return joined_content

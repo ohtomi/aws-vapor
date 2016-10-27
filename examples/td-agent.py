@@ -71,7 +71,7 @@ def generate():
                     .commands('install_td-agent_plugin', 'td-agnet-gem install fluent-plugin-dstat fluent-plugin-map fluent-plugin-forest')
                 ,
                 CfnInitMetadata.Config('Configure')
-                    .files('/etc/td-agent/td-agent.conf', CfnInitMetadata.from_file('files/td-agent.conf'), mode='000644', owner='root', group='root')
+                    .files('/etc/td-agent/td-agent.conf', local_file_path='files/td-agent.conf', mode='000644', owner='root', group='root')
                 ,
                 CfnInitMetadata.Config('Start')
                     .services('sysvinit', 'td-agent', enabled=True, ensure_running=True)

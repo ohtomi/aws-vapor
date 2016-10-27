@@ -63,7 +63,7 @@ def generate():
         CfnInitMetadata.Init([
             CfnInitMetadata.ConfigSet('default', [
                 CfnInitMetadata.Config('SetupRepos')
-                    .files('/etc/yum.repos.d/mongodb-org.3.2.repo', CfnInitMetadata.from_file('files/mongodb-org-3.2.repo'), mode='00644', owner='root', group='root')
+                    .files('/etc/yum.repos.d/mongodb-org.3.2.repo', local_file_path='files/mongodb-org-3.2.repo', mode='00644', owner='root', group='root')
                     .commands('import_mongodb_public_key', 'rpm --import https://www.mongodb.org/static/pgp/server-3.2.asc')
                 ,
                 CfnInitMetadata.Config('DownloadFromS3')
@@ -75,7 +75,7 @@ def generate():
                     .packages('yum', 'mongodb-org-tools')
                 ,
                 CfnInitMetadata.Config('Configure')
-                    .files('/etc/mongod.conf', CfnInitMetadata.from_file('files/mongod.conf'), mode='000644', owner='root', group='root')
+                    .files('/etc/mongod.conf', local_file_path='files/mongod.conf', mode='000644', owner='root', group='root')
                     .commands('make_data_directory', 'mkdir -p /data/db; chmod 777 /data/db')
                 ,
                 CfnInitMetadata.Config('Start')
