@@ -427,6 +427,11 @@ class CfnInitMetadata(object):
                 m['content'] = content
             if source is not None:
                 m['source'] = source
+            if local_file_path is not None:
+                with open(local_file_path) as fh:
+                    c = fh.read()
+                init_file_content = utils.inject_params(c, local_file_params)
+                m['content'] = Intrinsics.join('', init_file_content)
             if encoding is not None:
                 m['encoding'] = encoding
             if group is not None:
@@ -439,11 +444,6 @@ class CfnInitMetadata(object):
                 m['authentication'] = authentication
             if context is not None:
                 m['context'] = context
-            if local_file_path is not None:
-                with open(local_file_path) as fh:
-                    c = fh.read()
-                init_file_content = utils.inject_params(c, local_file_params)
-                m['content'] = Intrinsics.join('', init_file_content)
 
             v = self._create_and_get_map(['files'])
             v[key] = m
