@@ -9,14 +9,14 @@ from six.moves import configparser
 import os
 
 
-CURRENT_DIRECTORY = os.getcwd()
-CONFIG_DIRECTORY = os.path.expanduser('~/.aws-vapor')
+LOCAL_CONFIG_DIRECTORY = CURRENT_DIRECTORY = os.getcwd()
+GLOBAL_CONFIG_DIRECTORY = os.path.expanduser('~/.aws-vapor')
 CONFIG_FILE_NAME = 'config'
 
 FILE_WRITE_MODE = 'wt' if PY3 else 'wb'
 
 
-def load_from_config_file(config_directories=[CONFIG_DIRECTORY, CURRENT_DIRECTORY]):
+def load_from_config_file(config_directories=[GLOBAL_CONFIG_DIRECTORY, LOCAL_CONFIG_DIRECTORY]):
     props = {}
 
     config = configparser.RawConfigParser()
@@ -55,10 +55,10 @@ def save_to_config_file(props):
         for key, value in list(entries.items()):
             config.set(section, key, value)
 
-    if not os.path.exists(CONFIG_DIRECTORY):
-        os.mkdir(CONFIG_DIRECTORY)
+    if not os.path.exists(GLOBAL_CONFIG_DIRECTORY):
+        os.mkdir(GLOBAL_CONFIG_DIRECTORY)
 
-    with open(os.path.join(CONFIG_DIRECTORY, CONFIG_FILE_NAME), mode=FILE_WRITE_MODE) as configfile:
+    with open(os.path.join(GLOBAL_CONFIG_DIRECTORY, CONFIG_FILE_NAME), mode=FILE_WRITE_MODE) as configfile:
         config.write(configfile)
 
 
