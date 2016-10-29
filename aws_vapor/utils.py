@@ -47,7 +47,7 @@ def get_property_from_config_file(section, key, default_value=None):
     return value
 
 
-def save_to_config_file(props):
+def save_to_config_file(props, save_on_global=False):
     config = configparser.RawConfigParser()
 
     for section, entries in list(props.items()):
@@ -55,11 +55,16 @@ def save_to_config_file(props):
         for key, value in list(entries.items()):
             config.set(section, key, value)
 
-    if not os.path.exists(GLOBAL_CONFIG_DIRECTORY):
-        os.mkdir(GLOBAL_CONFIG_DIRECTORY)
+    if save_on_global:
+        if not os.path.exists(GLOBAL_CONFIG_DIRECTORY):
+            os.mkdir(GLOBAL_CONFIG_DIRECTORY)
 
-    with open(os.path.join(GLOBAL_CONFIG_DIRECTORY, CONFIG_FILE_NAME), mode=FILE_WRITE_MODE) as configfile:
-        config.write(configfile)
+        with open(os.path.join(GLOBAL_CONFIG_DIRECTORY, CONFIG_FILE_NAME), mode=FILE_WRITE_MODE) as configfile:
+            config.write(configfile)
+
+    else:
+        with open(os.path.join(LOCAL_CONFIG_DIRECTORY, CONFIG_FILE_NAME), mode=FILE_WRITE_MODE) as configfile:
+            config.write(configfile)
 
 
 def combine_user_data(files):

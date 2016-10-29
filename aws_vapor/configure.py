@@ -16,6 +16,7 @@ class Configure(Command):
 
         set_subparser = subparsers.add_parser('set', help='sets key to specified value')
         set_subparser.set_defaults(func=self.set_configuration)
+        set_subparser.add_argument('--system', action='store_true', default=False)
         set_subparser.add_argument('section')
         set_subparser.add_argument('key')
         set_subparser.add_argument('value')
@@ -33,11 +34,14 @@ class Configure(Command):
                 self.app.stdout.write('{0} = {1}\n'.format(key, value))
 
     def set_configuration(self, args):
-        props = utils.load_from_config_file()
+        save_on_global = args.system
+
+        config_directory = [utils.GLOBAL_CONFIG_DIRECTORY] if save_on_global else [utils.LOCAL_CONFIG_DIRECTORY]
+        props = utils.load_from_config_file(config_directories=config_directory)
 
         if args.section not in props:
             props[args.section] = {}
         section = props[args.section]
         section[args.key] = args.value
 
-        utils.save_to_config_file(props)
+        utils.save_to_config_file(props, save_on_global)
