@@ -73,3 +73,8 @@ License
 ========================================
 
 MIT
+
+Author
+========================================
+
+`Kenichi Ohtomi https://github.com/ohtomi`_
