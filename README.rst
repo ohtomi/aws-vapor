@@ -77,4 +77,4 @@ MIT
 Author
 ========================================
 
-`Kenichi Ohtomi https://github.com/ohtomi`_
+`Kenichi Ohtomi <https://github.com/ohtomi>`_
