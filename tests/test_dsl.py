@@ -180,7 +180,7 @@ def test_resource__add_property():
 
 def test_resource__depends_on__resource():
     template = {}
-    resource = Resource('abcde').type('type').dependsOn(Resource('res_name')).to_template(template)
+    resource = Resource('abcde').type('type').depends_on(Resource('res_name')).to_template(template)
     assert_equal(
         template,
         {'abcde': {'Type': 'type', 'DependsOn': 'res_name'}}
@@ -192,7 +192,7 @@ def test_resource__depends_on__named_object():
         def __init__(self):
             self.name = 'res_name'
     template = {}
-    resource = Resource('abcde').type('type').dependsOn(named_object()).to_template(template)
+    resource = Resource('abcde').type('type').depends_on(named_object()).to_template(template)
     assert_equal(
         template,
         {'abcde': {'Type': 'type', 'DependsOn': 'res_name'}}
@@ -201,7 +201,7 @@ def test_resource__depends_on__named_object():
 
 @raises(ValueError)
 def test_resource__depends_on__other():
-    Resource('abcde').type('type').dependsOn({})
+    Resource('abcde').type('type').depends_on({})
 
 
 def test_resource__user_data():
