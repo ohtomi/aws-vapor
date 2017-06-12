@@ -1,5 +1,5 @@
-aws\_vapor package
-==================
+aws-vapor package
+=================
 
 Submodules
 ----------

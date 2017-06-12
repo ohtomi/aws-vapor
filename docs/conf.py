@@ -17,8 +17,8 @@
 # documentation root, use os.path.abspath to make it absolute, like shown here.
 #
 # import os
-# import sys
-# sys.path.insert(0, u'/Users/ohtomi/src/github.com/ohtomi/aws-vapor/aws_vapor')
+import sys
+sys.path.insert(0, u'../aws_vapor/')
 
 
 # -- General configuration ------------------------------------------------
@@ -47,9 +47,9 @@ source_suffix = '.rst'
 master_doc = 'index'
 
 # General information about the project.
-project = u'aws_vapor'
-copyright = u'2017, Author'
-author = u'Author'
+project = u'aws-vapor'
+copyright = u'2017, Kenichi Ohtomi'
+author = u'Kenichi Ohtomi'
 
 # The version info for the project you're documenting, acts as replacement for
 # |version| and |release|, also used in various other places throughout the
