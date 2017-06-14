@@ -1,26 +1,26 @@
-****************************************
+*********
 aws-vapor
-****************************************
+*********
 
 Description
-========================================
+===========
 
 This tool generates AWS CloudFormation template from python object.
 
 Requirements
-========================================
+============
 
 - Python v2.7.x, v3.4.x, v3.5.x, v3.6.x
 
 How to install
-========================================
+==============
 
 .. code-block:: bash
 
    $ pip install aws-vapor
 
 How to use
-========================================
+==========
 
 .. code-block:: bash
 
@@ -45,7 +45,7 @@ How to use
      help           print detailed help for another command
 
 generates AWS CloudFormation template
-----------------------------------------
+-------------------------------------
 
 .. code-block:: bash
 
@@ -56,12 +56,12 @@ generates AWS CloudFormation template
    $ aws-vapor generate 'template-file' --output '/path/to/json-file'
 
 Examples
-========================================
+========
 
 See https://github.com/ohtomi/aws-vapor/tree/master/examples/
 
 Contributing
-========================================
+============
 
 1. Fork it!
 2. Create your feature branch: `git checkout -b my-new-feature`
@@ -70,11 +70,11 @@ Contributing
 5. Submit a pull request :D
 
 License
-========================================
+=======
 
 MIT
 
 Author
-========================================
+======
 
 `Kenichi Ohtomi <https://github.com/ohtomi>`_
