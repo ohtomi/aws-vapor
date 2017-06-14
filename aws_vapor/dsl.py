@@ -5,7 +5,6 @@ from collections import OrderedDict
 
 
 class Template(object):
-
     def __init__(self, version='2010-09-09', description=''):
         self.version = version
         self.description = description
@@ -71,7 +70,6 @@ class Template(object):
 
 
 class Element(object):
-
     def __init__(self, name):
         self.name = name
         self.attrs = OrderedDict()
@@ -85,13 +83,11 @@ class Element(object):
 
 
 class Metadatum(Element):
-
     def __init__(self, name):
         super(Metadatum, self).__init__(name)
 
 
 class Parameter(Element):
-
     def __init__(self, name):
         super(Parameter, self).__init__(name)
 
@@ -130,7 +126,6 @@ class Parameter(Element):
 
 
 class Mapping(Element):
-
     def __init__(self, name):
         super(Mapping, self).__init__(name)
 
@@ -157,7 +152,6 @@ class Mapping(Element):
 
 
 class Condition(Element):
-
     def __init__(self, name):
         super(Condition, self).__init__(name)
 
@@ -170,7 +164,6 @@ class Condition(Element):
 
 
 class Resource(Element):
-
     def __init__(self, name):
         super(Resource, self).__init__(name)
 
@@ -200,7 +193,6 @@ class Resource(Element):
 
 
 class Output(Element):
-
     def __init__(self, name):
         super(Output, self).__init__(name)
 
@@ -218,7 +210,6 @@ class Output(Element):
 
 
 class Attributes(object):
-
     @classmethod
     def of(cls, name, value):
         if isinstance(value, Element):
@@ -228,7 +219,6 @@ class Attributes(object):
 
 
 class Intrinsics(object):
-
     @classmethod
     def base64(cls, value_to_encode):
         return {'Fn::Base64': value_to_encode}
@@ -310,7 +300,6 @@ class Intrinsics(object):
 
 
 class Pseudos(object):
-
     @classmethod
     def account_id(cls):
         return {'Ref': 'AWS::AccountId'}
@@ -337,7 +326,6 @@ class Pseudos(object):
 
 
 class UserData(object):
-
     @classmethod
     def of(cls, values):
         return {'UserData': Intrinsics.base64(Intrinsics.join('', values))}
@@ -349,7 +337,6 @@ class UserData(object):
 
 
 class CfnInitMetadata(object):
-
     @classmethod
     def of(cls, list_of_metadata):
         m = OrderedDict()
@@ -421,7 +408,10 @@ class CfnInitMetadata(object):
             v[key] = m
             return self
 
-        def files(self, key, content=None, source=None, local_file_path=None, encoding=None, group=None, owner=None, mode=None, authentication=None, context=None, local_file_params={}):
+        def files(self, key, content=None, source=None, local_file_path=None, encoding=None, group=None, owner=None,
+                  mode=None, authentication=None, context=None, local_file_params=None):
+            if local_file_params is None:
+                local_file_params = {}
             m = OrderedDict()
             if content is not None:
                 m['content'] = content
@@ -458,12 +448,15 @@ class CfnInitMetadata(object):
             v[key] = m
             return self
 
-        def packages(self, package_manager, key, versions=[]):
+        def packages(self, package_manager, key, versions=None):
+            if versions is None:
+                versions = []
             v = self._create_and_get_map(['packages', package_manager])
             v[key] = versions
             return self
 
-        def services(self, service_manager, key, ensure_running=None, enabled=None, files=None, sources=None, packages=None, commands=None):
+        def services(self, service_manager, key, ensure_running=None, enabled=None, files=None, sources=None,
+                     packages=None, commands=None):
             m = OrderedDict()
             if ensure_running is not None:
                 m['ensureRunning'] = 'true' if ensure_running else 'false'
@@ -490,7 +483,7 @@ class CfnInitMetadata(object):
         def users(self, key, uid, groups, home_dir):
             m = OrderedDict()
             m['groups'] = groups
-            m['uid'] =  str(uid)
+            m['uid'] = str(uid)
             m['homeDir'] = home_dir
 
             v = self._create_and_get_map(['users'])
@@ -499,13 +492,13 @@ class CfnInitMetadata(object):
 
     class Authentication(object):
 
-        def __init__(self, name, type):
+        def __init__(self, name, authentication_type):
             self.name = name
-            self.type = type
+            self.type = authentication_type
 
-            if type != 'basic' and type != 'S3':
-                raise ValueError('unknown authentication type. type: %r' % type)
-            self.value = OrderedDict({'type': type})
+            if authentication_type != 'basic' and authentication_type != 'S3':
+                raise ValueError('unknown authentication type. type: %r' % authentication_type)
+            self.value = OrderedDict({'type': authentication_type})
 
         def access_key_id(self, value):
             if self.type != 'S3':

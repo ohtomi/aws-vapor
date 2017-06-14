@@ -5,7 +5,7 @@ from cliff.command import Command
 
 
 class Configure(Command):
-    '''show current configuration or set new configuration'''
+    """show current configuration or set new configuration"""
 
     def get_parser(self, prog_name):
         parser = super(Configure, self).get_parser(prog_name)
@@ -33,7 +33,8 @@ class Configure(Command):
             for key, value in list(entries.items()):
                 self.app.stdout.write('{0} = {1}\n'.format(key, value))
 
-    def set_configuration(self, args):
+    @staticmethod
+    def set_configuration(args):
         save_on_global = args.system
 
         config_directory = [utils.GLOBAL_CONFIG_DIRECTORY] if save_on_global else [utils.LOCAL_CONFIG_DIRECTORY]

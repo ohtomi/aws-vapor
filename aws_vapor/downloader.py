@@ -8,7 +8,7 @@ from six.moves.urllib import request
 
 
 class Downloader(Command):
-    '''download contributed recipe from url'''
+    """download contributed recipe from url"""
 
     def get_parser(self, prog_name):
         parser = super(Downloader, self).get_parser(prog_name)
@@ -21,6 +21,7 @@ class Downloader(Command):
         contrib = utils.get_property_from_config_file('defaults', 'contrib')
         self._download_recipe(file_url, filename, contrib)
 
-    def _download_recipe(self, file_url, filename, contrib):
+    @staticmethod
+    def _download_recipe(file_url, filename, contrib):
         file_path = path.join(contrib, filename)
         request.urlretrieve(file_url, file_path)

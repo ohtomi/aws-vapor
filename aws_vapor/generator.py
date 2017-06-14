@@ -9,7 +9,7 @@ import sys
 
 
 class Generator(Command):
-    '''generate AWS CloudFormation template from python object'''
+    """generate AWS CloudFormation template from python object"""
 
     def get_parser(self, prog_name):
         parser = super(Generator, self).get_parser(prog_name)
@@ -35,7 +35,8 @@ class Generator(Command):
 
         self._output_template(template, args.output)
 
-    def _load_vaporfile(self, file_path, task_name):
+    @staticmethod
+    def _load_vaporfile(file_path, task_name):
         directory, filename = os.path.split(file_path)
 
         edited_module_search_path = False
@@ -51,9 +52,10 @@ class Generator(Command):
         task_name = task_name or 'generate'
         task = getattr(vaporfile, task_name)
 
-        return (vaporfile, task, directory)
+        return vaporfile, task, directory
 
-    def _apply_recipes(self, template, contrib, recipes):
+    @staticmethod
+    def _apply_recipes(template, contrib, recipes):
         edited_module_search_path = False
         if contrib is not None and contrib not in sys.path:
             sys.path.insert(0, contrib)

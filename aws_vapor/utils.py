@@ -16,7 +16,9 @@ CONFIG_FILE_NAME = 'config'
 FILE_WRITE_MODE = 'wt' if PY3 else 'wb'
 
 
-def load_from_config_file(config_directories=[GLOBAL_CONFIG_DIRECTORY, LOCAL_CONFIG_DIRECTORY]):
+def load_from_config_file(config_directories=None):
+    if config_directories is None:
+        config_directories = [GLOBAL_CONFIG_DIRECTORY, LOCAL_CONFIG_DIRECTORY]
     props = {}
 
     config = configparser.RawConfigParser()
@@ -24,7 +26,7 @@ def load_from_config_file(config_directories=[GLOBAL_CONFIG_DIRECTORY, LOCAL_CON
 
     for section in config.sections():
         for key, value in config.items(section):
-            if not section in props:
+            if section not in props:
                 props[section] = {}
             props[section][key] = value
 
@@ -74,7 +76,7 @@ def combine_user_data(files):
         with open(filename) as fh:
             contents = fh.read()
         sub_message = MIMEText(contents, format_type, 'ascii')
-        sub_message.add_header('Content-Disposition', 'attachment; filename="%s"' % (filename))
+        sub_message.add_header('Content-Disposition', 'attachment; filename="%s"' % filename)
         combined_message.attach(sub_message)
 
     return str(combined_message)
