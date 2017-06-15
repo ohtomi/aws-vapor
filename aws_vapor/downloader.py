@@ -8,7 +8,7 @@ from six.moves.urllib import request
 
 
 class Downloader(Command):
-    """download contributed recipe from url"""
+    """Download a contributed recipe from URL."""
 
     def get_parser(self, prog_name):
         parser = super(Downloader, self).get_parser(prog_name)

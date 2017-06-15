@@ -9,7 +9,7 @@ import sys
 
 
 class Generator(Command):
-    """generate AWS CloudFormation template from python object"""
+    """Generate an AWS CloudFormation template from Python objects."""
 
     def get_parser(self, prog_name):
         parser = super(Generator, self).get_parser(prog_name)
