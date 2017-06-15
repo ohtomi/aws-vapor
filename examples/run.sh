@@ -3,7 +3,7 @@
 echo "- configure..."
 SCRIPT_DIR=$(cd $(dirname $0) && pwd)
 CONTRIB_DIR="$SCRIPT_DIR/contribs"
-aws-vapor config set defaults contrib $CONTRIB_DIR
+aws-vapor config set defaults contrib ${CONTRIB_DIR}
 
 echo "- current config"
 aws-vapor config list
