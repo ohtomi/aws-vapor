@@ -5,6 +5,8 @@ from collections import OrderedDict
 
 
 class Template(object):
+    """An AWS CloudFormation template builder."""
+
     def __init__(self, version='2010-09-09', description=''):
         self.version = version
         self.description = description
@@ -70,6 +72,8 @@ class Template(object):
 
 
 class Element(object):
+    """This is an abstract base class of the template section."""
+
     def __init__(self, name):
         self.name = name
         self.attrs = OrderedDict()
@@ -83,11 +87,19 @@ class Element(object):
 
 
 class Metadatum(Element):
+    """The `Metadatum` class is a subclass of `Element`,
+    each instance of which represents details about the template.
+    """
+
     def __init__(self, name):
         super(Metadatum, self).__init__(name)
 
 
 class Parameter(Element):
+    """The `Parameter` class is a subclass of `Element`,
+    each instance of which passes values into your template when you create a stack.
+    """
+
     def __init__(self, name):
         super(Parameter, self).__init__(name)
 
@@ -126,6 +138,10 @@ class Parameter(Element):
 
 
 class Mapping(Element):
+    """The `Mapping` class is a subclass of `Element`,
+    each instance of which matches a key to a corresponding set of named values.
+    """
+
     def __init__(self, name):
         super(Mapping, self).__init__(name)
 
@@ -152,6 +168,10 @@ class Mapping(Element):
 
 
 class Condition(Element):
+    """The `Condition` class is a subclass of `Element`,
+    each instance of which includes statements that define when a resource is created or when a property is defined.
+    """
+
     def __init__(self, name):
         super(Condition, self).__init__(name)
 
@@ -164,6 +184,10 @@ class Condition(Element):
 
 
 class Resource(Element):
+    """The `Resource` class is a subclass of `Element`,
+    each instance of which declares the AWS resources that you want to include in the stack, such as an Amazon EC2 instance or an Amazon S3 bucket.
+    """
+
     def __init__(self, name):
         super(Resource, self).__init__(name)
 
@@ -193,6 +217,10 @@ class Resource(Element):
 
 
 class Output(Element):
+    """The `Output` class is a subclass of `Element`,
+    each instance of which declares output values that you can import into other stacks (to create cross-stack references), return in response (to describe stack calls), or view on the AWS CloudFormation console.
+    """
+
     def __init__(self, name):
         super(Output, self).__init__(name)
 
