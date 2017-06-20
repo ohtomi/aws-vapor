@@ -8,7 +8,7 @@ from six.moves.urllib import request
 
 
 class Downloader(Command):
-    """This is a subclass of `cliff.command.Command`,
+    """This is a subclass of :class:`cliff.command.Command`,
     which downloads a contributed recipe from URL."""
 
     def get_parser(self, prog_name):
@@ -18,7 +18,7 @@ class Downloader(Command):
         return parser
 
     def take_action(self, args):
-        """Download a recipe from specified URL and write it to a file under the contrib directory."""
+        """Save a recipe, which were downloaded from specified URL, under the contrib directory."""
         file_url = args.url
         filename = parse.urlsplit(file_url).path.split('/')[-1:][0]
         contrib = utils.get_property_from_config_file('defaults', 'contrib')

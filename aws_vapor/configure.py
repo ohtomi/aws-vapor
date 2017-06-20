@@ -5,7 +5,7 @@ from cliff.command import Command
 
 
 class Configure(Command):
-    """This is a subclass of `cliff.command.Command`,
+    """This is a subclass of :class:`cliff.command.Command`,
     which shows the current configuration or sets a new configuration."""
 
     def get_parser(self, prog_name):

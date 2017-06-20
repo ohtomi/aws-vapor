@@ -87,7 +87,7 @@ class Element(object):
 
 
 class Metadatum(Element):
-    """The `Metadatum` class is a subclass of `Element`,
+    """The `Metadatum` class is a subclass of :class:`Element`,
     each instance of which represents details about the template.
     """
 
@@ -96,7 +96,7 @@ class Metadatum(Element):
 
 
 class Parameter(Element):
-    """The `Parameter` class is a subclass of `Element`,
+    """The `Parameter` class is a subclass of :class:`Element`,
     each instance of which passes values into your template when you create a stack.
     """
 
@@ -138,7 +138,7 @@ class Parameter(Element):
 
 
 class Mapping(Element):
-    """The `Mapping` class is a subclass of `Element`,
+    """The `Mapping` class is a subclass of :class:`Element`,
     each instance of which matches a key to a corresponding set of named values.
     """
 
@@ -168,7 +168,7 @@ class Mapping(Element):
 
 
 class Condition(Element):
-    """The `Condition` class is a subclass of `Element`,
+    """The `Condition` class is a subclass of :class:`Element`,
     each instance of which includes statements that define when a resource is created or when a property is defined.
     """
 
@@ -184,7 +184,7 @@ class Condition(Element):
 
 
 class Resource(Element):
-    """The `Resource` class is a subclass of `Element`,
+    """The `Resource` class is a subclass of :class:`Element`,
     each instance of which declares the AWS resources that you want to include in the stack, such as an Amazon EC2 instance or an Amazon S3 bucket.
     """
 
@@ -217,7 +217,7 @@ class Resource(Element):
 
 
 class Output(Element):
-    """The `Output` class is a subclass of `Element`,
+    """The `Output` class is a subclass of :class:`Element`,
     each instance of which declares output values that you can import into other stacks (to create cross-stack references), return in response (to describe stack calls), or view on the AWS CloudFormation console.
     """
 

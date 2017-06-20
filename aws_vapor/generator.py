@@ -9,7 +9,7 @@ import sys
 
 
 class Generator(Command):
-    """This is a subclass of `cliff.command.Command`,
+    """This is a subclass of :class:`cliff.command.Command`,
     which generates an AWS CloudFormation template from Python objects."""
 
     def get_parser(self, prog_name):
