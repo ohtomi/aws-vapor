@@ -5,9 +5,11 @@ from cliff.command import Command
 
 
 class Configure(Command):
-    """Show the current configuration or set a new configuration."""
+    """This is a subclass of `cliff.command.Command`,
+    which shows the current configuration or sets a new configuration."""
 
     def get_parser(self, prog_name):
+        """Return an :class:`argparse.ArgumentParser`."""
         parser = super(Configure, self).get_parser(prog_name)
         subparsers = parser.add_subparsers(help='sub-command', title='sub-commands')
 
@@ -24,6 +26,7 @@ class Configure(Command):
         return parser
 
     def take_action(self, args):
+        """Show the current configuration or set a new configuration."""
         args.func(args)
 
     def list_configuration(self, args):
@@ -33,8 +36,7 @@ class Configure(Command):
             for key, value in list(entries.items()):
                 self.app.stdout.write('{0} = {1}\n'.format(key, value))
 
-    @staticmethod
-    def set_configuration(args):
+    def set_configuration(self, args):
         save_on_global = args.system
 
         config_directory = [utils.GLOBAL_CONFIG_DIRECTORY] if save_on_global else [utils.LOCAL_CONFIG_DIRECTORY]

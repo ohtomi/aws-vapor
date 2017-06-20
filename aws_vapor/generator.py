@@ -9,9 +9,11 @@ import sys
 
 
 class Generator(Command):
-    """Generate an AWS CloudFormation template from Python objects."""
+    """This is a subclass of `cliff.command.Command`,
+    which generates an AWS CloudFormation template from Python objects."""
 
     def get_parser(self, prog_name):
+        """Return an :class:`argparse.ArgumentParser`."""
         parser = super(Generator, self).get_parser(prog_name)
         parser.add_argument('vaporfile', help='file path of vaporfile')
         parser.add_argument('task', nargs='?', help='task name within vaporfile')
@@ -21,6 +23,7 @@ class Generator(Command):
         return parser
 
     def take_action(self, args):
+        """Generate a template from Python objects."""
         file_path = args.vaporfile
         task_name = args.task
         (vaporfile, task, directory) = self._load_vaporfile(file_path, task_name)
