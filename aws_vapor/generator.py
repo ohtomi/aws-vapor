@@ -23,7 +23,20 @@ class Generator(Command):
         return parser
 
     def take_action(self, args):
-        """Generate a template from Python objects."""
+        """Generate a template from Python objects.
+
+        First load `vaporfile` and run its `task` function to construct a template object.
+        Then locate `contrib` repository and load `recipe`s, apply them to the template object.
+        Finally convert the template object to a JSON string and save the JSON string to an `output` file.
+
+        Args:
+            args (:obj:`dict`): Parsed command line arguments.
+                "vaporfile" is a template module name.
+                "task" is a name of task defined in `vaporfile`.
+                "contrib" is a path to contrib repository.
+                "recipe" is a list of recipe module name.
+                "output" is a path to an output file. if not specified, stdout will be used.
+        """
         file_path = args.vaporfile
         task_name = args.task
         (vaporfile, task, directory) = self._load_vaporfile(file_path, task_name)
@@ -38,8 +51,7 @@ class Generator(Command):
 
         self._output_template(template, args.output)
 
-    @staticmethod
-    def _load_vaporfile(file_path, task_name):
+    def _load_vaporfile(self, file_path, task_name):
         directory, filename = os.path.split(file_path)
 
         edited_module_search_path = False
@@ -57,8 +69,7 @@ class Generator(Command):
 
         return vaporfile, task, directory
 
-    @staticmethod
-    def _apply_recipes(template, contrib, recipes):
+    def _apply_recipes(self, template, contrib, recipes):
         edited_module_search_path = False
         if contrib is not None and contrib not in sys.path:
             sys.path.insert(0, contrib)

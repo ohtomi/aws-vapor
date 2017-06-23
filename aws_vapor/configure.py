@@ -33,7 +33,9 @@ class Configure(Command):
         Or set a new configuration if the sub command is "set".
 
         Args:
-            args (dict): "func" is a method object of this class.
+            args (:obj:`dict`): Parsed command line arguments.
+                "func" is a method object of this class.
+                other keys may be used by "func".
         """
         args.func(args)
 
@@ -41,7 +43,7 @@ class Configure(Command):
         """Show the current configuration.
 
         Args:
-            args (dict): not be used.
+            args (:obj:`dict`): not be used.
         """
         props = utils.load_from_config_file()
         for section, entries in list(props.items()):
@@ -53,10 +55,11 @@ class Configure(Command):
         """Set a new configuration.
 
         Args:
-            args (dict): "system" is a flag whether or not a new configuration will be saved globaly.
-                         "section" is a name of configuration section block.
-                         "key" is a name of configuration property.
-                         "value" is a value of configuration property.
+            args (:obj:`dict`): Parsed command line arguments.
+                "system" is a flag whether or not a new configuration will be saved globaly.
+                "section" is a name of configuration section block.
+                "key" is a name of configuration property.
+                "value" is a value of configuration property.
         """
         save_on_global = args.system
 
