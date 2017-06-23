@@ -18,7 +18,12 @@ class Downloader(Command):
         return parser
 
     def take_action(self, args):
-        """Save a recipe, which were downloaded from specified URL, under the contrib directory."""
+        """Download a recipe from remote URL and save it to a local file under contrib directory.
+
+        Args:
+            args (:obj:`dict`): Parsed command line arguments.
+                "url" is an URL where a recipe will be downloaded from.
+        """
         file_url = args.url
         filename = parse.urlsplit(file_url).path.split('/')[-1:][0]
         contrib = utils.get_property_from_config_file('defaults', 'contrib')

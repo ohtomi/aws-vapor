@@ -18,7 +18,7 @@ class Generator(Command):
         parser.add_argument('vaporfile', help='file path of vaporfile')
         parser.add_argument('task', nargs='?', help='task name within vaporfile')
         parser.add_argument('--contrib', help='contrib repository url')
-        parser.add_argument('--recipe', nargs='+', help='file paths of recipe on contrib repository')
+        parser.add_argument('--recipe', nargs='+', help='file paths of recipe on contrib directory')
         parser.add_argument('--output', help='output file name')
         return parser
 
@@ -26,14 +26,14 @@ class Generator(Command):
         """Generate a template from Python objects.
 
         First load `vaporfile` and run its `task` function to construct a template object.
-        Then locate `contrib` repository and load `recipe`s, apply them to the template object.
+        Then load `recipe` modules under `contrib` directory and apply them to the template object.
         Finally convert the template object to a JSON string and save the JSON string to an `output` file.
 
         Args:
             args (:obj:`dict`): Parsed command line arguments.
                 "vaporfile" is a template module name.
                 "task" is a name of task defined in `vaporfile`.
-                "contrib" is a path to contrib repository.
+                "contrib" is a path to contrib directory.
                 "recipe" is a list of recipe module name.
                 "output" is a path to an output file. if not specified, stdout will be used.
         """
