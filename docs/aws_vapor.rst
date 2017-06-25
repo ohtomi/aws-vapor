@@ -4,6 +4,14 @@ aws-vapor package
 Submodules
 ----------
 
+aws\_vapor\.dsl module
+----------------------
+
+.. automodule:: aws_vapor.dsl
+    :members:
+    :undoc-members:
+    :show-inheritance:
+
 aws\_vapor\.configure module
 ----------------------------
 
@@ -20,26 +28,10 @@ aws\_vapor\.downloader module
     :undoc-members:
     :show-inheritance:
 
-aws\_vapor\.dsl module
-----------------------
-
-.. automodule:: aws_vapor.dsl
-    :members:
-    :undoc-members:
-    :show-inheritance:
-
 aws\_vapor\.generator module
 ----------------------------
 
 .. automodule:: aws_vapor.generator
-    :members:
-    :undoc-members:
-    :show-inheritance:
-
-aws\_vapor\.main module
------------------------
-
-.. automodule:: aws_vapor.main
     :members:
     :undoc-members:
     :show-inheritance:

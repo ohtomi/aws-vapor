@@ -16,7 +16,6 @@ class CliApp(App):
 
 
 def main(argv=sys.argv[1:]):
-    """Run aws-vapor."""
     app = CliApp()
     return app.run(argv)
 
