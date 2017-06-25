@@ -8,7 +8,6 @@ from six.moves import configparser
 
 import os
 
-
 LOCAL_CONFIG_DIRECTORY = CURRENT_DIRECTORY = os.getcwd()
 GLOBAL_CONFIG_DIRECTORY = os.path.expanduser('~/.aws-vapor')
 CONFIG_FILE_NAME = 'config'
@@ -17,6 +16,24 @@ FILE_WRITE_MODE = 'wt' if PY3 else 'wb'
 
 
 def load_from_config_file(config_directories=None):
+    """Load properties from a config file.
+
+    Args:
+        config_directories (:class:`list` of :class:`str`): A path to config directory having 'config'.
+            If not specified, locating 'config' on `GLOBAL_CONFIG_DIRECTORY` and `LOCAL_CONFIG_DIRECTORY`.
+
+    Returns:
+        A :class:`dict` of properties loaded from a config file.
+
+        example::
+
+            {
+                'section': {
+                    'key1': 'value1',
+                    'key2': 'value2'
+                }
+            }
+    """
     if config_directories is None:
         config_directories = [GLOBAL_CONFIG_DIRECTORY, LOCAL_CONFIG_DIRECTORY]
     props = {}
@@ -34,6 +51,17 @@ def load_from_config_file(config_directories=None):
 
 
 def get_property_from_config_file(section, key, default_value=None):
+    """Get a property value from a config file.
+
+    Args:
+        section (:class:`str`): A name of a section.
+        key (:class:`str`): A name of a property.
+        default_value (:class:`str`): A value will be returned when a property is not defined.
+
+    Returns:
+        A property value corresponding to the `key`, which is property name, in the `section`,
+        or `default_value` if the `section` is not defined or the `key` is not defined.
+    """
     props = load_from_config_file()
     if section not in props:
         return default_value
@@ -50,6 +78,12 @@ def get_property_from_config_file(section, key, default_value=None):
 
 
 def save_to_config_file(props, save_on_global=False):
+    """Save or properties to a config file.
+
+    Args:
+        props (:class:`dict`): A :class:`dict` of properties.
+        save_on_global (bool): A flag whether or not a new configuration will be saved globaly.
+    """
     config = configparser.RawConfigParser()
 
     for section, entries in list(props.items()):
