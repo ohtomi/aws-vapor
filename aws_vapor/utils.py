@@ -78,7 +78,7 @@ def get_property_from_config_file(section, key, default_value=None):
 
 
 def save_to_config_file(props, save_on_global=False):
-    """Save or properties to a config file.
+    """Save properties to a config file.
 
     Args:
         props (:class:`dict`): A :class:`dict` of properties.
