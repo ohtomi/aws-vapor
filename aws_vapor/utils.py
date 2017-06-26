@@ -55,7 +55,9 @@ def get_property_from_config_file(section, key, default_value=None):
 
     Args:
         section (:class:`str`): A name of a section.
+
         key (:class:`str`): A name of a property.
+
         default_value (:class:`str`): A value will be returned when a property is not defined.
 
     Returns:
@@ -82,6 +84,7 @@ def save_to_config_file(props, save_on_global=False):
 
     Args:
         props (:class:`dict`): A :class:`dict` of properties.
+
         save_on_global (bool): A flag whether or not a new configuration will be saved globaly.
     """
     config = configparser.RawConfigParser()
@@ -140,6 +143,7 @@ def inject_params(lines, params):
 
     Args:
         lines (:class:`list` of :class:`str`): A file content including placeholders (`{{ ... }}`).
+
         params (:class:`dict`): A :class:`dict` mapping a name of placeholders to a value.
 
     Returns:
