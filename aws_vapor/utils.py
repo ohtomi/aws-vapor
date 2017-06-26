@@ -104,6 +104,14 @@ def save_to_config_file(props, save_on_global=False):
 
 
 def combine_user_data(files):
+    """Make a multipart/* message from a file content.
+
+    Args:
+        files (:class:`list` of :class:`str`): Paths to a file, a content of which will be used as 'UserData'.
+
+    Returns:
+        A multipart/* message attached a file content to.
+    """
     combined_message = MIMEMultipart()
 
     for filename, format_type in files:
@@ -128,6 +136,15 @@ def _replace_params(line, params):
 
 
 def inject_params(lines, params):
+    """Replace placeholders with parameters.
+
+    Args:
+        lines (:class:`list` of :class:`str`): A file content including placeholders (`{{ ... }}`).
+        params (:class:`dict`): A :class:`dict` mapping a name of placeholders to a value.
+
+    Returns:
+        A file content replaced placeholders with parameters.
+    """
     tokens = []
     for line in lines.split('\n'):
         line += '\n'
@@ -138,6 +155,14 @@ def inject_params(lines, params):
 
 @contextmanager
 def open_outputfile(relative_file_path):
+    """Open an output file.
+
+    Args:
+        relative_file_path (:class:`str`): A path to an output file.
+
+    Retruns:
+        A file descriptor of an output file.
+    """
     file_path = os.path.join(CURRENT_DIRECTORY, relative_file_path)
     directory, filename = os.path.split(file_path)
 
