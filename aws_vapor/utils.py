@@ -157,7 +157,6 @@ def inject_params(lines, params):
     return tokens
 
 
-@contextmanager
 def open_outputfile(relative_file_path):
     """Open an output file.
 
@@ -173,5 +172,13 @@ def open_outputfile(relative_file_path):
     if not os.path.exists(directory):
         os.mkdir(directory)
 
-    with open(file_path, mode=FILE_WRITE_MODE) as outputfile:
-        yield outputfile
+    return _open_outputfile(file_path)
+
+
+@contextmanager
+def _open_outputfile(absolute_file_path):
+    with open(absolute_file_path, mode=FILE_WRITE_MODE) as outputfile:
+        try:
+            yield outputfile
+        finally:
+            pass
