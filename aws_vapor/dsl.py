@@ -72,7 +72,7 @@ class Template(object):
 
 
 class Element(object):
-    """This is an abstract base class of the template section."""
+    """This is an abstract base class of a template section."""
 
     def __init__(self, name):
         self.name = name
@@ -83,6 +83,16 @@ class Element(object):
         return self
 
     def to_template(self, template):
+        """Convert `attrs` into a top level section of an AWS CloudFormation template.
+
+        Put a :class:`OrderedDict` of `attrs` to `template`.
+
+        Args:
+            template (:class:`Template`): A template builder.
+
+        Returns:
+            Passed :class:`Template` object.
+        """
         template[self.name] = self.attrs
 
 
