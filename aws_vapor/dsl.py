@@ -79,13 +79,14 @@ class Element(object):
         self.attrs = OrderedDict()
 
     def attributes(self, name, value):
+        """Map `name` to `value`."""
         self.attrs[name] = value
         return self
 
     def to_template(self, template):
         """Convert `attrs` into a top level section of an AWS CloudFormation template.
 
-        Put a :class:`OrderedDict` of `attrs` to `template`.
+        Put a :class:`OrderedDict` of `self.attrs` to `template`.
 
         Args:
             template (:class:`Template`): A template builder.
@@ -114,36 +115,47 @@ class Parameter(Element):
         super(Parameter, self).__init__(name)
 
     def description(self, desc):
+        """Set 'Description' to `desc`."""
         return self.attributes('Description', desc)
 
     def constraint_description(self, desc):
+        """Set 'ConstraintDescription' to `desc`."""
         return self.attributes('ConstraintDescription', desc)
 
     def type(self, name):
+        """Set 'Type' to `name`."""
         return self.attributes('Type', name)
 
     def default(self, value):
+        """Set 'Default' to `value`."""
         return self.attributes('Default', value)
 
     def allowed_values(self, list_of_values):
+        """Set 'AllowedValues' to `list_of_values`."""
         return self.attributes('AllowedValues', list_of_values)
 
     def no_echo(self):
+        """Set 'NoEcho' to `true`."""
         return self.attributes('NoEcho', 'true')
 
     def allowed_pattern(self, pattern):
+        """Set 'AllowedPattern' to `pattern`."""
         return self.attributes('AllowedPattern', pattern)
 
     def max_length(self, length):
+        """Set 'MaxLength' to `length`."""
         return self.attributes('MaxLength', str(length))
 
     def min_length(self, length):
+        """Set `MinLength` to `length`."""
         return self.attributes('MinLength', str(length))
 
     def max_value(self, value):
+        """Set `MaxValue` to `value`."""
         return self.attributes('MaxValue', str(value))
 
     def min_value(self, value):
+        """Set `MinValue` to `value`."""
         return self.attributes('MinValue', str(value))
 
 
