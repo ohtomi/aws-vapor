@@ -79,14 +79,12 @@ class Element(object):
         self.attrs = OrderedDict()
 
     def attributes(self, name, value):
-        """Map `name` to `value`."""
+        """Map `name` to `value` and return `self`."""
         self.attrs[name] = value
         return self
 
     def to_template(self, template):
-        """Convert `attrs` into a top level section of an AWS CloudFormation template.
-
-        Put a :class:`OrderedDict` of `self.attrs` to `template`.
+        """Convert mapped key-value pairs into a top level section of an AWS CloudFormation template.
 
         Args:
             template (:class:`Template`): A template builder.
@@ -115,47 +113,47 @@ class Parameter(Element):
         super(Parameter, self).__init__(name)
 
     def description(self, desc):
-        """Set 'Description' to `desc`."""
+        """Set 'Description' to `desc` and return `self`."""
         return self.attributes('Description', desc)
 
     def constraint_description(self, desc):
-        """Set 'ConstraintDescription' to `desc`."""
+        """Set 'ConstraintDescription' to `desc` and return `self`."""
         return self.attributes('ConstraintDescription', desc)
 
     def type(self, name):
-        """Set 'Type' to `name`."""
+        """Set 'Type' to `name` and return `self`."""
         return self.attributes('Type', name)
 
     def default(self, value):
-        """Set 'Default' to `value`."""
+        """Set 'Default' to `value` and return `self`."""
         return self.attributes('Default', value)
 
     def allowed_values(self, list_of_values):
-        """Set 'AllowedValues' to `list_of_values`."""
+        """Set 'AllowedValues' to `list_of_values` and return `self`."""
         return self.attributes('AllowedValues', list_of_values)
 
     def no_echo(self):
-        """Set 'NoEcho' to `true`."""
+        """Set 'NoEcho' to `true` and return `self`."""
         return self.attributes('NoEcho', 'true')
 
     def allowed_pattern(self, pattern):
-        """Set 'AllowedPattern' to `pattern`."""
+        """Set 'AllowedPattern' to `pattern` and return `self`."""
         return self.attributes('AllowedPattern', pattern)
 
     def max_length(self, length):
-        """Set 'MaxLength' to `length`."""
+        """Set 'MaxLength' to `length` and return `self`."""
         return self.attributes('MaxLength', str(length))
 
     def min_length(self, length):
-        """Set `MinLength` to `length`."""
+        """Set `MinLength` to `length` and return `self`."""
         return self.attributes('MinLength', str(length))
 
     def max_value(self, value):
-        """Set `MaxValue` to `value`."""
+        """Set `MaxValue` to `value` and return `self`."""
         return self.attributes('MaxValue', str(value))
 
     def min_value(self, value):
-        """Set `MinValue` to `value`."""
+        """Set `MinValue` to `value` and return `self`."""
         return self.attributes('MinValue', str(value))
 
 
@@ -168,17 +166,31 @@ class Mapping(Element):
         super(Mapping, self).__init__(name)
 
     def add_category(self, category):
+        """Create a new top level section of 'Mappings' and return `self`.
+
+        Create a new top level section of 'Mappings' if doesn't contain `category`,
+        then set a current selection to `category`.
+
+        Args:
+            category (:class:`str`): A name of a top level section.
+
+        Returns:
+            `self`.
+        """
         self._category = category
         if category not in self.attrs:
             self.attributes(category, OrderedDict())
             return self
+        return self
 
     def add_item(self, key, value):
+        """Map `key` to `value` in a current selection and return `self`."""
         m = self.attrs[self._category]
         m[key] = value
         return self
 
     def find_in_map(self, top_level_key, second_level_key):
+        """Call `Intrinsics.find_in_map` and return its return value."""
         if isinstance(top_level_key, str):
             if top_level_key not in self.attrs:
                 raise ValueError('missing top_level_key. top_level_key: %r' % top_level_key)
@@ -198,10 +210,19 @@ class Condition(Element):
         super(Condition, self).__init__(name)
 
     def expression(self, expression):
+        """Set `expression` and return `self`."""
         self.expression = expression
         return self
 
     def to_template(self, template):
+        """Convert `self.attrs` into a top level section of an AWS CloudFormation template.
+
+        Args:
+            template (:class:`Template`): A template builder.
+
+        Returns:
+            Passed :class:`Template` object.
+        """
         template[self.name] = self.expression
 
 
@@ -214,20 +235,32 @@ class Resource(Element):
         super(Resource, self).__init__(name)
 
     def type(self, name):
+        """Set 'Type' to `name` and return `self`."""
         return self.attributes('Type', name)
 
     def condition(self, condition):
+        """Set 'Condition' to `condition` and return `self`."""
         return self.attributes('Condition', condition)
 
     def metadata(self, metadata):
+        """Set 'Metadata' to `metadata` and return `self`."""
         return self.attributes('Metadata', metadata)
 
     def depends_on(self, resource):
+        """Set 'DependsOn' to a name of `resource` and return `self`."""
         if not hasattr(resource, 'name'):
             raise ValueError('missing name of resource. resource: %r' % resource)
         return self.attributes('DependsOn', resource.name)
 
     def properties(self, props):
+        """Add a :class:`list` of a new key-value pair to 'Properties' and return `self`.
+
+        Args:
+            props (:class:`list`): A :class:`list` of a key-value pair.
+
+        Returns:
+            `self`.
+        """
         m = self.attrs['Properties'] if 'Properties' in self.attrs else OrderedDict()
         for p in props:
             for k, v in list(p.items()):
@@ -235,6 +268,7 @@ class Resource(Element):
         return self.attributes('Properties', m)
 
     def add_property(self, prop):
+        """Add a new key-value pair to 'Properties' and return `self`."""
         return self.properties([prop])
 
 
