@@ -1,9 +1,6 @@
 aws-vapor package
 =================
 
-Submodules
-----------
-
 aws\_vapor\.dsl module
 ----------------------
 
