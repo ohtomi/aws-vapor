@@ -48,7 +48,7 @@ master_doc = 'index'
 
 # General information about the project.
 project = u'aws-vapor'
-copyright = u'2017, Kenichi Ohtomi'
+copyright = u'2018, Kenichi Ohtomi'
 author = u'Kenichi Ohtomi'
 
 # The version info for the project you're documenting, acts as replacement for
