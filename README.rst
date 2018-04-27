@@ -10,7 +10,7 @@ This tool generates AWS CloudFormation template from python object.
 Requirements
 ============
 
-- Python v2.7.x, v3.4.x, v3.5.x, v3.6.x
+- Python 3.6+
 
 How to install
 ==============
