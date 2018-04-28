@@ -3,8 +3,7 @@
 from contextlib import contextmanager
 from email.mime.multipart import MIMEMultipart
 from email.mime.text import MIMEText
-from six import PY3
-from six.moves import configparser
+import configparser
 
 import os
 
@@ -12,7 +11,7 @@ LOCAL_CONFIG_DIRECTORY = CURRENT_DIRECTORY = os.getcwd()
 GLOBAL_CONFIG_DIRECTORY = os.path.expanduser('~/.aws-vapor')
 CONFIG_FILE_NAME = 'config'
 
-FILE_WRITE_MODE = 'wt' if PY3 else 'wb'
+FILE_WRITE_MODE = 'wt'
 
 
 def load_from_config_file(config_directories=None):
