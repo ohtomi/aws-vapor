@@ -17,7 +17,6 @@ from aws_vapor.utils import CURRENT_DIRECTORY
 from aws_vapor.utils import CONFIG_FILE_NAME
 from aws_vapor.utils import FILE_WRITE_MODE
 
-
 TOX_TMP1_DIR = '.tox/tmp1'
 TOX_TMP2_DIR = '.tox/tmp2'
 INVALID_DIR = '.tox/invalid'

@@ -22,7 +22,6 @@ from aws_vapor.dsl import UserData
 from aws_vapor.dsl import CfnInitMetadata
 from aws_vapor.utils import FILE_WRITE_MODE
 
-
 TOX_TMP_DIR = '.tox/tmp'
 X_SHELL_SCRIPT_FILE_NAME = os.path.join(TOX_TMP_DIR, 'x-shellscript.txt')
 X_SHELL_SCRIPT_PARAMS = {
@@ -65,10 +64,23 @@ def test_metadata():
 
 def test_parameter__any():
     template = {}
-    Parameter('abcde').description('description').type('type').default('default').allowed_values(['value_1', 'value_2']).no_echo().to_template(template)
+    Parameter('abcde') \
+        .description('description') \
+        .type('type') \
+        .default('default') \
+        .allowed_values(['value_1', 'value_2']) \
+        .no_echo() \
+        .to_template(template)
     assert_equal(
         template,
-        {'abcde': {'Description': 'description', 'Type': 'type', 'Default': 'default', 'AllowedValues': ['value_1', 'value_2'], 'NoEcho': 'true'}}
+        {
+            'abcde': {
+                'Description': 'description',
+                'Type': 'type', 'Default': 'default',
+                'AllowedValues': ['value_1', 'value_2'],
+                'NoEcho': 'true'
+            }
+        }
     )
 
 
@@ -92,12 +104,16 @@ def test_parameter__number():
 
 def test_mapping__one_category():
     template = {}
-    Mapping('abcde').add_category('category_1').add_item('key_1', 'value_1').add_item('key_2', 'value_2').to_template(template)
+    Mapping('abcde') \
+        .add_category('category_1').add_item('key_1', 'value_1').add_item('key_2', 'value_2') \
+        .to_template(template)
     assert_equal(
         template,
-        {'abcde': {
-            'category_1': {'key_1': 'value_1', 'key_2': 'value_2'}
-        }}
+        {
+            'abcde': {
+                'category_1': {'key_1': 'value_1', 'key_2': 'value_2'}
+            }
+        }
     )
 
 
@@ -150,16 +166,10 @@ def test_condition():
 
 def test_resource__properties():
     template = {}
-    resource = Resource('abcde').type('type').properties([
-        {'key_1': 'value_1'},
-        {'key_2': 'value_2'}
-    ]).to_template(template)
+    Resource('abcde').type('type').properties([{'key_1': 'value_1'}, {'key_2': 'value_2'}]).to_template(template)
     assert_equal(
         template,
-        {'abcde': {'Type': 'type', 'Properties': {
-            'key_1': 'value_1',
-            'key_2': 'value_2'
-        }}}
+        {'abcde': {'Type': 'type', 'Properties': {'key_1': 'value_1', 'key_2': 'value_2'}}}
     )
 
 
@@ -171,16 +181,13 @@ def test_resource__add_property():
     resource.to_template(template)
     assert_equal(
         template,
-        {'abcde': {'Type': 'type', 'Properties': {
-            'key_1': 'value_1',
-            'key_2': 'value_2'
-        }}}
+        {'abcde': {'Type': 'type', 'Properties': {'key_1': 'value_1', 'key_2': 'value_2'}}}
     )
 
 
 def test_resource__depends_on__resource():
     template = {}
-    resource = Resource('abcde').type('type').depends_on(Resource('res_name')).to_template(template)
+    Resource('abcde').type('type').depends_on(Resource('res_name')).to_template(template)
     assert_equal(
         template,
         {'abcde': {'Type': 'type', 'DependsOn': 'res_name'}}
@@ -191,8 +198,9 @@ def test_resource__depends_on__named_object():
     class named_object(object):
         def __init__(self):
             self.name = 'res_name'
+
     template = {}
-    resource = Resource('abcde').type('type').depends_on(named_object()).to_template(template)
+    Resource('abcde').type('type').depends_on(named_object()).to_template(template)
     assert_equal(
         template,
         {'abcde': {'Type': 'type', 'DependsOn': 'res_name'}}
@@ -206,14 +214,15 @@ def test_resource__depends_on__other():
 
 def test_resource__user_data():
     template = {}
-    resource = Resource('abcde').type('type').properties([
-        UserData.of(['value_1', 'value_2', 'value_3'])
-    ]).to_template(template)
+    Resource('abcde') \
+        .type('type') \
+        .properties([UserData.of(['value_1', 'value_2', 'value_3'])]) \
+        .to_template(template)
     assert_equal(
         template,
-        {'abcde': {'Type': 'type', 'Properties': {
-            'UserData': {'Fn::Base64': {'Fn::Join': ['', ['value_1', 'value_2', 'value_3']]}}
-        }}}
+        {'abcde': {'Type': 'type',
+                   'Properties': {'UserData': {'Fn::Base64': {'Fn::Join': ['', ['value_1', 'value_2', 'value_3']]}}}}
+         }
     )
 
 
@@ -228,17 +237,16 @@ def test_resource__metadata__config():
     resource.to_template(template)
     assert_equal(
         template,
-        {'abcde': {'Type': 'type', 'Metadata': {
-            'AWS::CloudFormation::Init': {
-                'config': {
-                    'commands': {
-                        'key_1': {
-                            'command': 'value_1'
-                        }
+        {
+            'abcde': {
+                'Type': 'type',
+                'Metadata': {
+                    'AWS::CloudFormation::Init': {
+                        'config': {'commands': {'key_1': {'command': 'value_1'}}}
                     }
                 }
             }
-        }}}
+        }
     )
 
 
@@ -248,34 +256,30 @@ def test_resource__metadata__config_sets():
     resource.metadata(CfnInitMetadata.of([
         CfnInitMetadata.Init([
             CfnInitMetadata.ConfigSet('default', [
-                CfnInitMetadata.Config('config')
-                    .commands('key_1', 'value_1')
+                CfnInitMetadata.Config('config').commands('key_1', 'value_1')
             ])
         ])
     ]))
     resource.to_template(template)
     assert_equal(
         template,
-        {'abcde': {'Type': 'type', 'Metadata': {
-            'AWS::CloudFormation::Init': {
-                'configSets': {
-                    'default': ['config']
-                },
-                'config': {
-                    'commands': {
-                        'key_1': {
-                            'command': 'value_1'
-                        }
+        {
+            'abcde': {
+                'Type': 'type',
+                'Metadata': {
+                    'AWS::CloudFormation::Init': {
+                        'configSets': {'default': ['config']},
+                        'config': {'commands': {'key_1': {'command': 'value_1'}}}
                     }
                 }
             }
-        }}}
+        }
     )
 
 
 def test_output__standard():
     template = {}
-    output = Output('abcde').description('description').value(Intrinsics.get_att('res_name', 'attr_name')).to_template(template)
+    Output('abcde').description('description').value(Intrinsics.get_att('res_name', 'attr_name')).to_template(template)
     assert_equal(
         template,
         {'abcde': {'Description': 'description', 'Value': {'Fn::GetAtt': ['res_name', 'attr_name']}}}
@@ -284,10 +288,20 @@ def test_output__standard():
 
 def test_output__with_export():
     template = {}
-    output = Output('abcde').description('description').value(Intrinsics.get_att('res_name', 'attr_name')).export('variable_name').to_template(template)
+    Output('abcde') \
+        .description('description') \
+        .value(Intrinsics.get_att('res_name', 'attr_name')) \
+        .export('variable_name') \
+        .to_template(template)
     assert_equal(
         template,
-        {'abcde': {'Description': 'description', 'Value': {'Fn::GetAtt': ['res_name', 'attr_name']}, 'Export': {'Name': 'variable_name'}}}
+        {
+            'abcde': {
+                'Description': 'description',
+                'Value': {'Fn::GetAtt': ['res_name', 'attr_name']},
+                'Export': {'Name': 'variable_name'}
+            }
+        }
     )
 
 
@@ -492,15 +506,34 @@ def test_user_data_of():
 
 def test_cfn_init_metadata_of__config():
     assert_equal(
-        CfnInitMetadata.of([CfnInitMetadata.Init([CfnInitMetadata.Config('config').commands('key_1', 'value_1')])]),
-        {'AWS::CloudFormation::Init': {'config': {'commands': {'key_1': {'command': 'value_1'}}}}}
+        CfnInitMetadata.of([
+            CfnInitMetadata.Init([
+                CfnInitMetadata.Config('config').commands('key_1', 'value_1')
+            ])
+        ]),
+        {
+            'AWS::CloudFormation::Init': {
+                'config': {'commands': {'key_1': {'command': 'value_1'}}}
+            }
+        }
     )
 
 
 def test_cfn_init_metadata_of__config_sets():
     assert_equal(
-        CfnInitMetadata.of([CfnInitMetadata.Init([CfnInitMetadata.ConfigSet('default', [CfnInitMetadata.Config('config').commands('key_1', 'value_1')])])]),
-        {'AWS::CloudFormation::Init': {'configSets': {'default': ['config']}, 'config': {'commands': {'key_1': {'command': 'value_1'}}}}}
+        CfnInitMetadata.of([
+            CfnInitMetadata.Init([
+                CfnInitMetadata.ConfigSet('default', [
+                    CfnInitMetadata.Config('config').commands('key_1', 'value_1')
+                ])
+            ])
+        ]),
+        {
+            'AWS::CloudFormation::Init': {
+                'configSets': {'default': ['config']},
+                'config': {'commands': {'key_1': {'command': 'value_1'}}}
+            }
+        }
     )
 
 
