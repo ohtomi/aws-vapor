@@ -5,7 +5,7 @@ from os import path
 from setuptools import find_packages
 from setuptools import setup
 
-VERSION = '0.0.14'
+import aws_vapor.version as version
 
 
 def load_long_description():
@@ -41,13 +41,13 @@ def load_test_require():
 def main():
     setup(
         name='aws-vapor',
-        version=VERSION,
+        version=version.LABEL,
         description='Generates AWS CloudFormation template from python object',
         long_description=load_long_description(),
         author='Kenichi Ohtomi',
         author_email='ohtomi.kenichi@gmail.com',
         url='https://github.com/ohtomi/aws-vapor/',
-        download_url='https://github.com/ohtomi/aws-vapor/tarball/v{0}'.format(VERSION),
+        download_url='https://github.com/ohtomi/aws-vapor/tarball/v{0}'.format(version.LABEL),
         keywords='aws cloudformation template generator',
         packages=find_packages(),
         install_requires=load_install_requires(),
