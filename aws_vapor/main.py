@@ -5,19 +5,19 @@ from cliff.commandmanager import CommandManager
 
 import sys
 
-import aws_vapor.version as version
+from aws_vapor.version import VersionLabel
 
 
 class CliApp(App):
     def __init__(self):
         super(CliApp, self).__init__(
             description='AWS CloudFormation Template Generator',
-            version=version.LABEL,
+            version=VersionLabel,
             command_manager=CommandManager('aws_vapor.command'),
         )
 
 
-def main(argv=sys.argv[1:]):
+def main(argv=sys.argv[1:]) -> int:
     app = CliApp()
     return app.run(argv)
 

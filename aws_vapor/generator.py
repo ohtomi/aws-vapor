@@ -1,5 +1,8 @@
 # -*- coding: utf-8 -*-
 
+from typing import Tuple
+from argparse import ArgumentParser
+
 from aws_vapor import utils
 from cliff.command import Command
 from json import dumps
@@ -12,7 +15,7 @@ class Generator(Command):
     """This is a subclass of :class:`cliff.command.Command`,
     which generates an AWS CloudFormation template from Python objects."""
 
-    def get_parser(self, prog_name):
+    def get_parser(self, prog_name: str) -> ArgumentParser:
         """Return an :class:`argparse.ArgumentParser`."""
         parser = super(Generator, self).get_parser(prog_name)
         parser.add_argument('vaporfile', help='file path of vaporfile')
@@ -39,7 +42,7 @@ class Generator(Command):
         """
         file_path = args.vaporfile
         task_name = args.task
-        (vaporfile, task, directory) = self._load_vaporfile(file_path, task_name)
+        (vaporfile, task, directory) = Generator._load_vaporfile(file_path, task_name)
 
         os.chdir(directory)
         template = task()
@@ -47,11 +50,12 @@ class Generator(Command):
         if args.recipe is not None:
             contrib = args.contrib or utils.get_property_from_config_file('defaults', 'contrib')
             recipes = args.recipe
-            self._apply_recipes(template, contrib, recipes)
+            Generator._apply_recipes(template, contrib, recipes)
 
         self._output_template(template, args.output)
 
-    def _load_vaporfile(self, file_path, task_name):
+    @staticmethod
+    def _load_vaporfile(file_path: str, task_name: str) -> Tuple[object, function, str]:
         directory, filename = os.path.split(file_path)
 
         edited_module_search_path = False
@@ -69,7 +73,8 @@ class Generator(Command):
 
         return vaporfile, task, directory
 
-    def _apply_recipes(self, template, contrib, recipes):
+    @staticmethod
+    def _apply_recipes(template, contrib, recipes):
         edited_module_search_path = False
         if contrib is not None and contrib not in sys.path:
             sys.path.insert(0, contrib)

@@ -1,5 +1,7 @@
 # -*- coding: utf-8 -*-
 
+from argparse import ArgumentParser
+
 from aws_vapor import utils
 from cliff.command import Command
 
@@ -8,7 +10,7 @@ class Configure(Command):
     """This is a subclass of :class:`cliff.command.Command`,
     which shows the current configuration or sets a new configuration."""
 
-    def get_parser(self, prog_name):
+    def get_parser(self, prog_name: str) -> ArgumentParser:
         """Return an :class:`argparse.ArgumentParser`."""
         parser = super(Configure, self).get_parser(prog_name)
         subparsers = parser.add_subparsers(help='sub-command', title='sub-commands')
@@ -17,7 +19,7 @@ class Configure(Command):
         list_subparser.set_defaults(func=self.list_configuration)
 
         set_subparser = subparsers.add_parser('set', help='sets key to specified value')
-        set_subparser.set_defaults(func=self.set_configuration)
+        set_subparser.set_defaults(func=Configure.set_configuration)
         set_subparser.add_argument('--system', action='store_true', default=False)
         set_subparser.add_argument('section')
         set_subparser.add_argument('key')
@@ -51,7 +53,8 @@ class Configure(Command):
             for key, value in list(entries.items()):
                 self.app.stdout.write('{0} = {1}\n'.format(key, value))
 
-    def set_configuration(self, args):
+    @staticmethod
+    def set_configuration(args):
         """Set a new configuration.
 
         Args:

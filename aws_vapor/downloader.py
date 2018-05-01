@@ -1,5 +1,7 @@
 # -*- coding: utf-8 -*-
 
+from argparse import ArgumentParser
+
 from aws_vapor import utils
 from cliff.command import Command
 from os import path
@@ -10,7 +12,7 @@ class Downloader(Command):
     """This is a subclass of :class:`cliff.command.Command`,
     which downloads a contributed recipe from URL."""
 
-    def get_parser(self, prog_name):
+    def get_parser(self, prog_name: str) -> ArgumentParser:
         """Return an :class:`argparse.ArgumentParser`."""
         parser = super(Downloader, self).get_parser(prog_name)
         parser.add_argument('url', help='url of recipe')
@@ -26,7 +28,7 @@ class Downloader(Command):
         file_url = args.url
         filename = parse.urlsplit(file_url).path.split('/')[-1:][0]
         contrib = utils.get_property_from_config_file('defaults', 'contrib')
-        self._download_recipe(file_url, filename, contrib)
+        Downloader._download_recipe(file_url, filename, contrib)
 
     @staticmethod
     def _download_recipe(file_url, filename, contrib):

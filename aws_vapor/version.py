@@ -1,3 +1,3 @@
 # -*- coding: utf-8 -*-
 
-LABEL = '0.0.14'
+VersionLabel: str = '0.0.14'
