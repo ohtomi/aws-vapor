@@ -2,6 +2,10 @@
 aws-vapor
 *********
 
+.. image:: https://readthedocs.org/projects/aws-vapor/badge/?version=latest
+   :target: http://aws-vapor.readthedocs.io/en/latest/?badge=latest
+   :alt: Documentation Status
+
 Description
 ===========
 
