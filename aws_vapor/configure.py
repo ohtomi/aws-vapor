@@ -7,11 +7,9 @@ from cliff.command import Command
 
 
 class Configure(Command):
-    """This is a subclass of :class:`cliff.command.Command`,
-    which shows the current configuration or sets a new configuration."""
+    """This class shows the current configuration or sets a new configuration."""
 
     def get_parser(self, prog_name: str) -> ArgumentParser:
-        """Return an :class:`argparse.ArgumentParser`."""
         parser = super(Configure, self).get_parser(prog_name)
         subparsers = parser.add_subparsers(help='sub-command', title='sub-commands')
 
@@ -28,17 +26,6 @@ class Configure(Command):
         return parser
 
     def take_action(self, args):
-        """Show the current configuration or set a new configuration.
-
-        The first parsed command line argument is a sub command name.
-        Show the current configuration if the sub command is "list",
-        Or set a new configuration if the sub command is "set".
-
-        Args:
-            args (:obj:`dict`): Parsed command line arguments.
-                "func" is a method object of this class.
-                other keys may be used by "func".
-        """
         args.func(args)
 
     def list_configuration(self, args):

@@ -12,11 +12,9 @@ import sys
 
 
 class Generator(Command):
-    """This is a subclass of :class:`cliff.command.Command`,
-    which generates an AWS CloudFormation template from Python objects."""
+    """This class generates an AWS CloudFormation template from Python objects."""
 
     def get_parser(self, prog_name: str) -> ArgumentParser:
-        """Return an :class:`argparse.ArgumentParser`."""
         parser = super(Generator, self).get_parser(prog_name)
         parser.add_argument('vaporfile', help='file path of vaporfile')
         parser.add_argument('task', nargs='?', help='task name within vaporfile')
@@ -26,20 +24,6 @@ class Generator(Command):
         return parser
 
     def take_action(self, args):
-        """Generate a template from Python objects.
-
-        First load `vaporfile` and run its `task` function to construct a template object.
-        Then load `recipe` modules under `contrib` directory and apply them to the template object.
-        Finally convert the template object to a JSON string and save the JSON string to an `output` file.
-
-        Args:
-            args (:obj:`dict`): Parsed command line arguments.
-                "vaporfile" is a template module name.
-                "task" is a name of task defined in `vaporfile`.
-                "contrib" is a path to contrib directory.
-                "recipe" is a list of recipe module name.
-                "output" is a path to an output file. if not specified, stdout will be used.
-        """
         file_path = args.vaporfile
         task_name = args.task
         (vaporfile, task, directory) = Generator._load_vaporfile(file_path, task_name)
