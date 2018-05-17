@@ -3,6 +3,10 @@ TEST_ENVIRONMENT = py36
 
 default: test
 
+init:
+	pip install pipenv --upgrade
+	pipenv install --dev --skip-lock
+
 test: pipenv-lock
 	tox -e ${TEST_ENVIRONMENT}
 
@@ -19,7 +23,7 @@ release:
 	twine --help
 
 pipenv-install:
-	pipenv install --dev
+	pipenv install --dev --skip-lock
 
 pipenv-lock:
 	pipenv lock -r >requirements.txt
