@@ -2,6 +2,10 @@
 aws-vapor
 *********
 
+.. image:: https://travis-ci.org/ohtomi/aws-vapor.svg?branch=eliminate-old-python-support
+   :target: https://travis-ci.org/ohtomi/aws-vapor
+   :alt: Build Status
+
 .. image:: https://readthedocs.org/projects/aws-vapor/badge/?version=latest
    :target: http://aws-vapor.readthedocs.io/en/latest/?badge=latest
    :alt: Documentation Status
