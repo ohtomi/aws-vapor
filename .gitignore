@@ -1,11 +1,9 @@
 build/
 dist/
+venv/
 .venv/
 .tox/
+.idea/
 *.egg-info/
 *.pyc
 .python-version
-.idea/
-venv/
-requirements.txt
-requirements-test.txt
