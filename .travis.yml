@@ -4,6 +4,6 @@ python:
   - "3.7-dev"
 install:
   - pip install pipenv --upgrade
-  - make pipenv-install pipenv-lock
+  - pip install tox --upgrade
 script:
   - tox

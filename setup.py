@@ -17,25 +17,27 @@ def load_long_description():
 
 
 def load_install_requires():
-    return [
-        name.rstrip()
-        for name in codecs.open(
-            path.join(path.abspath(path.dirname(__file__)), 'requirements.txt'),
-            mode='r',
-            encoding='utf-8'
-        ).readlines()
-    ]
+    return ['cliff']
+    # return [
+    #     name.rstrip()
+    #     for name in codecs.open(
+    #         path.join(path.abspath(path.dirname(__file__)), 'requirements.txt'),
+    #         mode='r',
+    #         encoding='utf-8'
+    #     ).readlines()
+    # ]
 
 
-def load_test_require():
-    return [
-        name.rstrip()
-        for name in codecs.open(
-            path.join(path.abspath(path.dirname(__file__)), 'requirements-test.txt'),
-            mode='r',
-            encoding='utf-8'
-        ).readlines()
-    ]
+def load_tests_require():
+    return ['nose']
+    # return [
+    #     name.rstrip()
+    #     for name in codecs.open(
+    #         path.join(path.abspath(path.dirname(__file__)), 'requirements-test.txt'),
+    #         mode='r',
+    #         encoding='utf-8'
+    #     ).readlines()
+    # ]
 
 
 def main():
@@ -51,7 +53,7 @@ def main():
         keywords='aws cloudformation template generator',
         packages=find_packages(),
         install_requires=load_install_requires(),
-        test_require=load_test_require(),
+        tests_require=load_tests_require(),
         test_suite='nose.collector',
         entry_points={
             'console_scripts':
