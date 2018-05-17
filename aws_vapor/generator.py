@@ -39,7 +39,7 @@ class Generator(Command):
         self._output_template(template, args.output)
 
     @staticmethod
-    def _load_vaporfile(file_path: str, task_name: str) -> Tuple[object, function, str]:
+    def _load_vaporfile(file_path: str, task_name: str) -> Tuple[object, any, str]:
         directory, filename = os.path.split(file_path)
 
         edited_module_search_path = False
