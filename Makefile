@@ -16,9 +16,9 @@ package: clean
 	python3 setup.py sdist bdist_wheel
 
 release:
-	twine --help
+	twine upload --repository pypi dist/*
 
-pipenv-install:
-	pipenv install --dev --skip-lock
+release-test:
+	twine upload --repository pypitest dist/*
 
-.PHONY: test clean install package release pipenv-install
+.PHONY: test clean install package release release-test
