@@ -8,6 +8,7 @@ cliff = "*"
 
 [dev-packages]
 nose = "*"
+tox = "*"
 
 [requires]
 python_version = "3.6"
