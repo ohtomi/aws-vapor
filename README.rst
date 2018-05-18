@@ -4,15 +4,19 @@ aws-vapor
 
 .. image:: https://img.shields.io/pypi/v/aws-vapor.svg
    :target: https://pypi.org/project/aws-vapor
+   :alt: PyPI
 
 .. image:: https://img.shields.io/pypi/status/aws-vapor.svg
    :target: https://pypi.org/project/aws-vapor
+   :alt: Status
 
 .. image:: https://img.shields.io/pypi/l/aws-vapor.svg
    :target: https://pypi.org/project/aws-vapor
+   :alt: License
 
 .. image:: https://img.shields.io/pypi/pyversions/aws-vapor.svg
    :target: https://pypi.org/project/aws-vapor
+   :alt: Python Versions
 
 .. image:: https://travis-ci.org/ohtomi/aws-vapor.svg?branch=eliminate-old-python-support
    :target: https://travis-ci.org/ohtomi/aws-vapor
