@@ -1,8 +1,8 @@
 language: python
 python:
-  - "3.6"
+    - "3.6"
 install:
-  - pip install pipenv --upgrade
-  - pip install tox --upgrade
+    - pip install pipenv --upgrade
+    - pip install tox --upgrade
 script:
-  - tox
+    - tox
