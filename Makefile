@@ -1,13 +1,13 @@
-MAIN_PACKAGE = aws_vapor
-TEST_ENVIRONMENT = py36
+PACKAGE_NAME = aws_vapor
+TEST_ENVIRONMENTS = py36
 
 default: test
 
 test:
-	tox -e ${TEST_ENVIRONMENT}
+	tox -e ${TEST_ENVIRONMENTS}
 
 clean:
-	@rm -fr ${MAIN_PACKAGE}.egg-info/* build/* dist/*
+	@rm -fr ${PACKAGE_NAME}.egg-info/* build/* dist/*
 
 install: clean
 	python3 setup.py install
@@ -15,10 +15,10 @@ install: clean
 package: clean
 	python3 setup.py sdist bdist_wheel
 
+pre-release:
+	twine upload --repository pypitest dist/*
+
 release:
 	twine upload --repository pypi dist/*
 
-release-test:
-	twine upload --repository pypitest dist/*
-
-.PHONY: test clean install package release release-test
+.PHONY: test clean install package pre-release release
