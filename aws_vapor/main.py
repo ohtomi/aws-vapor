@@ -11,7 +11,7 @@ import aws_vapor.meta as meta
 class CliApp(App):
     def __init__(self):
         super(CliApp, self).__init__(
-            description=meta.description,
+            description='Generates AWS CloudFormation template from python object',
             version=meta.version,
             command_manager=CommandManager('aws_vapor.command'),
         )
