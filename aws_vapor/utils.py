@@ -84,7 +84,7 @@ def save_to_config_file(props, save_on_global=False):
     Args:
         props (:class:`dict`): A :class:`dict` of properties.
 
-        save_on_global (bool): A flag whether or not a new configuration will be saved globaly.
+        save_on_global (bool): A flag whether or not a new configuration will be saved globally.
     """
     config = configparser.RawConfigParser()
 

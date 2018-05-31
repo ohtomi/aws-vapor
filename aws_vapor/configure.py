@@ -46,7 +46,7 @@ class Configure(Command):
 
         Args:
             args (:obj:`dict`): Parsed command line arguments.
-                "system" is a flag whether or not a new configuration will be saved globaly.
+                "system" is a flag whether or not a new configuration will be saved globally.
                 "section" is a name of configuration section block.
                 "key" is a name of configuration property.
                 "value" is a value of configuration property.
