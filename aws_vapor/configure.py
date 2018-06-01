@@ -14,10 +14,10 @@ class Configure(Command):
         subparsers = parser.add_subparsers(help='sub-command', title='sub-commands')
 
         list_subparser = subparsers.add_parser('list', help='lists all values within config file')
-        list_subparser.set_defaults(func=self.list_configuration)
+        list_subparser.set_defaults(func=list_configuration, command=self)
 
         set_subparser = subparsers.add_parser('set', help='sets key to specified value')
-        set_subparser.set_defaults(func=Configure.set_configuration)
+        set_subparser.set_defaults(func=set_configuration)
         set_subparser.add_argument('--system', action='store_true', default=False)
         set_subparser.add_argument('section')
         set_subparser.add_argument('key')
@@ -28,37 +28,38 @@ class Configure(Command):
     def take_action(self, args):
         args.func(args)
 
-    def list_configuration(self, args):
-        """Show the current configuration.
 
-        Args:
-            args (:obj:`dict`): not be used.
-        """
-        props = utils.load_from_config_file()
-        for section, entries in list(props.items()):
-            self.app.stdout.write('[{0}]\n'.format(section))
-            for key, value in list(entries.items()):
-                self.app.stdout.write('{0} = {1}\n'.format(key, value))
+def list_configuration(args):
+    """Show the current configuration.
 
-    @staticmethod
-    def set_configuration(args):
-        """Set a new configuration.
+    Args:
+        args (:obj:`dict`): not be used.
+    """
+    props = utils.load_from_config_file()
+    for section, entries in list(props.items()):
+        args.command.app.stdout.write('[{0}]\n'.format(section))
+        for key, value in list(entries.items()):
+            args.command.app.stdout.write('{0} = {1}\n'.format(key, value))
 
-        Args:
-            args (:obj:`dict`): Parsed command line arguments.
-                "system" is a flag whether or not a new configuration will be saved globally.
-                "section" is a name of configuration section block.
-                "key" is a name of configuration property.
-                "value" is a value of configuration property.
-        """
-        save_on_global = args.system
 
-        config_directory = [utils.GLOBAL_CONFIG_DIRECTORY] if save_on_global else [utils.LOCAL_CONFIG_DIRECTORY]
-        props = utils.load_from_config_file(config_directories=config_directory)
+def set_configuration(args):
+    """Set a new configuration.
 
-        if args.section not in props:
-            props[args.section] = {}
-        section = props[args.section]
-        section[args.key] = args.value
+    Args:
+        args (:obj:`dict`): Parsed command line arguments.
+            "system" is a flag whether or not a new configuration will be saved globally.
+            "section" is a name of configuration section block.
+            "key" is a name of configuration property.
+            "value" is a value of configuration property.
+    """
+    save_on_global = args.system
 
-        utils.save_to_config_file(props, save_on_global)
+    config_directory = [utils.GLOBAL_CONFIG_DIRECTORY] if save_on_global else [utils.LOCAL_CONFIG_DIRECTORY]
+    props = utils.load_from_config_file(config_directories=config_directory)
+
+    if args.section not in props:
+        props[args.section] = {}
+    section = props[args.section]
+    section[args.key] = args.value
+
+    utils.save_to_config_file(props, save_on_global)

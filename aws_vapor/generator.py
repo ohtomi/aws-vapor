@@ -26,7 +26,7 @@ class Generator(Command):
     def take_action(self, args):
         file_path = args.vaporfile
         task_name = args.task
-        (vaporfile, task, directory) = Generator._load_vaporfile(file_path, task_name)
+        (vaporfile, task, directory) = load_vaporfile(file_path, task_name)
 
         os.chdir(directory)
         template = task()
@@ -34,49 +34,50 @@ class Generator(Command):
         if args.recipe is not None:
             contrib = args.contrib or utils.get_property_from_config_file('defaults', 'contrib')
             recipes = args.recipe
-            Generator._apply_recipes(template, contrib, recipes)
+            apply_recipes(template, contrib, recipes)
 
-        self._output_template(template, args.output)
+        output_template(self, template, args.output)
 
-    @staticmethod
-    def _load_vaporfile(file_path: str, task_name: str) -> Tuple[object, any, str]:
-        directory, filename = os.path.split(file_path)
 
-        edited_module_search_path = False
-        if directory not in sys.path:
-            sys.path.insert(0, directory)
-            edited_module_search_path = True
+def load_vaporfile(file_path: str, task_name: str) -> Tuple[object, any, str]:
+    directory, filename = os.path.split(file_path)
 
-        vaporfile = __import__(os.path.splitext(filename)[0])
+    edited_module_search_path = False
+    if directory not in sys.path:
+        sys.path.insert(0, directory)
+        edited_module_search_path = True
 
-        if edited_module_search_path:
-            del sys.path[0]
+    vaporfile = __import__(os.path.splitext(filename)[0])
 
-        task_name = task_name or 'generate'
-        task = getattr(vaporfile, task_name)
+    if edited_module_search_path:
+        del sys.path[0]
 
-        return vaporfile, task, directory
+    task_name = task_name or 'generate'
+    task = getattr(vaporfile, task_name)
 
-    @staticmethod
-    def _apply_recipes(template, contrib, recipes):
-        edited_module_search_path = False
-        if contrib is not None and contrib not in sys.path:
-            sys.path.insert(0, contrib)
-            edited_module_search_path = True
+    return vaporfile, task, directory
 
-        for recipe in recipes:
-            recipefile = __import__(os.path.splitext(recipe)[0])
-            task = getattr(recipefile, 'recipe')
-            task(template)
 
-        if edited_module_search_path:
-            del sys.path[0]
+def apply_recipes(template, contrib, recipes):
+    edited_module_search_path = False
+    if contrib is not None and contrib not in sys.path:
+        sys.path.insert(0, contrib)
+        edited_module_search_path = True
 
-    def _output_template(self, template, relative_file_path=None):
-        json_document = dumps(template.to_template(), indent=2, separators=(',', ': '))
+    for recipe in recipes:
+        recipefile = __import__(os.path.splitext(recipe)[0])
+        task = getattr(recipefile, 'recipe')
+        task(template)
 
-        if relative_file_path is None:
-            self.app.stdout.write('{0}\n'.format(json_document))
-        else:
-            with utils.open_outputfile(relative_file_path) as outputfile:
-                outputfile.write('{0}\n'.format(json_document))
+    if edited_module_search_path:
+        del sys.path[0]
+
+
+def output_template(command, template, relative_file_path=None):
+    json_document = dumps(template.to_template(), indent=2, separators=(',', ': '))
+
+    if relative_file_path is None:
+        command.app.stdout.write('{0}\n'.format(json_document))
+    else:
+        with utils.open_outputfile(relative_file_path) as outputfile:
+            outputfile.write('{0}\n'.format(json_document))

@@ -20,9 +20,9 @@ class Downloader(Command):
         file_url = args.url
         filename = parse.urlsplit(file_url).path.split('/')[-1:][0]
         contrib = utils.get_property_from_config_file('defaults', 'contrib')
-        Downloader._download_recipe(file_url, filename, contrib)
+        download_recipe(file_url, filename, contrib)
 
-    @staticmethod
-    def _download_recipe(file_url, filename, contrib):
-        file_path = path.join(contrib, filename)
-        request.urlretrieve(file_url, file_path)
+
+def download_recipe(file_url, filename, contrib):
+    file_path = path.join(contrib, filename)
+    request.urlretrieve(file_url, file_path)
