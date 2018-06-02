@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 
+from typing import Any
 from argparse import ArgumentParser
 
 from aws_vapor import utils
@@ -18,23 +19,23 @@ class Configure(Command):
 
         set_subparser = subparsers.add_parser('set', help='sets key to specified value')
         set_subparser.set_defaults(func=set_configuration)
-        set_subparser.add_argument('--system', action='store_true', default=False)
-        set_subparser.add_argument('section')
-        set_subparser.add_argument('key')
-        set_subparser.add_argument('value')
+        set_subparser.add_argument('--system', action='store_true', default=False,
+                                   help='a flag whether or not a new configuration will be saved globally')
+        set_subparser.add_argument('section',
+                                   help='a name of a configuration section block')
+        set_subparser.add_argument('key',
+                                   help='a name of a configuration property')
+        set_subparser.add_argument('value',
+                                   help='a value of a configuration property')
 
         return parser
 
-    def take_action(self, args):
+    def take_action(self, args: Any):
         args.func(args)
 
 
-def list_configuration(args):
-    """Show the current configuration.
-
-    Args:
-        args (:obj:`dict`): not be used.
-    """
+def list_configuration(args: Any):
+    """Show the current configuration."""
     props = utils.load_from_config_file()
     for section, entries in list(props.items()):
         args.command.app.stdout.write('[{0}]\n'.format(section))
@@ -42,16 +43,8 @@ def list_configuration(args):
             args.command.app.stdout.write('{0} = {1}\n'.format(key, value))
 
 
-def set_configuration(args):
-    """Set a new configuration.
-
-    Args:
-        args (:obj:`dict`): Parsed command line arguments.
-            "system" is a flag whether or not a new configuration will be saved globally.
-            "section" is a name of configuration section block.
-            "key" is a name of configuration property.
-            "value" is a value of configuration property.
-    """
+def set_configuration(args: Any):
+    """Set a new configuration."""
     save_on_global = args.system
 
     config_directory = [utils.GLOBAL_CONFIG_DIRECTORY] if save_on_global else [utils.LOCAL_CONFIG_DIRECTORY]

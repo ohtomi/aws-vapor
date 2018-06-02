@@ -1,9 +1,9 @@
 # -*- coding: utf-8 -*-
 
-from typing import Tuple
+from typing import Any, List, Tuple
 from argparse import ArgumentParser
 
-from aws_vapor import utils
+from aws_vapor import dsl, utils
 from cliff.command import Command
 from json import dumps
 
@@ -16,14 +16,19 @@ class Generator(Command):
 
     def get_parser(self, prog_name: str) -> ArgumentParser:
         parser = super(Generator, self).get_parser(prog_name)
-        parser.add_argument('vaporfile', help='file path of vaporfile')
-        parser.add_argument('task', nargs='?', help='task name within vaporfile')
-        parser.add_argument('--contrib', help='contrib repository url')
-        parser.add_argument('--recipe', nargs='+', help='file paths of recipe on contrib directory')
-        parser.add_argument('--output', help='output file name')
+        parser.add_argument('vaporfile',
+                            help='a file path to vaporfile')
+        parser.add_argument('task', nargs='?',
+                            help='a task name defined in vaporfile')
+        parser.add_argument('--contrib',
+                            help='a module search path of contrib recipes')
+        parser.add_argument('--recipe', nargs='+',
+                            help='a module name of contrib recipe')
+        parser.add_argument('--output',
+                            help='an output file name')
         return parser
 
-    def take_action(self, args):
+    def take_action(self, args: Any):
         file_path = args.vaporfile
         task_name = args.task
         (vaporfile, task, directory) = load_vaporfile(file_path, task_name)
@@ -58,7 +63,7 @@ def load_vaporfile(file_path: str, task_name: str) -> Tuple[object, any, str]:
     return vaporfile, task, directory
 
 
-def apply_recipes(template, contrib, recipes):
+def apply_recipes(template: dsl.Template, contrib: str, recipes: List[str]):
     edited_module_search_path = False
     if contrib is not None and contrib not in sys.path:
         sys.path.insert(0, contrib)
@@ -73,7 +78,7 @@ def apply_recipes(template, contrib, recipes):
         del sys.path[0]
 
 
-def output_template(command, template, relative_file_path=None):
+def output_template(command: Command, template: dsl.Template, relative_file_path: str = None):
     json_document = dumps(template.to_template(), indent=2, separators=(',', ': '))
 
     if relative_file_path is None:
