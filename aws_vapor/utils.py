@@ -1,5 +1,8 @@
 # -*- coding: utf-8 -*-
 
+from typing import List, Tuple
+from io import TextIOBase
+
 from contextlib import contextmanager
 from email.mime.multipart import MIMEMultipart
 from email.mime.text import MIMEText
@@ -14,15 +17,15 @@ CONFIG_FILE_NAME = 'config'
 FILE_WRITE_MODE = 'wt'
 
 
-def load_from_config_file(config_directories=None):
+def load_from_config_file(config_directories: List[str] = None) -> dict:
     """Load properties from a config file.
 
     Args:
-        config_directories (:class:`list` of :class:`str`): A path to config directory having 'config'.
+        config_directories: A path to config directory having 'config'.
             If not specified, locating 'config' on `GLOBAL_CONFIG_DIRECTORY` and `LOCAL_CONFIG_DIRECTORY`.
 
     Returns:
-        A :class:`dict` of properties loaded from a config file.
+        A mapping of properties loaded from a config file.
 
         example::
 
@@ -49,15 +52,15 @@ def load_from_config_file(config_directories=None):
     return props
 
 
-def get_property_from_config_file(section, key, default_value=None):
+def get_property_from_config_file(section: str, key: str, default_value: str = None) -> str:
     """Get a property value from a config file.
 
     Args:
-        section (:class:`str`): A name of a section.
+        section: A name of a section.
 
-        key (:class:`str`): A name of a property.
+        key: A name of a property.
 
-        default_value (:class:`str`): A value will be returned when a property is not defined.
+        default_value: A value will be returned when a property is not defined.
 
     Returns:
         A property value corresponding to the `key`, which is property name, in the `section`,
@@ -78,13 +81,13 @@ def get_property_from_config_file(section, key, default_value=None):
     return value
 
 
-def save_to_config_file(props, save_on_global=False):
+def save_to_config_file(props: dict, save_on_global: bool = False):
     """Save properties to a config file.
 
     Args:
-        props (:class:`dict`): A :class:`dict` of properties.
+        props: A mapping of properties.
 
-        save_on_global (bool): A flag whether or not a new configuration will be saved globally.
+        save_on_global: A flag whether or not a new configuration will be saved globally.
     """
     config = configparser.RawConfigParser()
 
@@ -105,11 +108,11 @@ def save_to_config_file(props, save_on_global=False):
             config.write(configfile)
 
 
-def combine_user_data(files):
+def combine_user_data(files: List[Tuple[str, str]]) -> str:
     """Make a multipart/* message from a file content.
 
     Args:
-        files (:class:`list` of :class:`str`): Paths to a file, a content of which will be used as 'UserData'.
+        files: Paths to a file, a content of which will be used as 'UserData'.
 
     Returns:
         A multipart/* message attached a file content to.
@@ -126,7 +129,7 @@ def combine_user_data(files):
     return str(combined_message)
 
 
-def _replace_params(line, params):
+def _replace_params(line: str, params: dict) -> List[str]:
     for k, v in list(params.items()):
         key = '{{ %s }}' % k
         if line.find(key) != -1:
@@ -137,13 +140,13 @@ def _replace_params(line, params):
     return [line]
 
 
-def inject_params(lines, params):
+def inject_params(lines: str, params: dict) -> List[str]:
     """Replace placeholders with parameters.
 
     Args:
-        lines (:class:`list` of :class:`str`): A file content including placeholders (`{{ ... }}`).
+        lines: A file content including placeholders (`{{ ... }}`).
 
-        params (:class:`dict`): A :class:`dict` mapping a name of placeholders to a value.
+        params: A mapping a name of placeholders to a value.
 
     Returns:
         A file content replaced placeholders with parameters.
@@ -156,11 +159,11 @@ def inject_params(lines, params):
     return tokens
 
 
-def open_outputfile(relative_file_path):
+def open_outputfile(relative_file_path: str) -> TextIOBase:
     """Open an output file.
 
     Args:
-        relative_file_path (:class:`str`): A path to an output file.
+        relative_file_path: A path to an output file.
 
     Retruns:
         A file descriptor of an output file.
@@ -175,7 +178,7 @@ def open_outputfile(relative_file_path):
 
 
 @contextmanager
-def _open_outputfile(absolute_file_path):
+def _open_outputfile(absolute_file_path: str) -> TextIOBase:
     with open(absolute_file_path, mode=FILE_WRITE_MODE) as outputfile:
         try:
             yield outputfile
