@@ -14,8 +14,6 @@ LOCAL_CONFIG_DIRECTORY = CURRENT_DIRECTORY = os.getcwd()
 GLOBAL_CONFIG_DIRECTORY = os.path.expanduser('~/.aws-vapor')
 CONFIG_FILE_NAME = 'config'
 
-FILE_WRITE_MODE = 'wt'
-
 
 def load_from_config_file(config_directories: List[str] = None) -> dict:
     """Load properties from a config file.
@@ -100,11 +98,11 @@ def save_to_config_file(props: dict, save_on_global: bool = False):
         if not os.path.exists(GLOBAL_CONFIG_DIRECTORY):
             os.mkdir(GLOBAL_CONFIG_DIRECTORY)
 
-        with open(os.path.join(GLOBAL_CONFIG_DIRECTORY, CONFIG_FILE_NAME), mode=FILE_WRITE_MODE) as configfile:
+        with open(os.path.join(GLOBAL_CONFIG_DIRECTORY, CONFIG_FILE_NAME), mode='wt') as configfile:
             config.write(configfile)
 
     else:
-        with open(os.path.join(LOCAL_CONFIG_DIRECTORY, CONFIG_FILE_NAME), mode=FILE_WRITE_MODE) as configfile:
+        with open(os.path.join(LOCAL_CONFIG_DIRECTORY, CONFIG_FILE_NAME), mode='wt') as configfile:
             config.write(configfile)
 
 
@@ -159,13 +157,13 @@ def inject_params(lines: str, params: dict) -> List[str]:
     return tokens
 
 
-def open_outputfile(relative_file_path: str) -> TextIOBase:
+def open_output_file(relative_file_path: str) -> TextIOBase:
     """Open an output file.
 
     Args:
         relative_file_path: A path to an output file.
 
-    Retruns:
+    Returns:
         A file descriptor of an output file.
     """
     file_path = os.path.join(CURRENT_DIRECTORY, relative_file_path)
@@ -174,13 +172,13 @@ def open_outputfile(relative_file_path: str) -> TextIOBase:
     if not os.path.exists(directory):
         os.mkdir(directory)
 
-    return _open_outputfile(file_path)
+    return _open_output_file(file_path)
 
 
 @contextmanager
-def _open_outputfile(absolute_file_path: str) -> TextIOBase:
-    with open(absolute_file_path, mode=FILE_WRITE_MODE) as outputfile:
+def _open_output_file(absolute_file_path: str) -> TextIOBase:
+    with open(absolute_file_path, mode='wt') as output_file:
         try:
-            yield outputfile
+            yield output_file
         finally:
             pass

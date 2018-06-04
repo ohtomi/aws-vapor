@@ -12,10 +12,9 @@ from aws_vapor.utils import get_property_from_config_file
 from aws_vapor.utils import save_to_config_file
 from aws_vapor.utils import combine_user_data
 from aws_vapor.utils import inject_params
-from aws_vapor.utils import open_outputfile
+from aws_vapor.utils import open_output_file
 from aws_vapor.utils import CURRENT_DIRECTORY
 from aws_vapor.utils import CONFIG_FILE_NAME
-from aws_vapor.utils import FILE_WRITE_MODE
 
 TOX_TMP1_DIR = '.tox/tmp1'
 TOX_TMP2_DIR = '.tox/tmp2'
@@ -28,7 +27,7 @@ def setup():
             os.mkdir(directory)
 
         config_file = os.path.join(directory, CONFIG_FILE_NAME)
-        with open(config_file, mode=FILE_WRITE_MODE) as fh:
+        with open(config_file, mode='wt') as fh:
             fh.write('[section_1]\n')
             fh.write('key_1 = value_1\n')
             fh.write('key_2 = value_2\n')

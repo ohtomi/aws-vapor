@@ -14,8 +14,8 @@ import sys
 class Generator(Command):
     """This class generates an AWS CloudFormation template from Python objects."""
 
-    def get_parser(self, prog_name: str) -> ArgumentParser:
-        parser = super(Generator, self).get_parser(prog_name)
+    def get_parser(self, program_name: str) -> ArgumentParser:
+        parser = super(Generator, self).get_parser(program_name)
         parser.add_argument('vaporfile',
                             help='a file path to vaporfile')
         parser.add_argument('task', nargs='?',
@@ -70,8 +70,8 @@ def apply_recipes(template: dsl.Template, contrib: str, recipes: List[str]):
         edited_module_search_path = True
 
     for recipe in recipes:
-        recipefile = __import__(os.path.splitext(recipe)[0])
-        task = getattr(recipefile, 'recipe')
+        recipe_file = __import__(os.path.splitext(recipe)[0])
+        task = getattr(recipe_file, 'recipe')
         task(template)
 
     if edited_module_search_path:
@@ -84,5 +84,5 @@ def output_template(command: Command, template: dsl.Template, relative_file_path
     if relative_file_path is None:
         command.app.stdout.write('{0}\n'.format(json_document))
     else:
-        with utils.open_outputfile(relative_file_path) as outputfile:
-            outputfile.write('{0}\n'.format(json_document))
+        with utils.open_output_file(relative_file_path) as output_file:
+            output_file.write('{0}\n'.format(json_document))

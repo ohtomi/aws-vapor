@@ -12,8 +12,8 @@ from urllib import parse, request
 class Downloader(Command):
     """This class downloads recipe from remote repository."""
 
-    def get_parser(self, prog_name: str) -> ArgumentParser:
-        parser = super(Downloader, self).get_parser(prog_name)
+    def get_parser(self, program_name: str) -> ArgumentParser:
+        parser = super(Downloader, self).get_parser(program_name)
         parser.add_argument('url',
                             help='an URL of downloading recipe')
         return parser

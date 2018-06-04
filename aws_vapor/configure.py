@@ -10,23 +10,23 @@ from cliff.command import Command
 class Configure(Command):
     """This class shows the current configuration or sets a new configuration."""
 
-    def get_parser(self, prog_name: str) -> ArgumentParser:
-        parser = super(Configure, self).get_parser(prog_name)
+    def get_parser(self, program_name: str) -> ArgumentParser:
+        parser = super(Configure, self).get_parser(program_name)
         subparsers = parser.add_subparsers(help='sub-command', title='sub-commands')
 
-        list_subparser = subparsers.add_parser('list', help='lists all values within config file')
-        list_subparser.set_defaults(func=list_configuration, command=self)
+        list_sub_parser = subparsers.add_parser('list', help='lists all values within config file')
+        list_sub_parser.set_defaults(func=list_configuration, command=self)
 
-        set_subparser = subparsers.add_parser('set', help='sets key to specified value')
-        set_subparser.set_defaults(func=set_configuration)
-        set_subparser.add_argument('--system', action='store_true', default=False,
-                                   help='a flag whether or not a new configuration will be saved globally')
-        set_subparser.add_argument('section',
-                                   help='a name of a configuration section block')
-        set_subparser.add_argument('key',
-                                   help='a name of a configuration property')
-        set_subparser.add_argument('value',
-                                   help='a value of a configuration property')
+        set_sub_parser = subparsers.add_parser('set', help='sets key to specified value')
+        set_sub_parser.set_defaults(func=set_configuration)
+        set_sub_parser.add_argument('--system', action='store_true', default=False,
+                                    help='a flag whether or not a new configuration will be saved globally')
+        set_sub_parser.add_argument('section',
+                                    help='a name of a configuration section block')
+        set_sub_parser.add_argument('key',
+                                    help='a name of a configuration property')
+        set_sub_parser.add_argument('value',
+                                    help='a value of a configuration property')
 
         return parser
 
