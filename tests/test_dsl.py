@@ -20,7 +20,6 @@ from aws_vapor.dsl import Intrinsics
 from aws_vapor.dsl import Pseudos
 from aws_vapor.dsl import UserData
 from aws_vapor.dsl import CfnInitMetadata
-from aws_vapor.utils import FILE_WRITE_MODE
 
 TOX_TMP_DIR = '.tox/tmp'
 X_SHELL_SCRIPT_FILE_NAME = os.path.join(TOX_TMP_DIR, 'x-shellscript.txt')
@@ -34,7 +33,7 @@ def setup():
     if not os.path.exists(TOX_TMP_DIR):
         os.mkdir(TOX_TMP_DIR)
 
-    with open(X_SHELL_SCRIPT_FILE_NAME, mode=FILE_WRITE_MODE) as fh:
+    with open(X_SHELL_SCRIPT_FILE_NAME, mode='wt') as fh:
         fh.write('ABCDE {{ param_1 }}\n')
         fh.write('abcde {{ param_2 }}\n')
 
