@@ -1,25 +1,27 @@
 # -*- coding: utf-8 -*-
 
+import os
 import sys
 import sphinx_rtd_theme
 
-sys.path.insert(0, u'../aws_vapor/')
+sys.path.insert(0, os.path.abspath('../'))
 
 extensions = [
     'sphinx.ext.autodoc',
     'sphinx.ext.todo',
-    'sphinx.ext.viewcode'
+    'sphinx.ext.viewcode',
+    'sphinx.ext.napoleon'
 ]
 templates_path = ['_templates']
 
 source_suffix = '.rst'
 
 master_doc = 'index'
-project = u'aws-vapor'
-copyright = u'2018, Kenichi Ohtomi'
-author = u'Kenichi Ohtomi'
-version = u'0.0'
-release = u'0.0.14'
+project = 'aws-vapor'
+copyright = '2018, Kenichi Ohtomi'
+author = 'Kenichi Ohtomi'
+version = '0.0'
+release = '0.0.14'
 exclude_patterns = [
     '_build',
     'Thumbs.db',
