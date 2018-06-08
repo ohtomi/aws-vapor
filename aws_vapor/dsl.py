@@ -1,32 +1,39 @@
 # -*- coding: utf-8 -*-
 
+from typing import Any, Dict, List, Union
+
 from aws_vapor import utils
 from collections import OrderedDict
+
+RegexPattern = str
+MapNameOrMapping = Union[str, 'Mapping']
+IntrinsicFunction = Dict[str, Any]
 
 
 class Template(object):
     """An AWS CloudFormation template builder."""
 
-    def __init__(self, version='2010-09-09', description=''):
+    def __init__(self, version: str = '2010-09-09', description: str = ''):
         self.version = version
         self.description = description
         self.elements = OrderedDict()
 
-    def description(self, description):
+    def description(self, description: str) -> 'Template':
         self.description = description
+        return self
 
-    def get_section(self, section_name):
+    def get_section(self, section_name: str) -> List['Element']:
         if section_name not in self.elements:
             self.elements[section_name] = []
         return self.elements[section_name]
 
-    def index_of_section(self, section, element_name):
+    def index_of_section(self, section: List['Element'], element_name: str) -> int:
         if len([item for item in section if item.name == element_name]) >= 1:
             return [item.name for item in section].index(element_name)
         else:
             return -1
 
-    def merge_or_replace_element(self, section_name, element, merge):
+    def merge_or_replace_element(self, section_name: str, element: 'Element', merge: bool) -> 'Element':
         section = self.get_section(section_name)
         index = self.index_of_section(section, element.name)
 
@@ -41,25 +48,25 @@ class Template(object):
 
         return element
 
-    def metadata(self, element, merge=False):
+    def metadata(self, element: 'Element', merge: bool = False) -> 'Element':
         return self.merge_or_replace_element('Metadata', element, merge)
 
-    def parameters(self, element, merge=False):
+    def parameters(self, element: 'Element', merge: bool = False) -> 'Element':
         return self.merge_or_replace_element('Parameters', element, merge)
 
-    def mappings(self, element, merge=False):
+    def mappings(self, element: 'Element', merge: bool = False) -> 'Element':
         return self.merge_or_replace_element('Mappings', element, merge)
 
-    def conditions(self, element, merge=False):
+    def conditions(self, element: 'Element', merge: bool = False) -> 'Element':
         return self.merge_or_replace_element('Conditions', element, merge)
 
-    def resources(self, element, merge=False):
+    def resources(self, element: 'Element', merge: bool = False) -> 'Element':
         return self.merge_or_replace_element('Resources', element, merge)
 
-    def outputs(self, element, merge=False):
+    def outputs(self, element: 'Element', merge: bool = False) -> 'Element':
         return self.merge_or_replace_element('Outputs', element, merge)
 
-    def to_template(self):
+    def to_template(self) -> OrderedDict:
         template = OrderedDict()
         template['AWSTemplateFormatVersion'] = self.version
         template['Description'] = self.description
@@ -74,23 +81,23 @@ class Template(object):
 class Element(object):
     """This is an abstract base class of a template section."""
 
-    def __init__(self, name):
+    def __init__(self, name: str):
         self.name = name
         self.attrs = OrderedDict()
 
-    def attributes(self, name, value):
+    def attributes(self, name: str, value: Any):
         """Map `name` to `value` and return `self`."""
         self.attrs[name] = value
         return self
 
-    def to_template(self, template):
+    def to_template(self, template: OrderedDict):
         """Convert mapped key-value pairs into a top level section of an AWS CloudFormation template.
 
         Args:
-            template (:class:`Template`): A template builder.
+            template: A template builder.
 
         Returns:
-            Passed :class:`Template` object.
+            Passed a mapping object.
         """
         template[self.name] = self.attrs
 
@@ -100,7 +107,7 @@ class Metadatum(Element):
     each instance of which represents details about the template.
     """
 
-    def __init__(self, name):
+    def __init__(self, name: str):
         super(Metadatum, self).__init__(name)
 
 
@@ -109,50 +116,50 @@ class Parameter(Element):
     each instance of which passes values into your template when you create a stack.
     """
 
-    def __init__(self, name):
+    def __init__(self, name: str):
         super(Parameter, self).__init__(name)
 
-    def description(self, desc):
+    def description(self, desc: str) -> 'Parameter':
         """Set 'Description' to `desc` and return `self`."""
         return self.attributes('Description', desc)
 
-    def constraint_description(self, desc):
+    def constraint_description(self, desc: str) -> 'Parameter':
         """Set 'ConstraintDescription' to `desc` and return `self`."""
         return self.attributes('ConstraintDescription', desc)
 
-    def type(self, name):
+    def type(self, name: str) -> 'Parameter':
         """Set 'Type' to `name` and return `self`."""
         return self.attributes('Type', name)
 
-    def default(self, value):
+    def default(self, value: Any) -> 'Parameter':
         """Set 'Default' to `value` and return `self`."""
         return self.attributes('Default', value)
 
-    def allowed_values(self, list_of_values):
+    def allowed_values(self, list_of_values: List[Any]) -> 'Parameter':
         """Set 'AllowedValues' to `list_of_values` and return `self`."""
         return self.attributes('AllowedValues', list_of_values)
 
-    def no_echo(self):
+    def no_echo(self) -> 'Parameter':
         """Set 'NoEcho' to `true` and return `self`."""
         return self.attributes('NoEcho', 'true')
 
-    def allowed_pattern(self, pattern):
+    def allowed_pattern(self, pattern: RegexPattern) -> 'Parameter':
         """Set 'AllowedPattern' to `pattern` and return `self`."""
         return self.attributes('AllowedPattern', pattern)
 
-    def max_length(self, length):
+    def max_length(self, length: int) -> 'Parameter':
         """Set 'MaxLength' to `length` and return `self`."""
         return self.attributes('MaxLength', str(length))
 
-    def min_length(self, length):
+    def min_length(self, length: int) -> 'Parameter':
         """Set `MinLength` to `length` and return `self`."""
         return self.attributes('MinLength', str(length))
 
-    def max_value(self, value):
+    def max_value(self, value: int) -> 'Parameter':
         """Set `MaxValue` to `value` and return `self`."""
         return self.attributes('MaxValue', str(value))
 
-    def min_value(self, value):
+    def min_value(self, value: int) -> 'Parameter':
         """Set `MinValue` to `value` and return `self`."""
         return self.attributes('MinValue', str(value))
 
@@ -162,17 +169,18 @@ class Mapping(Element):
     each instance of which matches a key to a corresponding set of named values.
     """
 
-    def __init__(self, name):
+    def __init__(self, name: str):
         super(Mapping, self).__init__(name)
+        self._category = None
 
-    def add_category(self, category):
+    def add_category(self, category: str) -> 'Mapping':
         """Create a new top level section of 'Mappings' and return `self`.
 
         Create a new top level section of 'Mappings' if doesn't contain `category`,
         then set a current selection to `category`.
 
         Args:
-            category (:class:`str`): A name of a top level section.
+            category: A name of a top level section.
 
         Returns:
             `self`.
@@ -183,13 +191,13 @@ class Mapping(Element):
             return self
         return self
 
-    def add_item(self, key, value):
+    def add_item(self, key: str, value: Any) -> 'Mapping':
         """Map `key` to `value` in a current selection and return `self`."""
         m = self.attrs[self._category]
         m[key] = value
         return self
 
-    def find_in_map(self, top_level_key, second_level_key):
+    def find_in_map(self, top_level_key: MapNameOrMapping, second_level_key: MapNameOrMapping) -> IntrinsicFunction:
         """Call `Intrinsics.find_in_map` and return its return value."""
         if isinstance(top_level_key, str):
             if top_level_key not in self.attrs:
@@ -206,57 +214,59 @@ class Condition(Element):
     each instance of which includes statements that define when a resource is created or when a property is defined.
     """
 
-    def __init__(self, name):
+    def __init__(self, name: str):
         super(Condition, self).__init__(name)
+        self._expression = None
 
-    def expression(self, expression):
+    def expression(self, expression: IntrinsicFunction) -> 'Condition':
         """Set `expression` and return `self`."""
-        self.expression = expression
+        self._expression = expression
         return self
 
-    def to_template(self, template):
+    def to_template(self, template: OrderedDict):
         """Convert `self.attrs` into a top level section of an AWS CloudFormation template.
 
         Args:
-            template (:class:`Template`): A template builder.
+            template: A template builder.
 
         Returns:
-            Passed :class:`Template` object.
+            Passed a mapping object.
         """
-        template[self.name] = self.expression
+        template[self.name] = self._expression
 
 
 class Resource(Element):
     """The `Resource` class is a subclass of :class:`Element`,
-    each instance of which declares the AWS resources that you want to include in the stack, such as an Amazon EC2 instance or an Amazon S3 bucket.
+    each instance of which declares the AWS resources that you want to include in the stack,
+    such as an Amazon EC2 instance or an Amazon S3 bucket.
     """
 
-    def __init__(self, name):
+    def __init__(self, name: str):
         super(Resource, self).__init__(name)
 
-    def type(self, name):
+    def type(self, name: str) -> 'Resource':
         """Set 'Type' to `name` and return `self`."""
         return self.attributes('Type', name)
 
-    def condition(self, condition):
+    def condition(self, condition: 'Condition') -> 'Resource':
         """Set 'Condition' to `condition` and return `self`."""
-        return self.attributes('Condition', condition)
+        return self.attributes('Condition', condition.name)
 
-    def metadata(self, metadata):
+    def metadata(self, metadata: Any) -> 'Resource':
         """Set 'Metadata' to `metadata` and return `self`."""
         return self.attributes('Metadata', metadata)
 
-    def depends_on(self, resource):
+    def depends_on(self, resource: 'Resource') -> 'Resource':
         """Set 'DependsOn' to a name of `resource` and return `self`."""
         if not hasattr(resource, 'name'):
             raise ValueError('missing name of resource. resource: %r' % resource)
         return self.attributes('DependsOn', resource.name)
 
-    def properties(self, props):
+    def properties(self, props: List[Dict[str, Any]]) -> 'Resource':
         """Add a :class:`list` of a new key-value pair to 'Properties' and return `self`.
 
         Args:
-            props (:class:`list`): A :class:`list` of a key-value pair.
+            props: A :class:`list` of a key-value pair.
 
         Returns:
             `self`.
@@ -267,35 +277,36 @@ class Resource(Element):
                 m[k] = v
         return self.attributes('Properties', m)
 
-    def add_property(self, prop):
+    def add_property(self, prop: Dict[str, Any]) -> 'Resource':
         """Add a new key-value pair to 'Properties' and return `self`."""
         return self.properties([prop])
 
 
 class Output(Element):
     """The `Output` class is a subclass of :class:`Element`,
-    each instance of which declares output values that you can import into other stacks (to create cross-stack references), return in response (to describe stack calls), or view on the AWS CloudFormation console.
+    each instance of which declares output values that you can import into other stacks (to create cross-stack
+    references), return in response (to describe stack calls), or view on the AWS CloudFormation console.
     """
 
-    def __init__(self, name):
+    def __init__(self, name: str):
         super(Output, self).__init__(name)
 
-    def description(self, desc):
+    def description(self, desc: str) -> 'Output':
         return self.attributes('Description', desc)
 
-    def condition(self, condition):
-        return self.attributes('Condition', condition)
+    def condition(self, condition: 'Condition') -> 'Output':
+        return self.attributes('Condition', condition.name)
 
-    def value(self, value):
+    def value(self, value: str) -> 'Output':
         return self.attributes('Value', value)
 
-    def export(self, name):
+    def export(self, name: str) -> 'Output':
         return self.attributes('Export', {'Name': name})
 
 
 class Attributes(object):
     @classmethod
-    def of(cls, name, value):
+    def of(cls, name: str, value: Any) -> Dict[str, Any]:
         if isinstance(value, Element):
             return {name: Intrinsics.ref(value)}
         else:
@@ -321,7 +332,7 @@ class Intrinsics(object):
     @classmethod
     def fn_and(cls, conditions=list()):
         if 2 <= len(conditions) <= 10:
-            return {'Fn::And': [condition.expression for condition in conditions]}
+            return {'Fn::And': [condition._expression for condition in conditions]}
         else:
             raise ValueError('the minimum number of conditions is 2, and the maximum is 10. but %r' % len(conditions))
 
@@ -335,12 +346,12 @@ class Intrinsics(object):
 
     @classmethod
     def fn_not(cls, condition):
-        return {'Fn::Not': [condition.expression]}
+        return {'Fn::Not': [condition._expression]}
 
     @classmethod
     def fn_or(cls, conditions=list()):
         if 2 <= len(conditions) <= 10:
-            return {'Fn::Or': [condition.expression for condition in conditions]}
+            return {'Fn::Or': [condition._expression for condition in conditions]}
         else:
             raise ValueError('the minimum number of conditions is 2, and the maximum is 10. but %r' % len(conditions))
 
