@@ -22,20 +22,20 @@ class Template(object):
         self.description = description
         return self
 
-    def get_section(self, section_name: str) -> List['Element']:
+    def _get_section(self, section_name: str) -> List['Element']:
         if section_name not in self.elements:
             self.elements[section_name] = []
         return self.elements[section_name]
 
-    def index_of_section(self, section: List['Element'], element_name: str) -> int:
-        if len([item for item in section if item.name == element_name]) >= 1:
-            return [item.name for item in section].index(element_name)
-        else:
-            return -1
+    def _merge_or_replace_element(self, section_name: str, element: 'Element', merge: bool) -> 'Element':
+        def index_of_section(s: List['Element'], n: str) -> int:
+            if len([item for item in s if item.name == n]) >= 1:
+                return [item.name for item in s].index(n)
+            else:
+                return -1
 
-    def merge_or_replace_element(self, section_name: str, element: 'Element', merge: bool) -> 'Element':
-        section = self.get_section(section_name)
-        index = self.index_of_section(section, element.name)
+        section = self._get_section(section_name)
+        index = index_of_section(section, element.name)
 
         if index == -1:
             section.append(element)
@@ -49,22 +49,22 @@ class Template(object):
         return element
 
     def metadata(self, element: 'Element', merge: bool = False) -> 'Element':
-        return self.merge_or_replace_element('Metadata', element, merge)
+        return self._merge_or_replace_element('Metadata', element, merge)
 
     def parameters(self, element: 'Element', merge: bool = False) -> 'Element':
-        return self.merge_or_replace_element('Parameters', element, merge)
+        return self._merge_or_replace_element('Parameters', element, merge)
 
     def mappings(self, element: 'Element', merge: bool = False) -> 'Element':
-        return self.merge_or_replace_element('Mappings', element, merge)
+        return self._merge_or_replace_element('Mappings', element, merge)
 
     def conditions(self, element: 'Element', merge: bool = False) -> 'Element':
-        return self.merge_or_replace_element('Conditions', element, merge)
+        return self._merge_or_replace_element('Conditions', element, merge)
 
     def resources(self, element: 'Element', merge: bool = False) -> 'Element':
-        return self.merge_or_replace_element('Resources', element, merge)
+        return self._merge_or_replace_element('Resources', element, merge)
 
     def outputs(self, element: 'Element', merge: bool = False) -> 'Element':
-        return self.merge_or_replace_element('Outputs', element, merge)
+        return self._merge_or_replace_element('Outputs', element, merge)
 
     def to_template(self) -> OrderedDict:
         template = OrderedDict()
@@ -216,11 +216,11 @@ class Condition(Element):
 
     def __init__(self, name: str):
         super(Condition, self).__init__(name)
-        self._expression = None
+        self.expr = None
 
     def expression(self, expression: IntrinsicFunction) -> 'Condition':
         """Set `expression` and return `self`."""
-        self._expression = expression
+        self.expr = expression
         return self
 
     def to_template(self, template: OrderedDict):
@@ -232,7 +232,7 @@ class Condition(Element):
         Returns:
             Passed a mapping object.
         """
-        template[self.name] = self._expression
+        template[self.name] = self.expr
 
 
 class Resource(Element):
@@ -330,9 +330,11 @@ class Intrinsics(object):
             raise ValueError('value should be map name or mapping. but %r' % type(map_name_or_mapping))
 
     @classmethod
-    def fn_and(cls, conditions=list()):
+    def fn_and(cls, conditions=None):
+        if conditions is None:
+            conditions = []
         if 2 <= len(conditions) <= 10:
-            return {'Fn::And': [condition._expression for condition in conditions]}
+            return {'Fn::And': [condition.expr for condition in conditions]}
         else:
             raise ValueError('the minimum number of conditions is 2, and the maximum is 10. but %r' % len(conditions))
 
@@ -346,12 +348,14 @@ class Intrinsics(object):
 
     @classmethod
     def fn_not(cls, condition):
-        return {'Fn::Not': [condition._expression]}
+        return {'Fn::Not': [condition.expr]}
 
     @classmethod
-    def fn_or(cls, conditions=list()):
+    def fn_or(cls, conditions=None):
+        if conditions is None:
+            conditions = []
         if 2 <= len(conditions) <= 10:
-            return {'Fn::Or': [condition._expression for condition in conditions]}
+            return {'Fn::Or': [condition.expr for condition in conditions]}
         else:
             raise ValueError('the minimum number of conditions is 2, and the maximum is 10. but %r' % len(conditions))
 
