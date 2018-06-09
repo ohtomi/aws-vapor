@@ -1,13 +1,15 @@
 # -*- coding: utf-8 -*-
 
-from typing import Any, Dict, List, Union
+from typing import Any, Dict, List, Tuple, Union
 
 from aws_vapor import utils
 from collections import OrderedDict
 
 RegexPattern = str
 MapNameOrMapping = Union[str, 'Mapping']
+LogicalNameOrElement = Union[str, 'Element']
 IntrinsicFunction = Dict[str, Any]
+PseudoParameter = Dict[str, Any]
 
 
 class Template(object):
@@ -90,7 +92,7 @@ class Element(object):
         self.attrs[name] = value
         return self
 
-    def to_template(self, template: OrderedDict):
+    def to_template(self, template: Dict[str, Any]):
         """Convert mapped key-value pairs into a top level section of an AWS CloudFormation template.
 
         Args:
@@ -197,7 +199,7 @@ class Mapping(Element):
         m[key] = value
         return self
 
-    def find_in_map(self, top_level_key: MapNameOrMapping, second_level_key: MapNameOrMapping) -> IntrinsicFunction:
+    def find_in_map(self, top_level_key: str, second_level_key: str) -> IntrinsicFunction:
         """Call `Intrinsics.find_in_map` and return its return value."""
         if isinstance(top_level_key, str):
             if top_level_key not in self.attrs:
@@ -223,7 +225,7 @@ class Condition(Element):
         self.expr = expression
         return self
 
-    def to_template(self, template: OrderedDict):
+    def to_template(self, template: Dict[str, Any]):
         """Convert `self.attrs` into a top level section of an AWS CloudFormation template.
 
         Args:
@@ -297,7 +299,7 @@ class Output(Element):
     def condition(self, condition: 'Condition') -> 'Output':
         return self.attributes('Condition', condition.name)
 
-    def value(self, value: str) -> 'Output':
+    def value(self, value: IntrinsicFunction) -> 'Output':
         return self.attributes('Value', value)
 
     def export(self, name: str) -> 'Output':
@@ -315,11 +317,12 @@ class Attributes(object):
 
 class Intrinsics(object):
     @classmethod
-    def base64(cls, value_to_encode):
+    def base64(cls, value_to_encode: Any) -> IntrinsicFunction:
         return {'Fn::Base64': value_to_encode}
 
     @classmethod
-    def find_in_map(cls, map_name_or_mapping, top_level_key, second_level_key):
+    def find_in_map(cls, map_name_or_mapping: MapNameOrMapping,
+                    top_level_key: str, second_level_key: str) -> IntrinsicFunction:
         if isinstance(map_name_or_mapping, str):
             map_name = map_name_or_mapping
             return {'Fn::FindInMap': [map_name, top_level_key, second_level_key]}
@@ -330,7 +333,7 @@ class Intrinsics(object):
             raise ValueError('value should be map name or mapping. but %r' % type(map_name_or_mapping))
 
     @classmethod
-    def fn_and(cls, conditions=None):
+    def fn_and(cls, conditions: List[Condition] = None) -> IntrinsicFunction:
         if conditions is None:
             conditions = []
         if 2 <= len(conditions) <= 10:
@@ -339,19 +342,19 @@ class Intrinsics(object):
             raise ValueError('the minimum number of conditions is 2, and the maximum is 10. but %r' % len(conditions))
 
     @classmethod
-    def fn_equals(cls, value_1, value_2):
+    def fn_equals(cls, value_1: Any, value_2: Any) -> IntrinsicFunction:
         return {'Fn::Equals': [value_1, value_2]}
 
     @classmethod
-    def fn_if(cls, condition_name, value_if_true, value_if_false):
+    def fn_if(cls, condition_name: str, value_if_true: Any, value_if_false: Any) -> IntrinsicFunction:
         return {'Fn::If': [condition_name, value_if_true, value_if_false]}
 
     @classmethod
-    def fn_not(cls, condition):
+    def fn_not(cls, condition: Condition) -> IntrinsicFunction:
         return {'Fn::Not': [condition.expr]}
 
     @classmethod
-    def fn_or(cls, conditions=None):
+    def fn_or(cls, conditions: List[Condition] = None) -> IntrinsicFunction:
         if conditions is None:
             conditions = []
         if 2 <= len(conditions) <= 10:
@@ -360,34 +363,34 @@ class Intrinsics(object):
             raise ValueError('the minimum number of conditions is 2, and the maximum is 10. but %r' % len(conditions))
 
     @classmethod
-    def get_att(cls, logical_name_of_resource, attribute_name):
+    def get_att(cls, logical_name_of_resource: str, attribute_name: str) -> IntrinsicFunction:
         return {'Fn::GetAtt': [logical_name_of_resource, attribute_name]}
 
     @classmethod
-    def get_azs(cls, region=''):
+    def get_azs(cls, region: str = '') -> IntrinsicFunction:
         return {'Fn::GetAZs': region}
 
     @classmethod
-    def import_value(cls, value_to_import):
+    def import_value(cls, value_to_import: Any) -> IntrinsicFunction:
         return {'Fn::ImportValue': value_to_import}
 
     @classmethod
-    def join(cls, delimiter, list_of_values):
+    def join(cls, delimiter: str, list_of_values: List[Any]) -> IntrinsicFunction:
         return {'Fn::Join': [delimiter, list_of_values]}
 
     @classmethod
-    def select(cls, index, list_of_objects):
+    def select(cls, index: int, list_of_objects: List[Any]) -> IntrinsicFunction:
         return {'Fn::Select': [index, list_of_objects]}
 
     @classmethod
-    def sub(cls, template, dict_of_parameters=None):
+    def sub(cls, template: str, dict_of_parameters: Dict[str, Any] = None) -> IntrinsicFunction:
         if dict_of_parameters is None:
             return {'Fn::Sub': template}
         else:
             return {'Fn::Sub': [template, dict_of_parameters]}
 
     @classmethod
-    def ref(cls, logical_name_or_element):
+    def ref(cls, logical_name_or_element: LogicalNameOrElement) -> IntrinsicFunction:
         if isinstance(logical_name_or_element, str):
             logical_name = logical_name_or_element
             return {'Ref': logical_name}
@@ -400,44 +403,44 @@ class Intrinsics(object):
 
 class Pseudos(object):
     @classmethod
-    def account_id(cls):
+    def account_id(cls) -> PseudoParameter:
         return {'Ref': 'AWS::AccountId'}
 
     @classmethod
-    def notification_arns(cls):
+    def notification_arns(cls) -> PseudoParameter:
         return {'Ref': 'AWS::NotificationARNs'}
 
     @classmethod
-    def no_value(cls):
+    def no_value(cls) -> PseudoParameter:
         return {'Ref': 'AWS::NoValue'}
 
     @classmethod
-    def region(cls):
+    def region(cls) -> PseudoParameter:
         return {'Ref': 'AWS::Region'}
 
     @classmethod
-    def stack_id(cls):
+    def stack_id(cls) -> PseudoParameter:
         return {'Ref': 'AWS::StackId'}
 
     @classmethod
-    def stack_name(cls):
+    def stack_name(cls) -> PseudoParameter:
         return {'Ref': 'AWS::StackName'}
 
 
 class UserData(object):
     @classmethod
-    def of(cls, values):
+    def of(cls, values: List[Any]) -> Dict[str, Any]:
         return {'UserData': Intrinsics.base64(Intrinsics.join('', values))}
 
     @classmethod
-    def from_files(cls, files, params):
+    def from_files(cls, files: List[Tuple[str, str]], params: Dict[str, Any]) -> Dict[str, Any]:
         user_data = utils.inject_params(utils.combine_user_data(files), params)
         return {'UserData': Intrinsics.base64(Intrinsics.join('', user_data))}
 
 
 class CfnInitMetadata(object):
     @classmethod
-    def of(cls, list_of_metadata):
+    def of(cls, list_of_metadata: List[Union['CfnInitMetadata.Init', 'CfnInitMetadata.Authentication']]) -> OrderedDict:
         m = OrderedDict()
         for metadata in list_of_metadata:
             if isinstance(metadata, CfnInitMetadata.Init):
@@ -466,22 +469,22 @@ class CfnInitMetadata(object):
 
     class Init(object):
 
-        def __init__(self, config_or_config_sets):
+        def __init__(self, config_or_config_sets: List[Union['CfnInitMetadata.Config', 'CfnInitMetadata.ConfigSet']]):
             self.config_or_config_sets = config_or_config_sets
 
     class ConfigSet(object):
 
-        def __init__(self, name, configs):
+        def __init__(self, name, configs: List['CfnInitMetadata.Config']):
             self.name = name
             self.configs = configs
 
     class Config(object):
 
-        def __init__(self, name):
+        def __init__(self, name: str):
             self.name = name
             self.value = OrderedDict()
 
-        def _create_and_get_map(self, keys):
+        def _create_and_get_map(self, keys: List[str]) -> OrderedDict:
             m = self.value
             for key in keys:
                 if key not in m:
@@ -489,7 +492,9 @@ class CfnInitMetadata(object):
                 m = m[key]
             return m
 
-        def commands(self, key, command, env=None, cwd=None, test=None, ignore_errors=None, wait_after_completion=None):
+        def commands(self, key: str,
+                     command: str, env: Dict[str, Any] = None, cwd: str = None, test: str = None,
+                     ignore_errors: bool = None, wait_after_completion: int = None) -> 'CfnInitMetadata.Config':
             m = OrderedDict()
             m['command'] = command
             if env is not None:
@@ -507,8 +512,11 @@ class CfnInitMetadata(object):
             v[key] = m
             return self
 
-        def files(self, key, content=None, source=None, local_file_path=None, encoding=None, group=None, owner=None,
-                  mode=None, authentication=None, context=None, local_file_params=None):
+        def files(self, key: str,
+                  content: Union[str, Dict[str, Any]] = None, source: str = None, local_file_path: str = None,
+                  encoding: str = None, group: str = None, owner: str = None, mode: str = None,
+                  authentication: str = None, context: str = None,
+                  local_file_params: str = None) -> 'CfnInitMetadata.Config':
             if local_file_params is None:
                 local_file_params = {}
             m = OrderedDict()
@@ -538,7 +546,7 @@ class CfnInitMetadata(object):
             v[key] = m
             return self
 
-        def groups(self, key, gid=None):
+        def groups(self, key: str, gid: int = None) -> 'CfnInitMetadata.Config':
             m = OrderedDict()
             if gid is not None:
                 m['gid'] = str(gid)
@@ -547,15 +555,17 @@ class CfnInitMetadata(object):
             v[key] = m
             return self
 
-        def packages(self, package_manager, key, versions=None):
+        def packages(self, package_manager: str, key: str, versions: List[str] = None) -> 'CfnInitMetadata.Config':
             if versions is None:
                 versions = []
             v = self._create_and_get_map(['packages', package_manager])
             v[key] = versions
             return self
 
-        def services(self, service_manager, key, ensure_running=None, enabled=None, files=None, sources=None,
-                     packages=None, commands=None):
+        def services(self, service_manager: str, key: str,
+                     ensure_running: bool = None, enabled: bool = None, files: List[str] = None,
+                     sources: List[str] = None, packages: Dict[str, List[str]] = None,
+                     commands: List[str] = None) -> 'CfnInitMetadata.Config':
             m = OrderedDict()
             if ensure_running is not None:
                 m['ensureRunning'] = 'true' if ensure_running else 'false'
@@ -574,12 +584,12 @@ class CfnInitMetadata(object):
             v[key] = m
             return self
 
-        def sources(self, key, url):
+        def sources(self, key: str, url: str) -> 'CfnInitMetadata.Config':
             v = self._create_and_get_map(['sources'])
             v[key] = url
             return self
 
-        def users(self, key, uid, groups, home_dir):
+        def users(self, key: str, uid: int, groups: List[str], home_dir: str) -> 'CfnInitMetadata.Config':
             m = OrderedDict()
             m['groups'] = groups
             m['uid'] = str(uid)
@@ -591,7 +601,7 @@ class CfnInitMetadata(object):
 
     class Authentication(object):
 
-        def __init__(self, name, authentication_type):
+        def __init__(self, name: str, authentication_type: str):
             self.name = name
             self.type = authentication_type
 
@@ -599,42 +609,42 @@ class CfnInitMetadata(object):
                 raise ValueError('unknown authentication type. type: %r' % authentication_type)
             self.value = OrderedDict({'type': authentication_type})
 
-        def access_key_id(self, value):
+        def access_key_id(self, value: str) -> 'CfnInitMetadata.Authentication':
             if self.type != 'S3':
                 raise ValueError('illegal authentication type. type: %r' % self.type)
             self.value['accessKeyId'] = value
             return self
 
-        def buckets(self, list_of_values):
+        def buckets(self, list_of_values: List[str]) -> 'CfnInitMetadata.Authentication':
             if self.type != 'S3':
                 raise ValueError('illegal authentication type. type: %r' % self.type)
             self.value['buckets'] = list_of_values
             return self
 
-        def password(self, value):
+        def password(self, value: str) -> 'CfnInitMetadata.Authentication':
             if self.type != 'basic':
                 raise ValueError('illegal authentication type. type: %r' % self.type)
             self.value['password'] = value
             return self
 
-        def secret_key(self, value):
+        def secret_key(self, value: str) -> 'CfnInitMetadata.Authentication':
             if self.type != 'S3':
                 raise ValueError('illegal authentication type. type: %r' % self.type)
             self.value['secretKey'] = value
             return self
 
-        def uris(self, list_of_values):
+        def uris(self, list_of_values: List[str]) -> 'CfnInitMetadata.Authentication':
             if self.type != 'basic':
                 raise ValueError('illegal authentication type. type: %r' % self.type)
             self.value['uris'] = list_of_values
             return self
 
-        def username(self, value):
+        def username(self, value: str) -> 'CfnInitMetadata.Authentication':
             if self.type != 'basic':
                 raise ValueError('illegal authentication type. type: %r' % self.type)
             self.value['username'] = value
             return self
 
-        def role_name(self, value):
+        def role_name(self, value: str) -> 'CfnInitMetadata.Authentication':
             self.value['roleName'] = value
             return self

@@ -156,7 +156,7 @@ def test_mapping__find_in_map__missing_second_level_key():
 
 def test_condition():
     template = {}
-    condition = Condition('abcde').expression(Intrinsics.fn_equals('value_1', 'value_2')).to_template(template)
+    Condition('abcde').expression(Intrinsics.fn_equals('value_1', 'value_2')).to_template(template)
     assert_equal(
         template,
         {'abcde': {'Fn::Equals': ['value_1', 'value_2']}}
@@ -194,12 +194,12 @@ def test_resource__depends_on__resource():
 
 
 def test_resource__depends_on__named_object():
-    class named_object(object):
+    class NamedObject(Resource):
         def __init__(self):
-            self.name = 'res_name'
+            super(NamedObject, self).__init__('res_name')
 
     template = {}
-    Resource('abcde').type('type').depends_on(named_object()).to_template(template)
+    Resource('abcde').type('type').depends_on(NamedObject()).to_template(template)
     assert_equal(
         template,
         {'abcde': {'Type': 'type', 'DependsOn': 'res_name'}}
