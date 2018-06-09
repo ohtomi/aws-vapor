@@ -58,6 +58,6 @@ Utilities
     :members:
     :undoc-members:
 
-.. autoclass:: aws_vapor.dsl.CfInitMetadata
+.. autoclass:: aws_vapor.dsl.CfnInitMetadata
     :members:
     :undoc-members:
