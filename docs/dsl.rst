@@ -1,5 +1,5 @@
-aws-vapor DSL
-=============
+DSL
+===
 
 Template Root
 -------------

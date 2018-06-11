@@ -1,8 +1,9 @@
-Welcome to aws-vapor's documentation!
-=====================================
+aws-vapor
+=========
 
 .. toctree::
    :maxdepth: 4
    :caption: Contents:
 
-   aws_vapor
+   dsl
+   utils
