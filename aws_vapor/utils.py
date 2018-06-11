@@ -33,6 +33,7 @@ def load_from_config_file(config_directories: List[str] = None) -> dict:
                     'key2': 'value2'
                 }
             }
+
     """
     if config_directories is None:
         config_directories = [GLOBAL_CONFIG_DIRECTORY, LOCAL_CONFIG_DIRECTORY]
@@ -63,6 +64,7 @@ def get_property_from_config_file(section: str, key: str, default_value: str = N
     Returns:
         A property value corresponding to the `key`, which is property name, in the `section`,
         or `default_value` if the `section` is not defined or the `key` is not defined.
+
     """
     props = load_from_config_file()
     if section not in props:
@@ -86,6 +88,7 @@ def save_to_config_file(props: dict, save_on_global: bool = False):
         props: A mapping of properties.
 
         save_on_global: A flag whether or not a new configuration will be saved globally.
+
     """
     config = configparser.RawConfigParser()
 
@@ -114,6 +117,7 @@ def combine_user_data(files: List[Tuple[str, str]]) -> str:
 
     Returns:
         A multipart/* message attached a file content to.
+
     """
     combined_message = MIMEMultipart()
 
@@ -148,6 +152,7 @@ def inject_params(lines: str, params: dict) -> List[str]:
 
     Returns:
         A file content replaced placeholders with parameters.
+
     """
     tokens = []
     for line in lines.split('\n'):
@@ -165,6 +170,7 @@ def open_output_file(relative_file_path: str) -> TextIOBase:
 
     Returns:
         A file descriptor of an output file.
+
     """
     file_path = os.path.join(CURRENT_DIRECTORY, relative_file_path)
     directory, filename = os.path.split(file_path)

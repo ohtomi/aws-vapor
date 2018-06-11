@@ -100,6 +100,7 @@ class Element(object):
 
         Returns:
             Passed a mapping object.
+
         """
         template[self.name] = self.attrs
 
@@ -186,6 +187,7 @@ class Mapping(Element):
 
         Returns:
             `self`.
+
         """
         self._category = category
         if category not in self.attrs:
@@ -233,6 +235,7 @@ class Condition(Element):
 
         Returns:
             Passed a mapping object.
+
         """
         template[self.name] = self.expr
 
@@ -272,6 +275,7 @@ class Resource(Element):
 
         Returns:
             `self`.
+
         """
         m = self.attrs['Properties'] if 'Properties' in self.attrs else OrderedDict()
         for p in props:
