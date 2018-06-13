@@ -20,8 +20,8 @@ master_doc = 'index'
 project = 'aws-vapor'
 copyright = '2018, Kenichi Ohtomi'
 author = 'Kenichi Ohtomi'
-version = '0.0'
-release = '0.0.14'
+version = '0.1'
+release = '0.1.0'
 exclude_patterns = [
     '_build',
     'Thumbs.db',
