@@ -11,7 +11,7 @@ aws-vapor
    :alt: Status
 
 .. image:: https://img.shields.io/pypi/l/aws-vapor.svg
-   :target: https://pypi.org/project/aws-vapor
+   :target: ./LICENSE
    :alt: License
 
 .. image:: https://img.shields.io/pypi/pyversions/aws-vapor.svg
